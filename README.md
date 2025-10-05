@@ -1,6 +1,6 @@
 # Fastmail MCP Server (Unofficial)
 
-An unofficial MCP (Model Context Protocol) server that provides access to Fastmail email via the effect-jmap library.
+An unofficial MCP (Model Context Protocol) server that provides access to Fastmail email via [effect-jmap](https://github.com/i11v/effect-jmap).
 
 ## Connect to a client
 
