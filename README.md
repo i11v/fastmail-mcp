@@ -30,11 +30,6 @@ Or manually add this to your Claude Desktop configuration:
 
 This MCP server provides the following tools:
 
-### `jmap_session`
-Establishes a JMAP session with Fastmail API.
-- No parameters required
-- Returns session information including capabilities and account details
-
 ### `mailbox_get`
 Retrieves all mailboxes from the account.
 - No parameters required
@@ -43,7 +38,12 @@ Retrieves all mailboxes from the account.
 ### `email_get`
 Gets specific emails by their IDs.
 - `emailIds` (required): Array of email IDs to retrieve
+- `accountId` (optional): Account ID to retrieve emails from (auto-detected if not provided)
 - `properties` (optional): Specific properties to fetch
+- `fetchTextBodyValues` (optional): Fetch text/plain body values
+- `fetchHTMLBodyValues` (optional): Fetch text/html body values
+- `fetchAllBodyValues` (optional): Fetch all text body values
+- `maxBodyValueBytes` (optional): Maximum size in bytes for body values
 
 ### `email_query`
 Queries emails with filters and sorting.
