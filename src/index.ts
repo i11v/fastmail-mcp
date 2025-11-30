@@ -11,22 +11,16 @@ import {
 import { z } from "zod";
 
 // Import effect-jmap library
-import { Effect, Layer, Runtime, Scope } from "effect";
-import { HttpClient, HttpClientRequest, HttpBody } from "@effect/platform";
-import { NodeHttpClient } from "@effect/platform-node";
+import { Effect, Layer } from "effect";
+import { HttpClient, HttpClientRequest } from "@effect/platform";
 import {
-  JMAPClientLive,
-  defaultConfig,
+  JMAPLive,
   JMAPClientService,
   MailboxService,
-  MailboxServiceLive,
   EmailService,
-  EmailServiceLive,
   EmailSubmissionService,
-  EmailSubmissionServiceLive,
-  IdGeneratorLive,
 } from "effect-jmap";
-import { Common, Id } from "effect-jmap";
+import { Common } from "effect-jmap";
 
 /**
  * MCP Server for Fastmail using effect-jmap library
@@ -86,23 +80,6 @@ const server = new Server(
 );
 
 /**
- * Helper function to create JMAP client layers
- */
-function createJMAPLayers(sessionUrl: string, bearerToken: string) {
-  const config = defaultConfig(sessionUrl, bearerToken);
-  return Layer.provideMerge(
-    Layer.mergeAll(
-      JMAPClientLive(config),
-      MailboxServiceLive,
-      EmailServiceLive,
-      EmailSubmissionServiceLive,
-      IdGeneratorLive
-    ),
-    NodeHttpClient.layer
-  );
-}
-
-/**
  * SessionManager - Caches JMAP session, layers, and account ID
  */
 class SessionManager {
@@ -122,10 +99,7 @@ class SessionManager {
     }
 
     if (!this.cachedLayers) {
-      this.cachedLayers = createJMAPLayers(
-        FASTMAIL_SESSION_ENDPOINT,
-        bearerToken,
-      );
+      this.cachedLayers = JMAPLive(FASTMAIL_SESSION_ENDPOINT, bearerToken);
     }
 
     return this.cachedLayers;
@@ -179,49 +153,37 @@ class SessionManager {
 const sessionManager = new SessionManager();
 
 /**
- * Helper function to get account ID from session
- * @deprecated Use sessionManager.getAccountId() instead
- */
-async function getAccountId(layers: Layer.Layer<any>): Promise<string> {
-  const program = Effect.gen(function* () {
-    const client = yield* JMAPClientService;
-    return yield* client.getSession;
-  });
-
-  const session = await Effect.runPromise(program.pipe(Effect.provide(layers)));
-  return (
-    session.primaryAccounts?.["urn:ietf:params:jmap:mail"] ||
-    Object.keys(session.accounts)[0]
-  );
-}
-
-/**
  * Helper function to get the default identity for sending emails
  */
 async function getDefaultIdentity(
   accountId: string,
-  layers: Layer.Layer<any>
+  layers: Layer.Layer<any>,
 ): Promise<{ id: string; email: string; name?: string }> {
   const program = Effect.gen(function* () {
     const client = yield* JMAPClientService;
     const callId = `identity-get-${Date.now()}`;
 
-    const methodCall: ["Identity/get", { accountId: string }, string] = ["Identity/get", { accountId }, callId];
-    const response = yield* client.batch([methodCall], [
-      'urn:ietf:params:jmap:core',
-      'urn:ietf:params:jmap:mail',
-      'urn:ietf:params:jmap:submission'
-    ]);
+    const methodCall: ["Identity/get", { accountId: string }, string] = [
+      "Identity/get",
+      { accountId },
+      callId,
+    ];
+    const response = yield* client.batch(
+      [methodCall],
+      [
+        "urn:ietf:params:jmap:core",
+        "urn:ietf:params:jmap:mail",
+        "urn:ietf:params:jmap:submission",
+      ],
+    );
 
     // Extract Identity/get response
     const identityResponse = response.methodResponses.find(
-      ([method]) => method === "Identity/get"
+      ([method]) => method === "Identity/get",
     );
 
     if (!identityResponse) {
-      return yield* Effect.fail(
-        new Error("Identity/get response not found")
-      );
+      return yield* Effect.fail(new Error("Identity/get response not found"));
     }
 
     const [, data] = identityResponse;
@@ -230,13 +192,11 @@ async function getDefaultIdentity(
       return {
         id: identity.id,
         email: identity.email,
-        name: identity.name
+        name: identity.name,
       };
     }
 
-    return yield* Effect.fail(
-      new Error("No identities found for account")
-    );
+    return yield* Effect.fail(new Error("No identities found for account"));
   });
 
   return await Effect.runPromise(program.pipe(Effect.provide(layers)));
@@ -248,7 +208,7 @@ async function getDefaultIdentity(
 async function uploadBlob(
   emailMessage: string,
   bearerToken: string,
-  layers: Layer.Layer<any>
+  layers: Layer.Layer<any>,
 ): Promise<{ blobId: string; size: number; type: string }> {
   const program = Effect.gen(function* () {
     const client = yield* JMAPClientService;
@@ -259,13 +219,13 @@ async function uploadBlob(
     const uploadUrl = session.uploadUrl.replace(
       "{accountId}",
       session.primaryAccounts?.["urn:ietf:params:jmap:mail"] ||
-        Object.keys(session.accounts)[0]
+        Object.keys(session.accounts)[0],
     );
 
     const uploadRequest = HttpClientRequest.post(uploadUrl).pipe(
       HttpClientRequest.setHeader("Authorization", `Bearer ${bearerToken}`),
       HttpClientRequest.setHeader("Content-Type", "message/rfc822"),
-      HttpClientRequest.bodyText(emailMessage)
+      HttpClientRequest.bodyText(emailMessage),
     );
 
     const response = yield* httpClient.execute(uploadRequest);
@@ -319,8 +279,8 @@ function buildEmailMessage(params: {
     : `From: ${identity.email}`;
 
   // Normalize line endings to CRLF (RFC 5322 requirement)
-  const normalizedBody = body.replace(/\r?\n/g, '\r\n');
-  const normalizedHtmlBody = htmlBody?.replace(/\r?\n/g, '\r\n');
+  const normalizedBody = body.replace(/\r?\n/g, "\r\n");
+  const normalizedHtmlBody = htmlBody?.replace(/\r?\n/g, "\r\n");
 
   // Common headers
   const commonHeaders = [
@@ -340,7 +300,7 @@ function buildEmailMessage(params: {
       `Content-Transfer-Encoding: 8bit`,
       ``,
       normalizedBody,
-    ].join('\r\n');
+    ].join("\r\n");
   }
 
   // Case 2: Multipart/alternative with both plain text and HTML
@@ -365,7 +325,7 @@ function buildEmailMessage(params: {
     normalizedHtmlBody,
     ``,
     `--${boundary}--`,
-  ].join('\r\n');
+  ].join("\r\n");
 }
 
 /**
@@ -391,7 +351,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {
             accountId: {
               type: "string",
-              description: "Account ID to retrieve emails from (optional, auto-detected if not provided)",
+              description:
+                "Account ID to retrieve emails from (optional, auto-detected if not provided)",
             },
             emailIds: {
               type: "array",
@@ -486,7 +447,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "email_send",
-        description: "Send an email via Fastmail. Supports plain text, HTML, or multipart/alternative (both) emails.",
+        description:
+          "Send an email via Fastmail. Supports plain text, HTML, or multipart/alternative (both) emails.",
         inputSchema: {
           type: "object",
           properties: {
@@ -500,11 +462,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             body: {
               type: "string",
-              description: "Email body (plain text). If htmlBody is also provided, this will be the plain text alternative.",
+              description:
+                "Email body (plain text). If htmlBody is also provided, this will be the plain text alternative.",
             },
             htmlBody: {
               type: "string",
-              description: "Optional: Email body in HTML format. When provided with body, creates a multipart/alternative message.",
+              description:
+                "Optional: Email body in HTML format. When provided with body, creates a multipart/alternative message.",
             },
             identityId: {
               type: "string",
@@ -640,7 +604,8 @@ async function handleEmailGet(
 
   try {
     const layers = sessionManager.getLayers(bearerToken);
-    const accountId = args.accountId || (await sessionManager.getAccountId(bearerToken));
+    const accountId =
+      args.accountId || (await sessionManager.getAccountId(bearerToken));
 
     const program = Effect.gen(function* () {
       const service = yield* EmailService;
@@ -701,7 +666,8 @@ async function handleEmailQuery(
 
   try {
     const layers = sessionManager.getLayers(bearerToken);
-    const accountId = args.accountId || (await sessionManager.getAccountId(bearerToken));
+    const accountId =
+      args.accountId || (await sessionManager.getAccountId(bearerToken));
 
     // Build the filter from the query arguments
     let filter: any = {};
@@ -779,24 +745,39 @@ async function handleEmailSend(
           const program = Effect.gen(function* () {
             const client = yield* JMAPClientService;
             const callId = `identity-get-${Date.now()}`;
-            const methodCall: ["Identity/get", { accountId: string; ids: string[] }, string] = [
+            const methodCall: [
+              "Identity/get",
+              { accountId: string; ids: string[] },
+              string,
+            ] = [
               "Identity/get",
               { accountId, ids: [args.identityId!] },
-              callId
+              callId,
             ];
-            const response = yield* client.batch([methodCall], [
-              'urn:ietf:params:jmap:core',
-              'urn:ietf:params:jmap:mail',
-              'urn:ietf:params:jmap:submission'
-            ]);
-            const identityResponse = response.methodResponses.find(([method]) => method === "Identity/get");
+            const response = yield* client.batch(
+              [methodCall],
+              [
+                "urn:ietf:params:jmap:core",
+                "urn:ietf:params:jmap:mail",
+                "urn:ietf:params:jmap:submission",
+              ],
+            );
+            const identityResponse = response.methodResponses.find(
+              ([method]) => method === "Identity/get",
+            );
             if (!identityResponse) {
-              return yield* Effect.fail(new Error("Identity/get response not found"));
+              return yield* Effect.fail(
+                new Error("Identity/get response not found"),
+              );
             }
             const [, data] = identityResponse;
             if (data.list && data.list.length > 0) {
               const identity = data.list[0];
-              return { id: identity.id, email: identity.email, name: identity.name };
+              return {
+                id: identity.id,
+                email: identity.email,
+                name: identity.name,
+              };
             }
             return yield* Effect.fail(new Error("Identity not found"));
           });
@@ -829,9 +810,7 @@ async function handleEmailSend(
       const draftsMailbox = mailboxes.find((mb) => mb.role === "drafts");
 
       if (!draftsMailbox) {
-        return yield* Effect.fail(
-          new Error("Drafts mailbox not found")
-        );
+        return yield* Effect.fail(new Error("Drafts mailbox not found"));
       }
 
       // Import the email
@@ -850,14 +829,16 @@ async function handleEmailSend(
         // Check if there are errors in notCreated
         if (importResult.notCreated) {
           const errors = Object.entries(importResult.notCreated).map(
-            ([key, error]) => `${key}: ${JSON.stringify(error)}`
+            ([key, error]) => `${key}: ${JSON.stringify(error)}`,
           );
           return yield* Effect.fail(
-            new Error(`Failed to import email: ${errors.join(", ")}`)
+            new Error(`Failed to import email: ${errors.join(", ")}`),
           );
         }
         return yield* Effect.fail(
-          new Error("Failed to import email: no created or notCreated field in response")
+          new Error(
+            "Failed to import email: no created or notCreated field in response",
+          ),
         );
       }
 
@@ -865,7 +846,9 @@ async function handleEmailSend(
       const createdEmails = Object.values(importResult.created);
       if (createdEmails.length === 0) {
         return yield* Effect.fail(
-          new Error(`No email was created. Import result: ${JSON.stringify(importResult)}`)
+          new Error(
+            `No email was created. Import result: ${JSON.stringify(importResult)}`,
+          ),
         );
       }
 
@@ -875,13 +858,15 @@ async function handleEmailSend(
       const submission = yield* submissionService.send(
         accountId,
         Common.createId(identityId),
-        emailId
+        emailId,
       );
 
       return submission;
     });
 
-    const result = await Effect.runPromise(program.pipe(Effect.provide(layers)));
+    const result = await Effect.runPromise(
+      program.pipe(Effect.provide(layers)),
+    );
 
     return {
       content: [
