@@ -21,8 +21,8 @@ importers:
         specifier: ^3.17.14
         version: 3.17.14
       effect-jmap:
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -254,8 +254,8 @@ packages:
     resolution: {integrity: sha512-ecqj/sy1jcK1uWrwpR67UhYrIFQ+5WlGxth34WquCbamhFA6hkkwiu37o6J5xCHdo1oixJRfVRw+ywV+Hq/0Aw==}
     engines: {node: '>=8'}
 
-  effect-jmap@0.2.0:
-    resolution: {integrity: sha512-xnOl5WY3zIptlX2Rw4kavfFHBbifqDn0y+JUNRsZQ62zMaTM1lC9kJc91kX+gWzOPdaDw9mxZ5HFTGjWAajyhQ==}
+  effect-jmap@0.3.0:
+    resolution: {integrity: sha512-FRksiHsimq5JiWAviRMHasEAxGf2mm7k/Gyi4iiMebFmQM/lM28YR6SY6mn8Xy44uyJy15Yg6wercGNoFbbsGw==}
 
   effect@3.17.14:
     resolution: {integrity: sha512-VpIZz72+cg3357vLkNHN8CG+Uq2X0QHNv3qkyGInvG3lG5K7Ala1JliGIAdgNvwzaN37J27FuzVD8m0kEiv2Ig==}
@@ -562,7 +562,7 @@ snapshots:
   detect-libc@2.1.1:
     optional: true
 
-  effect-jmap@0.2.0:
+  effect-jmap@0.3.0:
     dependencies:
       '@effect/platform': 0.91.1(effect@3.17.14)
       effect: 3.17.14
