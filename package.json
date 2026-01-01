@@ -3,6 +3,9 @@
   "version": "0.4.0",
   "description": "MCP server for Fastmail using effect-jmap library",
   "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
   "main": "dist/index.js",
   "bin": {
     "fastmail-mcp-unofficial": "dist/index.js"
