@@ -17,15 +17,15 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.25.1
         version: 1.25.1(hono@4.11.3)(zod@3.25.76)
-      '@vercel/mcp-adapter':
-        specifier: ^1.0.0
-        version: 1.0.0(@modelcontextprotocol/sdk@1.25.1(hono@4.11.3)(zod@3.25.76))
       effect:
         specifier: ^3.17.14
         version: 3.17.14
       effect-jmap:
         specifier: ^0.3.0
         version: 0.3.0
+      mcp-handler:
+        specifier: ^1.0.4
+        version: 1.0.4(@modelcontextprotocol/sdk@1.25.1(hono@4.11.3)(zod@3.25.76))
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -273,16 +273,6 @@ packages:
 
   '@types/node@24.5.2':
     resolution: {integrity: sha512-FYxk1I7wPv3K2XBaoyH2cTnocQEu8AOZ60hPbsyukMPLv5/5qr7V1i8PLHdl6Zf87I+xZXFvPCXYjiTFq+YSDQ==}
-
-  '@vercel/mcp-adapter@1.0.0':
-    resolution: {integrity: sha512-o/QA4LhYCJvuL7/i8CfKPpOm29u25/L4m1LWH44EQZ8cfYJlc4B7Bu+YzDHl23m8A3hDxCJQmlgZEGmsPAQ0vQ==}
-    hasBin: true
-    peerDependencies:
-      '@modelcontextprotocol/sdk': ^1.12.0
-      next: '>=13.0.0'
-    peerDependenciesMeta:
-      next:
-        optional: true
 
   accepts@2.0.0:
     resolution: {integrity: sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng==}
@@ -985,11 +975,6 @@ snapshots:
   '@types/node@24.5.2':
     dependencies:
       undici-types: 7.12.0
-
-  '@vercel/mcp-adapter@1.0.0(@modelcontextprotocol/sdk@1.25.1(hono@4.11.3)(zod@3.25.76))':
-    dependencies:
-      '@modelcontextprotocol/sdk': 1.25.1(hono@4.11.3)(zod@3.25.76)
-      mcp-handler: 1.0.4(@modelcontextprotocol/sdk@1.25.1(hono@4.11.3)(zod@3.25.76))
 
   accepts@2.0.0:
     dependencies:

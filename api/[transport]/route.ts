@@ -1,4 +1,5 @@
-import { createMcpHandler } from "@vercel/mcp-adapter";
+import { createMcpHandler } from "mcp-handler";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
   mailboxGet,
   emailGet,
@@ -10,7 +11,7 @@ import {
 } from "#tools";
 
 const handler = createMcpHandler(
-  (server) => {
+  (server: McpServer) => {
     // Tool: Get all mailboxes
     server.tool(
       "mailbox_get",
@@ -48,7 +49,7 @@ const handler = createMcpHandler(
         fetchAllBodyValues: EmailGetSchema.shape.fetchAllBodyValues,
         maxBodyValueBytes: EmailGetSchema.shape.maxBodyValueBytes,
       },
-      async (args) => {
+      async (args: unknown) => {
         try {
           const result = await emailGet(EmailGetSchema.parse(args));
           return {
@@ -86,7 +87,7 @@ const handler = createMcpHandler(
         sort: EmailQuerySchema.shape.sort,
         ascending: EmailQuerySchema.shape.ascending,
       },
-      async (args) => {
+      async (args: unknown) => {
         try {
           const result = await emailQuery(EmailQuerySchema.parse(args));
           return {
@@ -117,7 +118,7 @@ const handler = createMcpHandler(
         htmlBody: EmailSendSchema.shape.htmlBody,
         identityId: EmailSendSchema.shape.identityId,
       },
-      async (args) => {
+      async (args: unknown) => {
         try {
           const result = await emailSend(EmailSendSchema.parse(args));
           return {
