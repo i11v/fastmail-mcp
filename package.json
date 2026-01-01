@@ -10,6 +10,9 @@
   "bin": {
     "fastmail-mcp-unofficial": "dist/index.js"
   },
+  "imports": {
+    "#tools": "./dist/tools.js"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "node --watch dist/index.js",

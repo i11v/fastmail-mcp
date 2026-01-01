@@ -7,7 +7,7 @@ import {
   EmailGetSchema,
   EmailQuerySchema,
   EmailSendSchema,
-} from "../../dist/tools.js";
+} from "#tools";
 
 const handler = createMcpHandler(
   (server) => {
