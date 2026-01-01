@@ -1,4 +1,7 @@
 {
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install",
   "functions": {
     "api/[transport]/route.ts": {
       "maxDuration": 60
