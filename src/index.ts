@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPTransport } from "@hono/mcp";
-import { serve } from "@hono/node-server";
 import { registerTools } from "./tools.js";
 
 const app = new Hono();
@@ -49,11 +48,14 @@ app.get("/", (c) =>
   })
 );
 
-// Local development server
-const port = parseInt(process.env.PORT || "3000", 10);
-serve({ fetch: app.fetch, port }, (info) => {
-  console.log(`Fastmail MCP server running on http://localhost:${info.port}`);
-  console.log(`MCP endpoint: http://localhost:${info.port}/mcp`);
-});
+// Local development server (only when not on Vercel)
+if (!process.env.VERCEL) {
+  const { serve } = await import("@hono/node-server");
+  const port = parseInt(process.env.PORT || "3000", 10);
+  serve({ fetch: app.fetch, port }, (info) => {
+    console.log(`Fastmail MCP server running on http://localhost:${info.port}`);
+    console.log(`MCP endpoint: http://localhost:${info.port}/mcp`);
+  });
+}
 
 export default app;

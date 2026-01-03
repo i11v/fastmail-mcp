@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "src/index.ts": {
-      "maxDuration": 60
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
