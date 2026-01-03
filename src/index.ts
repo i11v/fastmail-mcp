@@ -1,8 +1,15 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPTransport } from "@hono/mcp";
 import { registerTools } from "./tools.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const publicDir = join(__dirname, "..", "public");
+const landingHtml = readFileSync(join(publicDir, "landing.html"), "utf-8");
 
 const app = new Hono();
 
@@ -39,14 +46,8 @@ app.all("/mcp", async (c) => {
 // Health check
 app.get("/health", (c) => c.json({ status: "ok" }));
 
-// Root - server info
-app.get("/", (c) =>
-  c.json({
-    name: "fastmail-mcp",
-    version: "1.0.0",
-    endpoints: { mcp: "/mcp", health: "/health" },
-  })
-);
+// Root - landing page with setup instructions
+app.get("/", (c) => c.html(landingHtml));
 
 // Local development server (only when not on Vercel)
 if (!process.env.VERCEL) {
