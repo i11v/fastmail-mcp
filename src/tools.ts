@@ -13,9 +13,71 @@ import { Common } from "effect-jmap";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import { getCachedSession, setCachedSession } from "./redis.js";
+import { unified } from "unified";
+import rehypeParse from "rehype-parse";
+import rehypeRemark from "rehype-remark";
+import remarkStringify from "remark-stringify";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
+
+// HTML to Markdown converter using rehype-remark
+const htmlToMarkdownProcessor = unified()
+  .use(rehypeParse, { fragment: true })
+  .use(rehypeRemark)
+  .use(remarkStringify);
+
+/**
+ * Convert HTML string to Markdown
+ */
+async function htmlToMarkdown(html: string): Promise<string> {
+  const result = await htmlToMarkdownProcessor.process(html);
+  return String(result);
+}
+
+/**
+ * Process email body values, converting HTML to Markdown
+ * This reduces context size when passing emails to LLMs
+ */
+async function processEmailBodyValues(emails: any[]): Promise<any[]> {
+  return Promise.all(
+    emails.map(async (email) => {
+      if (!email.bodyValues) {
+        return email;
+      }
+
+      const processedBodyValues: Record<string, any> = {};
+
+      for (const [partId, bodyValue] of Object.entries(email.bodyValues)) {
+        const bv = bodyValue as any;
+        // Check if this is an HTML body part
+        const htmlPart = email.htmlBody?.find((part: any) => part.partId === partId);
+
+        if (htmlPart && bv.value && typeof bv.value === "string") {
+          // Convert HTML to Markdown
+          try {
+            const markdown = await htmlToMarkdown(bv.value);
+            processedBodyValues[partId] = {
+              ...bv,
+              value: markdown,
+              isConvertedFromHtml: true,
+            };
+          } catch {
+            // If conversion fails, keep original
+            processedBodyValues[partId] = bv;
+          }
+        } else {
+          processedBodyValues[partId] = bv;
+        }
+      }
+
+      return {
+        ...email,
+        bodyValues: processedBodyValues,
+      };
+    })
+  );
+}
 
 /**
  * Hash token for use as Redis key (avoids storing full tokens)
@@ -353,7 +415,10 @@ export async function emailGet(args: EmailGetArgs, extra: RequestHandlerExtra<an
     program.pipe(Effect.provide(layers)),
   );
 
-  return (emailResult as any).list;
+  const emails = (emailResult as any).list;
+
+  // Convert HTML body values to Markdown to reduce context size
+  return processEmailBodyValues(emails);
 }
 
 /**
