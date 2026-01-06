@@ -1,25 +1,23 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "pnpm build",
   "installCommand": "pnpm install",
-  "builds": [
-    {
-      "src": "dist/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/dist/index.js"
-    }
-  ],
+  "functions": {
+    "dist/index.js": {}
+  },
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Mcp-Session-Id" }
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Mcp-Session-Id"
+        }
       ]
     }
   ]
