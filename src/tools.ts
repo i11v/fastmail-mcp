@@ -50,10 +50,22 @@ export const EmailSendSchema = z.object({
   identityId: z.string().optional(),
 });
 
+/**
+ * Identity schema with signature fields (RFC 8621)
+ */
+export const IdentitySchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  name: z.string().optional(),
+  textSignature: z.string().optional(),
+  htmlSignature: z.string().optional(),
+});
+
 // Type exports
 export type EmailQueryArgs = z.infer<typeof EmailQuerySchema>;
 export type EmailGetArgs = z.infer<typeof EmailGetSchema>;
 export type EmailSendArgs = z.infer<typeof EmailSendSchema>;
+export type Identity = z.infer<typeof IdentitySchema>;
 
 /**
  * SessionManager - Caches JMAP session, layers, and account ID
@@ -114,17 +126,6 @@ class SessionManager {
 
 // Global session manager instance
 export const sessionManager = new SessionManager();
-
-/**
- * Identity with signature fields (RFC 8621)
- */
-interface Identity {
-  id: string;
-  email: string;
-  name?: string;
-  textSignature?: string;
-  htmlSignature?: string;
-}
 
 /**
  * Helper function to get the default identity for sending emails
