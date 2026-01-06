@@ -10,6 +10,7 @@ import {
 } from "effect-jmap";
 import { Common } from "effect-jmap";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { tokenStorage } from "./index.js";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
@@ -283,10 +284,10 @@ function buildEmailMessage(params: {
  * Tool: Get all mailboxes
  */
 export async function mailboxGet(): Promise<any> {
-  const bearerToken = process.env.FASTMAIL_API_TOKEN;
+  const bearerToken = tokenStorage.getStore();
 
   if (!bearerToken) {
-    throw new Error("FASTMAIL_API_TOKEN environment variable is required");
+    throw new Error("Missing bearer token. Ensure Authorization header is set.");
   }
 
   const layers = sessionManager.getLayers(bearerToken);
@@ -304,10 +305,10 @@ export async function mailboxGet(): Promise<any> {
  * Tool: Get emails by ID
  */
 export async function emailGet(args: EmailGetArgs): Promise<any> {
-  const bearerToken = process.env.FASTMAIL_API_TOKEN;
+  const bearerToken = tokenStorage.getStore();
 
   if (!bearerToken) {
-    throw new Error("FASTMAIL_API_TOKEN environment variable is required");
+    throw new Error("Missing bearer token. Ensure Authorization header is set.");
   }
 
   const layers = sessionManager.getLayers(bearerToken);
@@ -340,10 +341,10 @@ export async function emailGet(args: EmailGetArgs): Promise<any> {
  * Tool: Query emails
  */
 export async function emailQuery(args: EmailQueryArgs): Promise<any> {
-  const bearerToken = process.env.FASTMAIL_API_TOKEN;
+  const bearerToken = tokenStorage.getStore();
 
   if (!bearerToken) {
-    throw new Error("FASTMAIL_API_TOKEN environment variable is required");
+    throw new Error("Missing bearer token. Ensure Authorization header is set.");
   }
 
   const layers = sessionManager.getLayers(bearerToken);
@@ -379,10 +380,10 @@ export async function emailQuery(args: EmailQueryArgs): Promise<any> {
  * Tool: Send email
  */
 export async function emailSend(args: EmailSendArgs): Promise<any> {
-  const bearerToken = process.env.FASTMAIL_API_TOKEN;
+  const bearerToken = tokenStorage.getStore();
 
   if (!bearerToken) {
-    throw new Error("FASTMAIL_API_TOKEN environment variable is required");
+    throw new Error("Missing bearer token. Ensure Authorization header is set.");
   }
 
   const layers = sessionManager.getLayers(bearerToken);
