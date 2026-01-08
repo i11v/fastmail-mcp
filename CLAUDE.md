@@ -19,6 +19,11 @@ pnpm deploy       # Deploy to Vercel (production)
 pnpm typecheck    # Type check without compilation
 ```
 
+## Source Files
+
+- `src/index.ts` - Server setup, Hono routes, MCP initialization
+- `src/tools.ts` - Tool implementations, Zod schemas, JMAP integration
+
 ## Key Dependencies
 
 | Package | Purpose |
