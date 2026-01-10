@@ -19,7 +19,7 @@ app.use(
   cors({
     origin: "*",
     allowMethods: ["GET", "POST", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Mcp-Session-Id"],
+    allowHeaders: ["Content-Type", "Mcp-Session-Id", "Authorization"],
   })
 );
 
