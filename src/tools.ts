@@ -547,10 +547,13 @@ export const toolDefinitions = {
  */
 export function registerTools(server: McpServer) {
   // Tool: Get all mailboxes
-  server.tool(
+  server.registerTool(
     "mailbox_get",
-    "Get all mailboxes using JMAP Mailbox/get method",
-    async (extra) => {
+    {
+      description: "Get all mailboxes using JMAP Mailbox/get method",
+      inputSchema: z.object({}),
+    },
+    async (_input, extra) => {
       try {
         const result = await mailboxGet(extra);
         return {
@@ -571,21 +574,15 @@ export function registerTools(server: McpServer) {
   );
 
   // Tool: Get emails by ID
-  server.tool(
+  server.registerTool(
     "email_get",
-    "Get specific emails by their IDs",
     {
-      accountId: EmailGetSchema.shape.accountId,
-      emailIds: EmailGetSchema.shape.emailIds,
-      properties: EmailGetSchema.shape.properties,
-      fetchTextBodyValues: EmailGetSchema.shape.fetchTextBodyValues,
-      fetchHTMLBodyValues: EmailGetSchema.shape.fetchHTMLBodyValues,
-      fetchAllBodyValues: EmailGetSchema.shape.fetchAllBodyValues,
-      maxBodyValueBytes: EmailGetSchema.shape.maxBodyValueBytes,
+      description: "Get specific emails by their IDs",
+      inputSchema: EmailGetSchema,
     },
-    async (args: unknown, extra) => {
+    async (args, extra) => {
       try {
-        const result = await emailGet(EmailGetSchema.parse(args), extra);
+        const result = await emailGet(args, extra);
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
@@ -604,26 +601,15 @@ export function registerTools(server: McpServer) {
   );
 
   // Tool: Query emails
-  server.tool(
+  server.registerTool(
     "email_query",
-    "Query emails with filters and sorting",
     {
-      accountId: EmailQuerySchema.shape.accountId,
-      mailboxId: EmailQuerySchema.shape.mailboxId,
-      limit: EmailQuerySchema.shape.limit,
-      from: EmailQuerySchema.shape.from,
-      to: EmailQuerySchema.shape.to,
-      subject: EmailQuerySchema.shape.subject,
-      hasKeyword: EmailQuerySchema.shape.hasKeyword,
-      notKeyword: EmailQuerySchema.shape.notKeyword,
-      before: EmailQuerySchema.shape.before,
-      after: EmailQuerySchema.shape.after,
-      sort: EmailQuerySchema.shape.sort,
-      ascending: EmailQuerySchema.shape.ascending,
+      description: "Query emails with filters and sorting",
+      inputSchema: EmailQuerySchema,
     },
-    async (args: unknown, extra) => {
+    async (args, extra) => {
       try {
-        const result = await emailQuery(EmailQuerySchema.parse(args), extra);
+        const result = await emailQuery(args, extra);
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
@@ -642,19 +628,15 @@ export function registerTools(server: McpServer) {
   );
 
   // Tool: Send email
-  server.tool(
+  server.registerTool(
     "email_send",
-    "Send an email via Fastmail. Supports plain text, HTML, or multipart/alternative (both) emails.",
     {
-      to: EmailSendSchema.shape.to,
-      subject: EmailSendSchema.shape.subject,
-      body: EmailSendSchema.shape.body,
-      htmlBody: EmailSendSchema.shape.htmlBody,
-      identityId: EmailSendSchema.shape.identityId,
+      description: "Send an email via Fastmail. Supports plain text, HTML, or multipart/alternative (both) emails.",
+      inputSchema: EmailSendSchema,
     },
-    async (args: unknown, extra) => {
+    async (args, extra) => {
       try {
-        const result = await emailSend(EmailSendSchema.parse(args), extra);
+        const result = await emailSend(args, extra);
         return {
           content: [
             {
