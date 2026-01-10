@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createHash } from "node:crypto";
 import { Effect, Layer } from "effect";
 import { HttpClient, HttpClientRequest } from "@effect/platform";
 import {
@@ -11,9 +12,17 @@ import {
 import { Common } from "effect-jmap";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
+import { getCachedSession, setCachedSession } from "./redis.js";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
+
+/**
+ * Hash token for use as Redis key (avoids storing full tokens)
+ */
+function hashToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex").substring(0, 16);
+}
 
 /**
  * Extract bearer token from request headers
@@ -77,64 +86,65 @@ export type EmailGetArgs = z.infer<typeof EmailGetSchema>;
 export type EmailSendArgs = z.infer<typeof EmailSendSchema>;
 
 /**
- * SessionManager - Caches JMAP session, layers, and account ID
+ * Create JMAP layers for a bearer token
  */
-class SessionManager {
-  private cachedLayers: Layer.Layer<any> | null = null;
-  private cachedAccountId: string | null = null;
-  private cachedSession: any | null = null;
-  private cachedToken: string | null = null;
-
-  getLayers(bearerToken: string): Layer.Layer<any> {
-    if (this.cachedToken !== bearerToken) {
-      this.invalidate();
-      this.cachedToken = bearerToken;
-    }
-
-    if (!this.cachedLayers) {
-      this.cachedLayers = JMAPLive(FASTMAIL_SESSION_ENDPOINT, bearerToken);
-    }
-
-    return this.cachedLayers;
-  }
-
-  async getSession(bearerToken: string): Promise<any> {
-    const layers = this.getLayers(bearerToken);
-
-    if (!this.cachedSession) {
-      const program = Effect.gen(function* () {
-        const client = yield* JMAPClientService;
-        return yield* client.getSession;
-      });
-
-      this.cachedSession = await Effect.runPromise(
-        program.pipe(Effect.provide(layers)),
-      );
-    }
-
-    return this.cachedSession;
-  }
-
-  async getAccountId(bearerToken: string): Promise<string> {
-    if (!this.cachedAccountId) {
-      const session = await this.getSession(bearerToken);
-      this.cachedAccountId =
-        session.primaryAccounts?.["urn:ietf:params:jmap:mail"] ||
-        Object.keys(session.accounts)[0];
-    }
-
-    return this.cachedAccountId!;
-  }
-
-  invalidate(): void {
-    this.cachedLayers = null;
-    this.cachedAccountId = null;
-    this.cachedSession = null;
-  }
+function createLayers(bearerToken: string): Layer.Layer<any> {
+  return JMAPLive(FASTMAIL_SESSION_ENDPOINT, bearerToken);
 }
 
-// Global session manager instance
-export const sessionManager = new SessionManager();
+/**
+ * Get JMAP session, using Redis cache if available
+ */
+async function getSession(
+  bearerToken: string,
+  layers: Layer.Layer<any>
+): Promise<any> {
+  const tokenHash = hashToken(bearerToken);
+
+  // Try Redis first
+  const cached = await getCachedSession(tokenHash);
+  if (cached) return JSON.parse(cached.json);
+
+  // Fetch from JMAP
+  const program = Effect.gen(function* () {
+    const client = yield* JMAPClientService;
+    return yield* client.getSession;
+  });
+
+  const session = await Effect.runPromise(program.pipe(Effect.provide(layers)));
+
+  // Cache in Redis
+  const accountId =
+    session.primaryAccounts?.["urn:ietf:params:jmap:mail"] ||
+    Object.keys(session.accounts)[0];
+  await setCachedSession(tokenHash, {
+    accountId,
+    json: JSON.stringify(session),
+  });
+
+  return session;
+}
+
+/**
+ * Get account ID, using Redis cache if available
+ */
+async function getAccountId(
+  bearerToken: string,
+  layers: Layer.Layer<any>
+): Promise<string> {
+  const tokenHash = hashToken(bearerToken);
+
+  // Try Redis first
+  const cached = await getCachedSession(tokenHash);
+  if (cached) return cached.accountId;
+
+  // Fetch session (will cache both)
+  const session = await getSession(bearerToken, layers);
+  return (
+    session.primaryAccounts?.["urn:ietf:params:jmap:mail"] ||
+    Object.keys(session.accounts)[0]
+  );
+}
 
 /**
  * Helper function to get the default identity for sending emails
@@ -305,8 +315,8 @@ function buildEmailMessage(params: {
  */
 export async function mailboxGet(extra: RequestHandlerExtra<any, any>): Promise<any> {
   const bearerToken = extractBearerToken(extra);
-  const layers = sessionManager.getLayers(bearerToken);
-  const accountId = await sessionManager.getAccountId(bearerToken);
+  const layers = createLayers(bearerToken);
+  const accountId = await getAccountId(bearerToken, layers);
 
   const program = Effect.gen(function* () {
     const service = yield* MailboxService;
@@ -321,9 +331,8 @@ export async function mailboxGet(extra: RequestHandlerExtra<any, any>): Promise<
  */
 export async function emailGet(args: EmailGetArgs, extra: RequestHandlerExtra<any, any>): Promise<any> {
   const bearerToken = extractBearerToken(extra);
-  const layers = sessionManager.getLayers(bearerToken);
-  const accountId =
-    args.accountId || (await sessionManager.getAccountId(bearerToken));
+  const layers = createLayers(bearerToken);
+  const accountId = args.accountId || (await getAccountId(bearerToken, layers));
 
   const program = Effect.gen(function* () {
     const service = yield* EmailService;
@@ -352,9 +361,8 @@ export async function emailGet(args: EmailGetArgs, extra: RequestHandlerExtra<an
  */
 export async function emailQuery(args: EmailQueryArgs, extra: RequestHandlerExtra<any, any>): Promise<any> {
   const bearerToken = extractBearerToken(extra);
-  const layers = sessionManager.getLayers(bearerToken);
-  const accountId =
-    args.accountId || (await sessionManager.getAccountId(bearerToken));
+  const layers = createLayers(bearerToken);
+  const accountId = args.accountId || (await getAccountId(bearerToken, layers));
 
   let filter: any = {};
   if (args.mailboxId) filter.inMailbox = args.mailboxId;
@@ -386,8 +394,8 @@ export async function emailQuery(args: EmailQueryArgs, extra: RequestHandlerExtr
  */
 export async function emailSend(args: EmailSendArgs, extra: RequestHandlerExtra<any, any>): Promise<any> {
   const bearerToken = extractBearerToken(extra);
-  const layers = sessionManager.getLayers(bearerToken);
-  const accountId = await sessionManager.getAccountId(bearerToken);
+  const layers = createLayers(bearerToken);
+  const accountId = await getAccountId(bearerToken, layers);
 
   // Get identity
   const identity = args.identityId
