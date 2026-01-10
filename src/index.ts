@@ -1,15 +1,11 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { AsyncLocalStorage } from "node:async_hooks";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPTransport } from "@hono/mcp";
 import { registerTools } from "./tools.js";
-
-// AsyncLocalStorage for storing bearer token per request
-export const tokenStorage = new AsyncLocalStorage<string>();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const publicDir = join(__dirname, "..", "public");
@@ -41,25 +37,10 @@ const transport = new StreamableHTTPTransport();
 
 // MCP endpoint
 app.all("/mcp", async (c) => {
-  // Extract bearer token from Authorization header
-  const authHeader = c.req.header("Authorization");
-  const bearerToken = authHeader?.startsWith("Bearer ")
-    ? authHeader.substring(7)
-    : undefined;
-
-  if (!bearerToken) {
-    return c.json(
-      { error: "Missing or invalid Authorization header. Expected: Bearer <token>" },
-      401
-    );
-  }
-
   if (!mcpServer.isConnected()) {
     await mcpServer.connect(transport);
   }
-
-  // Run the request handler within AsyncLocalStorage context with the bearer token
-  return tokenStorage.run(bearerToken, () => transport.handleRequest(c));
+  return transport.handleRequest(c);
 });
 
 // Health check

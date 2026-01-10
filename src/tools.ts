@@ -10,10 +10,30 @@ import {
 } from "effect-jmap";
 import { Common } from "effect-jmap";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { tokenStorage } from "./index.js";
+import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
+
+/**
+ * Extract bearer token from request headers
+ */
+function extractBearerToken(extra: RequestHandlerExtra<any, any>): string {
+  const headers = extra.requestInfo?.headers;
+
+  if (!headers) {
+    throw new Error("Missing request headers. Ensure Authorization header is set with 'Bearer <token>' format.");
+  }
+
+  // IsomorphicHeaders is Record<string, string | string[] | undefined>
+  const authHeader = headers["authorization"] || headers["Authorization"];
+
+  if (!authHeader || typeof authHeader !== "string" || !authHeader.startsWith("Bearer ")) {
+    throw new Error("Missing bearer token. Ensure Authorization header is set with 'Bearer <token>' format.");
+  }
+
+  return authHeader.substring(7);
+}
 
 // Zod schemas for validation
 export const EmailQuerySchema = z.object({
@@ -283,13 +303,8 @@ function buildEmailMessage(params: {
 /**
  * Tool: Get all mailboxes
  */
-export async function mailboxGet(): Promise<any> {
-  const bearerToken = tokenStorage.getStore();
-
-  if (!bearerToken) {
-    throw new Error("Missing bearer token. Ensure Authorization header is set.");
-  }
-
+export async function mailboxGet(extra: RequestHandlerExtra<any, any>): Promise<any> {
+  const bearerToken = extractBearerToken(extra);
   const layers = sessionManager.getLayers(bearerToken);
   const accountId = await sessionManager.getAccountId(bearerToken);
 
@@ -304,13 +319,8 @@ export async function mailboxGet(): Promise<any> {
 /**
  * Tool: Get emails by ID
  */
-export async function emailGet(args: EmailGetArgs): Promise<any> {
-  const bearerToken = tokenStorage.getStore();
-
-  if (!bearerToken) {
-    throw new Error("Missing bearer token. Ensure Authorization header is set.");
-  }
-
+export async function emailGet(args: EmailGetArgs, extra: RequestHandlerExtra<any, any>): Promise<any> {
+  const bearerToken = extractBearerToken(extra);
   const layers = sessionManager.getLayers(bearerToken);
   const accountId =
     args.accountId || (await sessionManager.getAccountId(bearerToken));
@@ -340,13 +350,8 @@ export async function emailGet(args: EmailGetArgs): Promise<any> {
 /**
  * Tool: Query emails
  */
-export async function emailQuery(args: EmailQueryArgs): Promise<any> {
-  const bearerToken = tokenStorage.getStore();
-
-  if (!bearerToken) {
-    throw new Error("Missing bearer token. Ensure Authorization header is set.");
-  }
-
+export async function emailQuery(args: EmailQueryArgs, extra: RequestHandlerExtra<any, any>): Promise<any> {
+  const bearerToken = extractBearerToken(extra);
   const layers = sessionManager.getLayers(bearerToken);
   const accountId =
     args.accountId || (await sessionManager.getAccountId(bearerToken));
@@ -379,13 +384,8 @@ export async function emailQuery(args: EmailQueryArgs): Promise<any> {
 /**
  * Tool: Send email
  */
-export async function emailSend(args: EmailSendArgs): Promise<any> {
-  const bearerToken = tokenStorage.getStore();
-
-  if (!bearerToken) {
-    throw new Error("Missing bearer token. Ensure Authorization header is set.");
-  }
-
+export async function emailSend(args: EmailSendArgs, extra: RequestHandlerExtra<any, any>): Promise<any> {
+  const bearerToken = extractBearerToken(extra);
   const layers = sessionManager.getLayers(bearerToken);
   const accountId = await sessionManager.getAccountId(bearerToken);
 
@@ -542,9 +542,9 @@ export function registerTools(server: McpServer) {
   server.tool(
     "mailbox_get",
     "Get all mailboxes using JMAP Mailbox/get method",
-    async () => {
+    async (extra) => {
       try {
-        const result = await mailboxGet();
+        const result = await mailboxGet(extra);
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
@@ -575,9 +575,9 @@ export function registerTools(server: McpServer) {
       fetchAllBodyValues: EmailGetSchema.shape.fetchAllBodyValues,
       maxBodyValueBytes: EmailGetSchema.shape.maxBodyValueBytes,
     },
-    async (args: unknown) => {
+    async (args: unknown, extra) => {
       try {
-        const result = await emailGet(EmailGetSchema.parse(args));
+        const result = await emailGet(EmailGetSchema.parse(args), extra);
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
@@ -613,9 +613,9 @@ export function registerTools(server: McpServer) {
       sort: EmailQuerySchema.shape.sort,
       ascending: EmailQuerySchema.shape.ascending,
     },
-    async (args: unknown) => {
+    async (args: unknown, extra) => {
       try {
-        const result = await emailQuery(EmailQuerySchema.parse(args));
+        const result = await emailQuery(EmailQuerySchema.parse(args), extra);
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
@@ -644,9 +644,9 @@ export function registerTools(server: McpServer) {
       htmlBody: EmailSendSchema.shape.htmlBody,
       identityId: EmailSendSchema.shape.identityId,
     },
-    async (args: unknown) => {
+    async (args: unknown, extra) => {
       try {
-        const result = await emailSend(EmailSendSchema.parse(args));
+        const result = await emailSend(EmailSendSchema.parse(args), extra);
         return {
           content: [
             {
