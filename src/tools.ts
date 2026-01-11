@@ -81,41 +81,40 @@ function escapeXmlAttr(str: string): string {
 }
 
 /**
- * Add address attributes to the list.
- * For each address field, adds {prefix}_name and {prefix}_email attributes.
- * For multiple addresses, adds {prefix}_name_2, {prefix}_email_2, etc.
+ * Escape XML text content
  */
-function addAddressAttrs(
-  attrs: string[],
-  addresses: Array<{ name?: string; email: string }> | undefined,
-  prefix: string
-): void {
-  if (!addresses || addresses.length === 0) return;
-
-  addresses.forEach((addr, i) => {
-    const suffix = i === 0 ? "" : `_${i + 1}`;
-    if (addr.name) {
-      attrs.push(`${prefix}_name${suffix}="${escapeXmlAttr(addr.name)}"`);
-    }
-    attrs.push(`${prefix}_email${suffix}="${escapeXmlAttr(addr.email)}"`);
-  });
+function escapeXmlText(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 /**
- * Build XML attributes string for an email
+ * Format address list as XML nodes
  */
-function buildEmailAttributes(email: any): string {
+function formatAddressNodes(
+  addresses: Array<{ name?: string; email: string }> | undefined,
+  tagName: string
+): string | null {
+  if (!addresses || addresses.length === 0) return null;
+
+  const addressTags = addresses.map((addr) => {
+    const nameAttr = addr.name ? ` name="${escapeXmlAttr(addr.name)}"` : "";
+    return `    <address${nameAttr} email="${escapeXmlAttr(addr.email)}" />`;
+  });
+
+  return `  <${tagName}>\n${addressTags.join("\n")}\n  </${tagName}>`;
+}
+
+/**
+ * Format a single email as XML
+ */
+async function formatEmailXml(email: any): Promise<string> {
+  const lines: string[] = [];
+
+  // Email opening tag with core attributes
   const attrs: string[] = [`id="${escapeXmlAttr(email.id)}"`];
-
-  // Address fields per RFC 8621
-  addAddressAttrs(attrs, email.from, "from");
-  addAddressAttrs(attrs, email.to, "to");
-  addAddressAttrs(attrs, email.cc, "cc");
-  addAddressAttrs(attrs, email.bcc, "bcc");
-  addAddressAttrs(attrs, email.replyTo, "reply_to");
-  addAddressAttrs(attrs, email.sender, "sender");
-
-  if (email.subject) attrs.push(`subject="${escapeXmlAttr(email.subject)}"`);
 
   if (email.receivedAt) {
     attrs.push(`date="${new Date(email.receivedAt).toISOString()}"`);
@@ -123,7 +122,6 @@ function buildEmailAttributes(email: any): string {
     attrs.push(`date="${new Date(email.sentAt).toISOString()}"`);
   }
 
-  // Flags
   const flags: string[] = [];
   if (!email.keywords?.$seen) flags.push("unread");
   if (email.keywords?.$flagged) flags.push("flagged");
@@ -131,16 +129,45 @@ function buildEmailAttributes(email: any): string {
   if (email.keywords?.$draft) flags.push("draft");
   if (flags.length > 0) attrs.push(`status="${flags.join(", ")}"`);
 
-  if (email.hasAttachment) {
-    attrs.push(`attachments="yes"`);
+  if (email.hasAttachment) attrs.push(`attachments="yes"`);
+
+  lines.push(`<email ${attrs.join(" ")}>`);
+
+  // Address fields per RFC 8621
+  const fromNodes = formatAddressNodes(email.from, "from");
+  if (fromNodes) lines.push(fromNodes);
+
+  const toNodes = formatAddressNodes(email.to, "to");
+  if (toNodes) lines.push(toNodes);
+
+  const ccNodes = formatAddressNodes(email.cc, "cc");
+  if (ccNodes) lines.push(ccNodes);
+
+  const bccNodes = formatAddressNodes(email.bcc, "bcc");
+  if (bccNodes) lines.push(bccNodes);
+
+  const replyToNodes = formatAddressNodes(email.replyTo, "reply_to");
+  if (replyToNodes) lines.push(replyToNodes);
+
+  const senderNodes = formatAddressNodes(email.sender, "sender");
+  if (senderNodes) lines.push(senderNodes);
+
+  // Subject
+  if (email.subject) {
+    lines.push(`  <subject>${escapeXmlText(email.subject)}</subject>`);
   }
 
-  return attrs.join(" ");
+  // Body
+  const body = await getEmailBody(email);
+  lines.push(`  <body>\n${body}\n  </body>`);
+
+  lines.push("</email>");
+
+  return lines.join("\n");
 }
 
 /**
  * Format emails into XML structure grouped by thread
- * Metadata as attributes, body content as Markdown
  */
 async function formatEmailsForLLM(emails: any[]): Promise<string> {
   // Group emails by threadId
@@ -167,14 +194,7 @@ async function formatEmailsForLLM(emails: any[]): Promise<string> {
   const threadOutputs: string[] = [];
 
   for (const [threadId, threadEmails] of threads) {
-    const emailTags = await Promise.all(
-      threadEmails.map(async (email) => {
-        const attrs = buildEmailAttributes(email);
-        const body = await getEmailBody(email);
-        return `<email ${attrs}>\n${body}\n</email>`;
-      })
-    );
-
+    const emailTags = await Promise.all(threadEmails.map(formatEmailXml));
     threadOutputs.push(`<thread id="${threadId}">\n${emailTags.join("\n")}\n</thread>`);
   }
 
