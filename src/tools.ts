@@ -36,22 +36,11 @@ async function htmlToMarkdown(html: string): Promise<string> {
 }
 
 /**
- * Get the body content from an email, preferring plain text over HTML.
- * HTML content is converted to Markdown for cleaner LLM consumption.
+ * Get the body content from an email.
+ * Prefers htmlBody (converted to Markdown) for consistent output.
  */
 async function getEmailBody(email: any): Promise<string> {
   if (!email.bodyValues) return "";
-
-  // Use textBody only if it's explicitly plain text
-  if (email.textBody && email.textBody.length > 0) {
-    const textPart = email.textBody[0];
-    if (textPart.type === "text/plain") {
-      const textBody = email.bodyValues[textPart.partId];
-      if (textBody?.value) {
-        return textBody.value.trim();
-      }
-    }
-  }
 
   // Use htmlBody and convert to Markdown
   if (email.htmlBody && email.htmlBody.length > 0) {
@@ -63,6 +52,15 @@ async function getEmailBody(email: any): Promise<string> {
       } catch {
         return htmlBody.value;
       }
+    }
+  }
+
+  // Fall back to textBody if no htmlBody
+  if (email.textBody && email.textBody.length > 0) {
+    const textPartId = email.textBody[0].partId;
+    const textBody = email.bodyValues[textPartId];
+    if (textBody?.value) {
+      return textBody.value.trim();
     }
   }
 
