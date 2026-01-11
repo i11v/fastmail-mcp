@@ -13,9 +13,163 @@ import { Common } from "effect-jmap";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import { getCachedSession, setCachedSession } from "./redis.js";
+import { unified } from "unified";
+import rehypeParse from "rehype-parse";
+import rehypeRemark from "rehype-remark";
+import remarkStringify from "remark-stringify";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
+
+// HTML to Markdown converter using rehype-remark
+const htmlToMarkdownProcessor = unified()
+  .use(rehypeParse, { fragment: true })
+  .use(rehypeRemark)
+  .use(remarkStringify);
+
+/**
+ * Convert HTML string to Markdown
+ */
+async function htmlToMarkdown(html: string): Promise<string> {
+  const result = await htmlToMarkdownProcessor.process(html);
+  return String(result);
+}
+
+/**
+ * Format an email address object to a readable string
+ */
+function formatAddress(addr: { name?: string; email: string }): string {
+  return addr.name ? `${addr.name} <${addr.email}>` : addr.email;
+}
+
+/**
+ * Format a list of email addresses
+ */
+function formatAddressList(addresses: Array<{ name?: string; email: string }> | undefined): string | undefined {
+  if (!addresses || addresses.length === 0) return undefined;
+  return addresses.map(formatAddress).join(", ");
+}
+
+/**
+ * Get the body content from an email, preferring text over HTML
+ */
+async function getEmailBody(email: any): Promise<string> {
+  if (!email.bodyValues) return "";
+
+  // Prefer text body parts
+  if (email.textBody && email.textBody.length > 0) {
+    const textPartId = email.textBody[0].partId;
+    const textBody = email.bodyValues[textPartId];
+    if (textBody?.value) return textBody.value.trim();
+  }
+
+  // Fall back to HTML body, converted to Markdown
+  if (email.htmlBody && email.htmlBody.length > 0) {
+    const htmlPartId = email.htmlBody[0].partId;
+    const htmlBody = email.bodyValues[htmlPartId];
+    if (htmlBody?.value) {
+      try {
+        return (await htmlToMarkdown(htmlBody.value)).trim();
+      } catch {
+        return htmlBody.value;
+      }
+    }
+  }
+
+  return "";
+}
+
+/**
+ * Escape XML attribute value
+ */
+function escapeXmlAttr(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
+ * Build XML attributes string for an email
+ */
+function buildEmailAttributes(email: any): string {
+  const attrs: string[] = [`id="${escapeXmlAttr(email.id)}"`];
+
+  const from = formatAddressList(email.from);
+  if (from) attrs.push(`from="${escapeXmlAttr(from)}"`);
+
+  const to = formatAddressList(email.to);
+  if (to) attrs.push(`to="${escapeXmlAttr(to)}"`);
+
+  const cc = formatAddressList(email.cc);
+  if (cc) attrs.push(`cc="${escapeXmlAttr(cc)}"`);
+
+  if (email.subject) attrs.push(`subject="${escapeXmlAttr(email.subject)}"`);
+
+  if (email.receivedAt) {
+    attrs.push(`date="${new Date(email.receivedAt).toISOString()}"`);
+  } else if (email.sentAt) {
+    attrs.push(`date="${new Date(email.sentAt).toISOString()}"`);
+  }
+
+  // Flags
+  const flags: string[] = [];
+  if (!email.keywords?.$seen) flags.push("unread");
+  if (email.keywords?.$flagged) flags.push("flagged");
+  if (email.keywords?.$answered) flags.push("replied");
+  if (email.keywords?.$draft) flags.push("draft");
+  if (flags.length > 0) attrs.push(`status="${flags.join(", ")}"`);
+
+  if (email.hasAttachment) {
+    attrs.push(`attachments="yes"`);
+  }
+
+  return attrs.join(" ");
+}
+
+/**
+ * Format emails into XML structure grouped by thread
+ * Metadata as attributes, body content as Markdown
+ */
+async function formatEmailsForLLM(emails: any[]): Promise<string> {
+  // Group emails by threadId
+  const threads = new Map<string, any[]>();
+
+  for (const email of emails) {
+    const threadId = email.threadId || email.id;
+    if (!threads.has(threadId)) {
+      threads.set(threadId, []);
+    }
+    threads.get(threadId)!.push(email);
+  }
+
+  // Sort emails within each thread by date (oldest first)
+  for (const threadEmails of threads.values()) {
+    threadEmails.sort((a, b) => {
+      const dateA = new Date(a.receivedAt || a.sentAt || 0).getTime();
+      const dateB = new Date(b.receivedAt || b.sentAt || 0).getTime();
+      return dateA - dateB;
+    });
+  }
+
+  // Format each thread
+  const threadOutputs: string[] = [];
+
+  for (const [threadId, threadEmails] of threads) {
+    const emailTags = await Promise.all(
+      threadEmails.map(async (email) => {
+        const attrs = buildEmailAttributes(email);
+        const body = await getEmailBody(email);
+        return `<email ${attrs}>\n${body}\n</email>`;
+      })
+    );
+
+    threadOutputs.push(`<thread id="${threadId}">\n${emailTags.join("\n")}\n</thread>`);
+  }
+
+  return threadOutputs.join("\n\n");
+}
 
 /**
  * Hash token for use as Redis key (avoids storing full tokens)
@@ -353,7 +507,10 @@ export async function emailGet(args: EmailGetArgs, extra: RequestHandlerExtra<an
     program.pipe(Effect.provide(layers)),
   );
 
-  return (emailResult as any).list;
+  const emails = (emailResult as any).list;
+
+  // Format emails as clean text for LLM consumption
+  return formatEmailsForLLM(emails);
 }
 
 /**
@@ -528,7 +685,7 @@ export const toolDefinitions = {
     parameters: z.object({}),
   },
   email_get: {
-    description: "Get specific emails by their IDs",
+    description: "Get specific emails by their IDs. Returns formatted text optimized for LLM consumption.",
     parameters: EmailGetSchema,
   },
   email_query: {
@@ -577,14 +734,14 @@ export function registerTools(server: McpServer) {
   server.registerTool(
     "email_get",
     {
-      description: "Get specific emails by their IDs",
+      description: "Get specific emails by their IDs. Returns formatted text optimized for LLM consumption.",
       inputSchema: EmailGetSchema,
     },
     async (args, extra) => {
       try {
-        const result = await emailGet(args, extra);
+        const formattedEmails = await emailGet(args, extra);
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: formattedEmails }],
         };
       } catch (error) {
         return {
