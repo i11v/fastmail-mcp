@@ -51,16 +51,37 @@ function formatAddressList(addresses: Array<{ name?: string; email: string }> | 
 }
 
 /**
- * Get the body content from an email, preferring text over HTML
+ * Check if content looks like HTML
+ */
+function looksLikeHtml(content: string): boolean {
+  const trimmed = content.trim().toLowerCase();
+  return trimmed.startsWith("<!doctype") ||
+         trimmed.startsWith("<html") ||
+         trimmed.startsWith("<body") ||
+         /<[a-z][\s\S]*>/i.test(trimmed.slice(0, 500));
+}
+
+/**
+ * Get the body content from an email, preferring text over HTML.
+ * HTML content is converted to Markdown for cleaner LLM consumption.
  */
 async function getEmailBody(email: any): Promise<string> {
   if (!email.bodyValues) return "";
 
-  // Prefer text body parts
+  // Prefer plain text body parts (check type to avoid HTML disguised as text)
   if (email.textBody && email.textBody.length > 0) {
-    const textPartId = email.textBody[0].partId;
+    const textPart = email.textBody[0];
+    const textPartId = textPart.partId;
     const textBody = email.bodyValues[textPartId];
-    if (textBody?.value) return textBody.value.trim();
+    if (textBody?.value) {
+      // Check if this is actual plain text (not HTML)
+      const isHtmlType = textPart.type === "text/html";
+      const isHtmlContent = !textPart.type && looksLikeHtml(textBody.value);
+
+      if (!isHtmlType && !isHtmlContent) {
+        return textBody.value.trim();
+      }
+    }
   }
 
   // Fall back to HTML body, converted to Markdown
