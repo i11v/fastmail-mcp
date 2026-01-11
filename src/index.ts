@@ -6,6 +6,7 @@ import { cors } from "hono/cors";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPTransport } from "@hono/mcp";
 import { registerTools } from "./tools.js";
+import { registerPrompts } from "./prompts.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const publicDir = join(__dirname, "..", "public");
@@ -29,8 +30,9 @@ const mcpServer = new McpServer({
   version: "1.0.0",
 });
 
-// Register tools
+// Register tools and prompts
 registerTools(mcpServer);
+registerPrompts(mcpServer);
 
 // Transport
 const transport = new StreamableHTTPTransport();
