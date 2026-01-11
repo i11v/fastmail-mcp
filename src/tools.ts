@@ -36,55 +36,24 @@ async function htmlToMarkdown(html: string): Promise<string> {
 }
 
 /**
- * Format an email address object to a readable string
- */
-function formatAddress(addr: { name?: string; email: string }): string {
-  return addr.name ? `${addr.name} <${addr.email}>` : addr.email;
-}
-
-/**
- * Format a list of email addresses
- */
-function formatAddressList(addresses: Array<{ name?: string; email: string }> | undefined): string | undefined {
-  if (!addresses || addresses.length === 0) return undefined;
-  return addresses.map(formatAddress).join(", ");
-}
-
-/**
- * Check if content looks like HTML
- */
-function looksLikeHtml(content: string): boolean {
-  const trimmed = content.trim().toLowerCase();
-  return trimmed.startsWith("<!doctype") ||
-         trimmed.startsWith("<html") ||
-         trimmed.startsWith("<body") ||
-         /<[a-z][\s\S]*>/i.test(trimmed.slice(0, 500));
-}
-
-/**
- * Get the body content from an email, preferring text over HTML.
+ * Get the body content from an email, preferring plain text over HTML.
  * HTML content is converted to Markdown for cleaner LLM consumption.
  */
 async function getEmailBody(email: any): Promise<string> {
   if (!email.bodyValues) return "";
 
-  // Prefer plain text body parts (check type to avoid HTML disguised as text)
+  // Use textBody only if it's explicitly plain text
   if (email.textBody && email.textBody.length > 0) {
     const textPart = email.textBody[0];
-    const textPartId = textPart.partId;
-    const textBody = email.bodyValues[textPartId];
-    if (textBody?.value) {
-      // Check if this is actual plain text (not HTML)
-      const isHtmlType = textPart.type === "text/html";
-      const isHtmlContent = !textPart.type && looksLikeHtml(textBody.value);
-
-      if (!isHtmlType && !isHtmlContent) {
+    if (textPart.type === "text/plain") {
+      const textBody = email.bodyValues[textPart.partId];
+      if (textBody?.value) {
         return textBody.value.trim();
       }
     }
   }
 
-  // Fall back to HTML body, converted to Markdown
+  // Use htmlBody and convert to Markdown
   if (email.htmlBody && email.htmlBody.length > 0) {
     const htmlPartId = email.htmlBody[0].partId;
     const htmlBody = email.bodyValues[htmlPartId];
@@ -112,19 +81,39 @@ function escapeXmlAttr(str: string): string {
 }
 
 /**
+ * Add address attributes to the list.
+ * For each address field, adds {prefix}_name and {prefix}_email attributes.
+ * For multiple addresses, adds {prefix}_name_2, {prefix}_email_2, etc.
+ */
+function addAddressAttrs(
+  attrs: string[],
+  addresses: Array<{ name?: string; email: string }> | undefined,
+  prefix: string
+): void {
+  if (!addresses || addresses.length === 0) return;
+
+  addresses.forEach((addr, i) => {
+    const suffix = i === 0 ? "" : `_${i + 1}`;
+    if (addr.name) {
+      attrs.push(`${prefix}_name${suffix}="${escapeXmlAttr(addr.name)}"`);
+    }
+    attrs.push(`${prefix}_email${suffix}="${escapeXmlAttr(addr.email)}"`);
+  });
+}
+
+/**
  * Build XML attributes string for an email
  */
 function buildEmailAttributes(email: any): string {
   const attrs: string[] = [`id="${escapeXmlAttr(email.id)}"`];
 
-  const from = formatAddressList(email.from);
-  if (from) attrs.push(`from="${escapeXmlAttr(from)}"`);
-
-  const to = formatAddressList(email.to);
-  if (to) attrs.push(`to="${escapeXmlAttr(to)}"`);
-
-  const cc = formatAddressList(email.cc);
-  if (cc) attrs.push(`cc="${escapeXmlAttr(cc)}"`);
+  // Address fields per RFC 8621
+  addAddressAttrs(attrs, email.from, "from");
+  addAddressAttrs(attrs, email.to, "to");
+  addAddressAttrs(attrs, email.cc, "cc");
+  addAddressAttrs(attrs, email.bcc, "bcc");
+  addAddressAttrs(attrs, email.replyTo, "reply_to");
+  addAddressAttrs(attrs, email.sender, "sender");
 
   if (email.subject) attrs.push(`subject="${escapeXmlAttr(email.subject)}"`);
 
