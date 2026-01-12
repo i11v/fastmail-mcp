@@ -13,6 +13,7 @@ import { Common } from "effect-jmap";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import { getCachedSession, setCachedSession } from "./redis.js";
+import { formatEmailsForLLM } from "./format.js";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
@@ -353,7 +354,10 @@ export async function emailGet(args: EmailGetArgs, extra: RequestHandlerExtra<an
     program.pipe(Effect.provide(layers)),
   );
 
-  return (emailResult as any).list;
+  const emails = (emailResult as any).list;
+
+  // Format emails as clean text for LLM consumption
+  return formatEmailsForLLM(emails);
 }
 
 /**
@@ -528,7 +532,7 @@ export const toolDefinitions = {
     parameters: z.object({}),
   },
   email_get: {
-    description: "Get specific emails by their IDs",
+    description: "Get specific emails by their IDs. Returns formatted text optimized for LLM consumption.",
     parameters: EmailGetSchema,
   },
   email_query: {
@@ -577,14 +581,14 @@ export function registerTools(server: McpServer) {
   server.registerTool(
     "email_get",
     {
-      description: "Get specific emails by their IDs",
+      description: "Get specific emails by their IDs. Returns formatted text optimized for LLM consumption.",
       inputSchema: EmailGetSchema,
     },
     async (args, extra) => {
       try {
-        const result = await emailGet(args, extra);
+        const formattedEmails = await emailGet(args, extra);
         return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          content: [{ type: "text", text: formattedEmails }],
         };
       } catch (error) {
         return {
