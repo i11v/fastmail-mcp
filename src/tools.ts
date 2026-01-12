@@ -16,15 +16,17 @@ import { getCachedSession, setCachedSession } from "./redis.js";
 import { unified } from "unified";
 import rehypeParse from "rehype-parse";
 import rehypeRemark from "rehype-remark";
+import remarkGfm from "remark-gfm";
 import remarkStringify from "remark-stringify";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
 
-// HTML to Markdown converter using rehype-remark
+// HTML to Markdown converter using rehype-remark with GFM support for tables
 const htmlToMarkdownProcessor = unified()
   .use(rehypeParse, { fragment: true })
   .use(rehypeRemark)
+  .use(remarkGfm)
   .use(remarkStringify);
 
 /**
