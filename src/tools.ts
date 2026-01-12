@@ -40,29 +40,41 @@ async function htmlToMarkdown(html: string): Promise<string> {
 /**
  * Get the body content from an email.
  * Prefers htmlBody (converted to Markdown) for consistent output.
+ * Concatenates all body parts if multiple exist.
  */
 async function getEmailBody(email: any): Promise<string> {
   if (!email.bodyValues) return "";
 
   // Use htmlBody and convert to Markdown
   if (email.htmlBody && email.htmlBody.length > 0) {
-    const htmlPartId = email.htmlBody[0].partId;
-    const htmlBody = email.bodyValues[htmlPartId];
-    if (htmlBody?.value) {
+    const htmlParts: string[] = [];
+    for (const part of email.htmlBody) {
+      const body = email.bodyValues[part.partId];
+      if (body?.value) {
+        htmlParts.push(body.value);
+      }
+    }
+    if (htmlParts.length > 0) {
+      const combinedHtml = htmlParts.join("\n");
       try {
-        return (await htmlToMarkdown(htmlBody.value)).trim();
+        return (await htmlToMarkdown(combinedHtml)).trim();
       } catch {
-        return htmlBody.value;
+        return combinedHtml;
       }
     }
   }
 
   // Fall back to textBody if no htmlBody
   if (email.textBody && email.textBody.length > 0) {
-    const textPartId = email.textBody[0].partId;
-    const textBody = email.bodyValues[textPartId];
-    if (textBody?.value) {
-      return textBody.value.trim();
+    const textParts: string[] = [];
+    for (const part of email.textBody) {
+      const body = email.bodyValues[part.partId];
+      if (body?.value) {
+        textParts.push(body.value);
+      }
+    }
+    if (textParts.length > 0) {
+      return textParts.join("\n").trim();
     }
   }
 
