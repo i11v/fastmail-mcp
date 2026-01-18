@@ -27,8 +27,8 @@ importers:
         specifier: ^3.17.14
         version: 3.17.14
       effect-jmap:
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: ^0.4.3
+        version: 0.4.3
       hono:
         specifier: ^4.9.8
         version: 4.11.3
@@ -723,8 +723,9 @@ packages:
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
-  effect-jmap@0.3.0:
-    resolution: {integrity: sha512-FRksiHsimq5JiWAviRMHasEAxGf2mm7k/Gyi4iiMebFmQM/lM28YR6SY6mn8Xy44uyJy15Yg6wercGNoFbbsGw==}
+  effect-jmap@0.4.3:
+    resolution: {integrity: sha512-CyGxKeF/rJd91+lqQo1nv3QPb3bvoK4dAqRcFCE9jpYjcbuSrvwwiIYHo6/Vo3RgsUqOV9X6u3Lv74hC9LgG2w==}
+    engines: {node: '>=24'}
 
   effect@3.17.14:
     resolution: {integrity: sha512-VpIZz72+cg3357vLkNHN8CG+Uq2X0QHNv3qkyGInvG3lG5K7Ala1JliGIAdgNvwzaN37J27FuzVD8m0kEiv2Ig==}
@@ -2637,7 +2638,7 @@ snapshots:
 
   ee-first@1.1.1: {}
 
-  effect-jmap@0.3.0:
+  effect-jmap@0.4.3:
     dependencies:
       '@effect/platform': 0.91.1(effect@3.17.14)
       effect: 3.17.14
