@@ -81,10 +81,22 @@ export const EmailSendSchema = z.object({
   identityId: z.string().optional(),
 });
 
+/**
+ * Identity schema with signature fields (RFC 8621)
+ */
+export const IdentitySchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  name: z.string().optional(),
+  textSignature: z.string().optional(),
+  htmlSignature: z.string().optional(),
+});
+
 // Type exports
 export type EmailQueryArgs = z.infer<typeof EmailQuerySchema>;
 export type EmailGetArgs = z.infer<typeof EmailGetSchema>;
 export type EmailSendArgs = z.infer<typeof EmailSendSchema>;
+export type Identity = z.infer<typeof IdentitySchema>;
 
 /**
  * Create JMAP layers for a bearer token
@@ -149,18 +161,35 @@ async function getAccountId(
 
 /**
  * Helper function to get the default identity for sending emails
+ * Fetches all RFC 8621 identity fields including signatures
  */
 async function getDefaultIdentity(
   accountId: string,
   layers: Layer.Layer<any>,
-): Promise<{ id: string; email: string; name?: string }> {
+): Promise<Identity> {
   const program = Effect.gen(function* () {
     const client = yield* JMAPClientService;
     const callId = `identity-get-${Date.now()}`;
 
-    const methodCall: ["Identity/get", { accountId: string }, string] = [
+    const methodCall: [
       "Identity/get",
-      { accountId },
+      { accountId: string; properties: string[] },
+      string,
+    ] = [
+      "Identity/get",
+      {
+        accountId,
+        properties: [
+          "id",
+          "name",
+          "email",
+          "replyTo",
+          "bcc",
+          "textSignature",
+          "htmlSignature",
+          "mayDelete",
+        ],
+      },
       callId,
     ];
     const response = yield* client.batch(
@@ -187,6 +216,8 @@ async function getDefaultIdentity(
         id: identity.id,
         email: identity.email,
         name: identity.name,
+        textSignature: identity.textSignature,
+        htmlSignature: identity.htmlSignature,
       };
     }
 
@@ -248,10 +279,85 @@ function generateMimeBoundary(): string {
 }
 
 /**
- * Build RFC 5322 email message
+ * Extract font style from HTML signature
+ * Looks for common font styling patterns in the HTML signature
+ */
+function extractFontStyleFromSignature(htmlSignature: string): {
+  fontFamily?: string;
+  fontSize?: string;
+  color?: string;
+} {
+  const style: { fontFamily?: string; fontSize?: string; color?: string } = {};
+
+  // Match inline style font-family
+  const fontFamilyMatch = htmlSignature.match(
+    /font-family:\s*([^;}"']+)/i,
+  );
+  if (fontFamilyMatch) {
+    style.fontFamily = fontFamilyMatch[1].trim();
+  }
+
+  // Match inline style font-size
+  const fontSizeMatch = htmlSignature.match(/font-size:\s*([^;}"']+)/i);
+  if (fontSizeMatch) {
+    style.fontSize = fontSizeMatch[1].trim();
+  }
+
+  // Match inline style color
+  const colorMatch = htmlSignature.match(
+    /(?:^|[^-])color:\s*([^;}"']+)/i,
+  );
+  if (colorMatch) {
+    style.color = colorMatch[1].trim();
+  }
+
+  return style;
+}
+
+/**
+ * Escape HTML special characters
+ */
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/**
+ * Convert plain text to HTML, preserving line breaks and applying font style
+ */
+function textToHtml(
+  text: string,
+  fontStyle: { fontFamily?: string; fontSize?: string; color?: string },
+): string {
+  const escapedText = escapeHtml(text);
+  const htmlLines = escapedText.split(/\r?\n/).join("<br>\n");
+
+  // Build inline style string
+  const styleProps: string[] = [];
+  if (fontStyle.fontFamily) {
+    styleProps.push(`font-family: ${fontStyle.fontFamily}`);
+  }
+  if (fontStyle.fontSize) {
+    styleProps.push(`font-size: ${fontStyle.fontSize}`);
+  }
+  if (fontStyle.color) {
+    styleProps.push(`color: ${fontStyle.color}`);
+  }
+
+  const styleAttr = styleProps.length > 0 ? ` style="${styleProps.join("; ")}"` : "";
+
+  return `<div${styleAttr}>${htmlLines}</div>`;
+}
+
+/**
+ * Build RFC 5322 email message with signature support
  */
 function buildEmailMessage(params: {
-  identity: { name?: string; email: string };
+  identity: Identity;
   to: string;
   subject: string;
   body: string;
@@ -265,8 +371,38 @@ function buildEmailMessage(params: {
     ? `From: "${identity.name}" <${identity.email}>`
     : `From: ${identity.email}`;
 
-  const normalizedBody = body.replace(/\r?\n/g, "\r\n");
-  const normalizedHtmlBody = htmlBody?.replace(/\r?\n/g, "\r\n");
+  // Determine if we should use HTML formatting
+  const hasHtmlSignature = Boolean(identity.htmlSignature);
+  const hasTextSignature = Boolean(identity.textSignature);
+
+  // Extract font style from HTML signature for formatting email body
+  const fontStyle = hasHtmlSignature
+    ? extractFontStyleFromSignature(identity.htmlSignature!)
+    : {};
+
+  // Build text body with signature
+  let finalTextBody = body;
+  if (hasTextSignature && identity.textSignature) {
+    finalTextBody = `${body}\n\n--\n${identity.textSignature}`;
+  }
+  const normalizedTextBody = finalTextBody.replace(/\r?\n/g, "\r\n");
+
+  // Build HTML body with signature and matching font style
+  let finalHtmlBody: string;
+  if (htmlBody) {
+    // User provided HTML - append HTML signature
+    finalHtmlBody = hasHtmlSignature
+      ? `${htmlBody}<br><br>--<br>${identity.htmlSignature}`
+      : htmlBody;
+  } else if (hasHtmlSignature) {
+    // No HTML provided but have HTML signature - convert body to HTML with matching font
+    const bodyHtml = textToHtml(body, fontStyle);
+    finalHtmlBody = `${bodyHtml}<br><br>--<br>${identity.htmlSignature}`;
+  } else {
+    // No HTML body and no HTML signature - plain text only
+    finalHtmlBody = "";
+  }
+  const normalizedHtmlBody = finalHtmlBody.replace(/\r?\n/g, "\r\n");
 
   const commonHeaders = [
     `Message-ID: ${messageId}`,
@@ -277,16 +413,18 @@ function buildEmailMessage(params: {
     `MIME-Version: 1.0`,
   ];
 
+  // If no HTML body (user didn't provide one and no HTML signature), send plain text only
   if (!normalizedHtmlBody) {
     return [
       ...commonHeaders,
       `Content-Type: text/plain; charset=utf-8`,
       `Content-Transfer-Encoding: 8bit`,
       ``,
-      normalizedBody,
+      normalizedTextBody,
     ].join("\r\n");
   }
 
+  // Send multipart/alternative with both text and HTML
   const boundary = generateMimeBoundary();
 
   return [
@@ -299,7 +437,7 @@ function buildEmailMessage(params: {
     `Content-Type: text/plain; charset=utf-8`,
     `Content-Transfer-Encoding: 8bit`,
     ``,
-    normalizedBody,
+    normalizedTextBody,
     ``,
     `--${boundary}`,
     `Content-Type: text/html; charset=utf-8`,
@@ -401,19 +539,32 @@ export async function emailSend(args: EmailSendArgs, extra: RequestHandlerExtra<
   const layers = createLayers(bearerToken);
   const accountId = await getAccountId(bearerToken, layers);
 
-  // Get identity
-  const identity = args.identityId
+  // Get identity with signature fields
+  const identity: Identity = args.identityId
     ? await (async () => {
         const program = Effect.gen(function* () {
           const client = yield* JMAPClientService;
           const callId = `identity-get-${Date.now()}`;
           const methodCall: [
             "Identity/get",
-            { accountId: string; ids: string[] },
+            { accountId: string; ids: string[]; properties: string[] },
             string,
           ] = [
             "Identity/get",
-            { accountId, ids: [args.identityId!] },
+            {
+              accountId,
+              ids: [args.identityId!],
+              properties: [
+                "id",
+                "name",
+                "email",
+                "replyTo",
+                "bcc",
+                "textSignature",
+                "htmlSignature",
+                "mayDelete",
+              ],
+            },
             callId,
           ];
           const response = yield* client.batch(
@@ -439,6 +590,8 @@ export async function emailSend(args: EmailSendArgs, extra: RequestHandlerExtra<
               id: identity.id,
               email: identity.email,
               name: identity.name,
+              textSignature: identity.textSignature,
+              htmlSignature: identity.htmlSignature,
             };
           }
           return yield* Effect.fail(new Error("Identity not found"));
