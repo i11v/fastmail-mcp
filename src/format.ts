@@ -1,3 +1,4 @@
+import { load } from "cheerio";
 import { unified } from "unified";
 import rehypeParse from "rehype-parse";
 import rehypeRemark from "rehype-remark";
@@ -12,11 +13,53 @@ const htmlToMarkdownProcessor = unified()
   .use(remarkStringify);
 
 /**
- * Convert HTML string to Markdown
+ * Sanitize email HTML using cheerio before Markdown conversion.
+ * Strips scripts, styles, tracking pixels, and hidden elements
+ * that produce noise in the converted output.
+ */
+function sanitizeEmailHtml(html: string): string {
+  const $ = load(html);
+
+  // Remove elements that should never appear in email text content
+  $("script, style, noscript, iframe, object, embed, applet").remove();
+
+  // Remove hidden elements
+  $("[style*='display:none'], [style*='display: none']").remove();
+  $("[style*='visibility:hidden'], [style*='visibility: hidden']").remove();
+  $('[hidden]').remove();
+
+  // Remove tracking pixels (1x1 images or images with no meaningful src)
+  $("img").each(function () {
+    const width = $(this).attr("width");
+    const height = $(this).attr("height");
+    if (
+      (width === "1" && height === "1") ||
+      (width === "0" && height === "0")
+    ) {
+      $(this).remove();
+    }
+  });
+
+  return $.html();
+}
+
+/**
+ * Convert HTML string to Markdown, with cheerio sanitization as a preprocessing step.
  */
 async function htmlToMarkdown(html: string): Promise<string> {
-  const result = await htmlToMarkdownProcessor.process(html);
+  const sanitized = sanitizeEmailHtml(html);
+  const result = await htmlToMarkdownProcessor.process(sanitized);
   return String(result);
+}
+
+/**
+ * Extract plain text from HTML using cheerio. Used as a fallback
+ * when the full Markdown conversion pipeline fails.
+ */
+function htmlToText(html: string): string {
+  const $ = load(html);
+  $("script, style, noscript").remove();
+  return $("body").text().trim() || $.root().text().trim();
 }
 
 /**
@@ -41,7 +84,8 @@ async function getEmailBody(email: any): Promise<string> {
       try {
         return (await htmlToMarkdown(combinedHtml)).trim();
       } catch {
-        return combinedHtml;
+        // Fall back to plain text extraction instead of returning raw HTML
+        return htmlToText(combinedHtml);
       }
     }
   }
