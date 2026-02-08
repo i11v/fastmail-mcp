@@ -32,14 +32,18 @@ function extractBearerToken(extra: RequestHandlerExtra<any, any>): string {
   const headers = extra.requestInfo?.headers;
 
   if (!headers) {
-    throw new Error("Missing request headers. Ensure Authorization header is set with 'Bearer <token>' format.");
+    throw new Error(
+      "Missing request headers. Ensure Authorization header is set with 'Bearer <token>' format.",
+    );
   }
 
   // IsomorphicHeaders is Record<string, string | string[] | undefined>
   const authHeader = headers["authorization"] || headers["Authorization"];
 
   if (!authHeader || typeof authHeader !== "string" || !authHeader.startsWith("Bearer ")) {
-    throw new Error("Missing bearer token. Ensure Authorization header is set with 'Bearer <token>' format.");
+    throw new Error(
+      "Missing bearer token. Ensure Authorization header is set with 'Bearer <token>' format.",
+    );
   }
 
   return authHeader.substring(7);
@@ -57,9 +61,7 @@ export const EmailQuerySchema = z.object({
   notKeyword: z.string().optional(),
   before: z.string().optional(),
   after: z.string().optional(),
-  sort: z
-    .enum(["receivedAt", "sentAt", "subject", "from"])
-    .default("receivedAt"),
+  sort: z.enum(["receivedAt", "sentAt", "subject", "from"]).default("receivedAt"),
   ascending: z.boolean().default(false),
 });
 
@@ -96,10 +98,7 @@ function createLayers(bearerToken: string): Layer.Layer<any> {
 /**
  * Get JMAP session, using Redis cache if available
  */
-async function getSession(
-  bearerToken: string,
-  layers: Layer.Layer<any>
-): Promise<any> {
+async function getSession(bearerToken: string, layers: Layer.Layer<any>): Promise<any> {
   const tokenHash = hashToken(bearerToken);
 
   // Try Redis first
@@ -116,8 +115,7 @@ async function getSession(
 
   // Cache in Redis
   const accountId =
-    session.primaryAccounts?.["urn:ietf:params:jmap:mail"] ||
-    Object.keys(session.accounts)[0];
+    session.primaryAccounts?.["urn:ietf:params:jmap:mail"] || Object.keys(session.accounts)[0];
   await setCachedSession(tokenHash, {
     accountId,
     json: JSON.stringify(session),
@@ -129,10 +127,7 @@ async function getSession(
 /**
  * Get account ID, using Redis cache if available
  */
-async function getAccountId(
-  bearerToken: string,
-  layers: Layer.Layer<any>
-): Promise<string> {
+async function getAccountId(bearerToken: string, layers: Layer.Layer<any>): Promise<string> {
   const tokenHash = hashToken(bearerToken);
 
   // Try Redis first
@@ -141,10 +136,7 @@ async function getAccountId(
 
   // Fetch session (will cache both)
   const session = await getSession(bearerToken, layers);
-  return (
-    session.primaryAccounts?.["urn:ietf:params:jmap:mail"] ||
-    Object.keys(session.accounts)[0]
-  );
+  return session.primaryAccounts?.["urn:ietf:params:jmap:mail"] || Object.keys(session.accounts)[0];
 }
 
 /**
@@ -165,16 +157,10 @@ async function getDefaultIdentity(
     ];
     const response = yield* client.batch(
       [methodCall],
-      [
-        "urn:ietf:params:jmap:core",
-        "urn:ietf:params:jmap:mail",
-        "urn:ietf:params:jmap:submission",
-      ],
+      ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail", "urn:ietf:params:jmap:submission"],
     );
 
-    const identityResponse = response.methodResponses.find(
-      ([method]) => method === "Identity/get",
-    );
+    const identityResponse = response.methodResponses.find(([method]) => method === "Identity/get");
 
     if (!identityResponse) {
       return yield* Effect.fail(new Error("Identity/get response not found"));
@@ -211,8 +197,7 @@ async function uploadBlob(
 
     const uploadUrl = session.uploadUrl.replace(
       "{accountId}",
-      session.primaryAccounts?.["urn:ietf:params:jmap:mail"] ||
-        Object.keys(session.accounts)[0],
+      session.primaryAccounts?.["urn:ietf:params:jmap:mail"] || Object.keys(session.accounts)[0],
     );
 
     const uploadRequest = HttpClientRequest.post(uploadUrl).pipe(
@@ -330,7 +315,10 @@ export async function mailboxGet(extra: RequestHandlerExtra<any, any>): Promise<
 /**
  * Tool: Get emails by ID
  */
-export async function emailGet(args: EmailGetArgs, extra: RequestHandlerExtra<any, any>): Promise<any> {
+export async function emailGet(
+  args: EmailGetArgs,
+  extra: RequestHandlerExtra<any, any>,
+): Promise<any> {
   const bearerToken = extractBearerToken(extra);
   const layers = createLayers(bearerToken);
   const accountId = args.accountId || (await getAccountId(bearerToken, layers));
@@ -350,9 +338,7 @@ export async function emailGet(args: EmailGetArgs, extra: RequestHandlerExtra<an
     });
   });
 
-  const emailResult = await Effect.runPromise(
-    program.pipe(Effect.provide(layers)),
-  );
+  const emailResult = await Effect.runPromise(program.pipe(Effect.provide(layers)));
 
   const emails = (emailResult as any).list;
 
@@ -363,7 +349,10 @@ export async function emailGet(args: EmailGetArgs, extra: RequestHandlerExtra<an
 /**
  * Tool: Query emails
  */
-export async function emailQuery(args: EmailQueryArgs, extra: RequestHandlerExtra<any, any>): Promise<any> {
+export async function emailQuery(
+  args: EmailQueryArgs,
+  extra: RequestHandlerExtra<any, any>,
+): Promise<any> {
   const bearerToken = extractBearerToken(extra);
   const layers = createLayers(bearerToken);
   const accountId = args.accountId || (await getAccountId(bearerToken, layers));
@@ -396,7 +385,10 @@ export async function emailQuery(args: EmailQueryArgs, extra: RequestHandlerExtr
 /**
  * Tool: Send email
  */
-export async function emailSend(args: EmailSendArgs, extra: RequestHandlerExtra<any, any>): Promise<any> {
+export async function emailSend(
+  args: EmailSendArgs,
+  extra: RequestHandlerExtra<any, any>,
+): Promise<any> {
   const bearerToken = extractBearerToken(extra);
   const layers = createLayers(bearerToken);
   const accountId = await getAccountId(bearerToken, layers);
@@ -407,11 +399,7 @@ export async function emailSend(args: EmailSendArgs, extra: RequestHandlerExtra<
         const program = Effect.gen(function* () {
           const client = yield* JMAPClientService;
           const callId = `identity-get-${Date.now()}`;
-          const methodCall: [
-            "Identity/get",
-            { accountId: string; ids: string[] },
-            string,
-          ] = [
+          const methodCall: ["Identity/get", { accountId: string; ids: string[] }, string] = [
             "Identity/get",
             { accountId, ids: [args.identityId!] },
             callId,
@@ -428,9 +416,7 @@ export async function emailSend(args: EmailSendArgs, extra: RequestHandlerExtra<
             ([method]) => method === "Identity/get",
           );
           if (!identityResponse) {
-            return yield* Effect.fail(
-              new Error("Identity/get response not found"),
-            );
+            return yield* Effect.fail(new Error("Identity/get response not found"));
           }
           const [, data] = identityResponse;
           if (data.list && data.list.length > 0) {
@@ -490,13 +476,9 @@ export async function emailSend(args: EmailSendArgs, extra: RequestHandlerExtra<
         const errors = Object.entries(importResult.notCreated).map(
           ([key, error]) => `${key}: ${JSON.stringify(error)}`,
         );
-        return yield* Effect.fail(
-          new Error(`Failed to import email: ${errors.join(", ")}`),
-        );
+        return yield* Effect.fail(new Error(`Failed to import email: ${errors.join(", ")}`));
       }
-      return yield* Effect.fail(
-        new Error("Failed to import email: no created field in response"),
-      );
+      return yield* Effect.fail(new Error("Failed to import email: no created field in response"));
     }
 
     const createdEmails = Object.values(importResult.created);
@@ -515,9 +497,7 @@ export async function emailSend(args: EmailSendArgs, extra: RequestHandlerExtra<
     return submission;
   });
 
-  const result = await Effect.runPromise(
-    program.pipe(Effect.provide(layers)),
-  );
+  const result = await Effect.runPromise(program.pipe(Effect.provide(layers)));
 
   return {
     id: result.id,
@@ -532,7 +512,8 @@ export const toolDefinitions = {
     parameters: z.object({}),
   },
   email_get: {
-    description: "Get specific emails by their IDs. Returns formatted text optimized for LLM consumption.",
+    description:
+      "Get specific emails by their IDs. Returns formatted text optimized for LLM consumption.",
     parameters: EmailGetSchema,
   },
   email_query: {
@@ -574,14 +555,15 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    }
+    },
   );
 
   // Tool: Get emails by ID
   server.registerTool(
     "email_get",
     {
-      description: "Get specific emails by their IDs. Returns formatted text optimized for LLM consumption.",
+      description:
+        "Get specific emails by their IDs. Returns formatted text optimized for LLM consumption.",
       inputSchema: EmailGetSchema,
     },
     async (args, extra) => {
@@ -601,7 +583,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    }
+    },
   );
 
   // Tool: Query emails
@@ -628,14 +610,15 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    }
+    },
   );
 
   // Tool: Send email
   server.registerTool(
     "email_send",
     {
-      description: "Send an email via Fastmail. Supports plain text, HTML, or multipart/alternative (both) emails.",
+      description:
+        "Send an email via Fastmail. Supports plain text, HTML, or multipart/alternative (both) emails.",
       inputSchema: EmailSendSchema,
     },
     async (args, extra) => {
@@ -660,6 +643,6 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    }
+    },
   );
 }

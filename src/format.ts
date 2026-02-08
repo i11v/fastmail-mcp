@@ -41,16 +41,13 @@ export function sanitizeEmailHtml(html: string): string {
   // Remove hidden elements
   $("[style*='display:none'], [style*='display: none']").remove();
   $("[style*='visibility:hidden'], [style*='visibility: hidden']").remove();
-  $('[hidden]').remove();
+  $("[hidden]").remove();
 
   // Remove tracking pixels (1x1 images or images with no meaningful src)
   $("img").each(function () {
     const width = $(this).attr("width");
     const height = $(this).attr("height");
-    if (
-      (width === "1" && height === "1") ||
-      (width === "0" && height === "0")
-    ) {
+    if ((width === "1" && height === "1") || (width === "0" && height === "0")) {
       $(this).remove();
     }
   });
@@ -182,10 +179,7 @@ function escapeXmlAttr(str: string): string {
  * Escape XML text content
  */
 function escapeXmlText(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 /**
@@ -193,7 +187,7 @@ function escapeXmlText(str: string): string {
  */
 function formatAddressNodes(
   addresses: Array<{ name?: string; email: string }> | undefined,
-  tagName: string
+  tagName: string,
 ): string | null {
   if (!addresses || addresses.length === 0) return null;
 

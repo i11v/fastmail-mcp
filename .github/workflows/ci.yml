@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  build:
-    name: Typecheck & Build
+  check:
+    name: Lint, Test & Build
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +30,15 @@ jobs:
 
       - name: Type check
         run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm fmt:check
+
+      - name: Test
+        run: pnpm test
 
       - name: Build
         run: pnpm build

@@ -16,13 +16,39 @@ pnpm install      # Install dependencies
 pnpm build        # Build TypeScript to dist/
 pnpm start        # Run local server on port 3000
 pnpm deploy       # Deploy to Vercel (production)
-pnpm typecheck    # Type check without compilation
 ```
+
+## Quality Commands
+
+```bash
+pnpm check        # Run ALL checks (typecheck + lint + fmt + test)
+pnpm typecheck    # Type check without compilation
+pnpm lint         # Lint with oxlint
+pnpm lint:fix     # Lint and auto-fix
+pnpm fmt          # Format with oxfmt (write)
+pnpm fmt:check    # Check formatting without writing
+pnpm test         # Run tests with vitest
+pnpm test:watch   # Run tests in watch mode
+```
+
+**Always run `pnpm check` before committing.** Pre-commit hooks (lefthook) enforce this automatically.
 
 ## Source Files
 
 - `src/index.ts` - Server setup, Hono routes, MCP initialization
 - `src/tools.ts` - Tool implementations, Zod schemas, JMAP integration
+- `src/format.ts` - Email formatting for LLM consumption (XML output, HTML→Markdown)
+- `src/redis.ts` - Redis client setup, session caching
+
+## Tooling
+
+| Tool | Config | Purpose |
+|------|--------|---------|
+| `oxlint` | `.oxlintrc.json` | Linting (correctness, suspicious, perf rules) |
+| `oxfmt` | `.oxfmtrc.json` | Formatting (Prettier-compatible) |
+| `vitest` | `vitest.config.ts` | Testing |
+| `lefthook` | `lefthook.yml` | Pre-commit hooks |
+| `typescript` | `tsconfig.json` | Type checking (strict mode) |
 
 ## Key Dependencies
 

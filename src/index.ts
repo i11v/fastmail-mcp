@@ -20,7 +20,7 @@ app.use(
     origin: "*",
     allowMethods: ["GET", "POST", "OPTIONS"],
     allowHeaders: ["Content-Type", "Mcp-Session-Id", "Authorization"],
-  })
+  }),
 );
 
 // Create MCP server
