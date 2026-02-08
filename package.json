@@ -12,8 +12,14 @@
     "start": "node dist/index.js",
     "deploy": "vercel --prod",
     "typecheck": "tsc --noEmit",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
+    "fmt": "oxfmt --write src",
+    "fmt:check": "oxfmt --check src",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "check": "pnpm typecheck && pnpm lint && pnpm fmt:check && pnpm test",
+    "prepare": "lefthook install"
   },
   "keywords": [
     "mcp",
@@ -39,6 +45,9 @@
   "devDependencies": {
     "@effect/language-service": "^0.56.0",
     "@types/node": "^24.5.2",
+    "lefthook": "^2.1.0",
+    "oxfmt": "^0.28.0",
+    "oxlint": "^1.43.0",
     "typescript": "^5.9.2",
     "vercel": "^39.2.4",
     "vitest": "^4.0.18"

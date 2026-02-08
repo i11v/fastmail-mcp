@@ -1,10 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join, basename } from "node:path";
-import {
-  sanitizeEmailHtml,
-  formatEmailsForLLM,
-} from "../format.js";
+import { sanitizeEmailHtml, formatEmailsForLLM } from "../format.js";
 
 const FIXTURES_DIR = join(import.meta.dirname, "fixtures");
 
@@ -185,12 +182,7 @@ describe("formatEmailsForLLM", () => {
 describe("real email fixtures", () => {
   const names = getFixtureNames();
 
-  if (names.length === 0) {
-    it.skip("no fixtures found — add .html files to src/__tests__/fixtures/", () => {});
-    return;
-  }
-
-  describe.each(names)("%s", (name) => {
+  describe.runIf(names.length > 0).each(names)("%s", (name) => {
     let html: string;
     let sanitized: string;
     let llmOutput: string;
