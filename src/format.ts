@@ -1,27 +1,42 @@
 import { load } from "cheerio";
-import { unified } from "unified";
-import rehypeParse from "rehype-parse";
-import rehypeRemark from "rehype-remark";
-import remarkGfm from "remark-gfm";
-import remarkStringify from "remark-stringify";
-
-// HTML to Markdown converter using rehype-remark with GFM support for tables
-const htmlToMarkdownProcessor = unified()
-  .use(rehypeParse, { fragment: true })
-  .use(rehypeRemark)
-  .use(remarkGfm)
-  .use(remarkStringify);
 
 /**
- * Sanitize email HTML using cheerio before Markdown conversion.
- * Strips scripts, styles, tracking pixels, and hidden elements
- * that produce noise in the converted output.
+ * Unescape JSON string escape sequences commonly found in JMAP body values.
+ * JMAP returns HTML body content as JSON strings, so literal \n, \", \t etc.
+ * must be converted to their real characters before HTML parsing.
  */
-function sanitizeEmailHtml(html: string): string {
+function unescapeJsonString(str: string): string {
+  return str
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "\r")
+    .replace(/\\t/g, "\t")
+    .replace(/\\"/g, '"')
+    .replace(/\\\\/g, "\\");
+}
+
+/**
+ * Sanitize email HTML using cheerio.
+ * Strips scripts, styles, tracking pixels, hidden elements,
+ * MSO conditional comments, and layout tables that produce noise.
+ */
+export function sanitizeEmailHtml(html: string): string {
+  // Unescape JSON string escapes (JMAP body values are JSON strings)
+  html = unescapeJsonString(html);
+
+  // Strip MSO conditional comments: <!--[if ...]>...<![endif]-->
+  // These contain <style> blocks and markup only relevant to Outlook
+  html = html.replace(/<!--\[if[^\]]*\]>[\s\S]*?<!\[endif\]-->/gi, "");
+  // Also handle the <![if !mso]> variant (non-comment form)
+  html = html.replace(/<!\[if[^\]]*\]>/gi, "");
+  html = html.replace(/<!--<!\[endif\]-->/gi, "");
+
   const $ = load(html);
 
   // Remove elements that should never appear in email text content
   $("script, style, noscript, iframe, object, embed, applet").remove();
+
+  // Remove <head> content (meta tags, title) that leaks into output
+  $("head").remove();
 
   // Remove hidden elements
   $("[style*='display:none'], [style*='display: none']").remove();
@@ -40,37 +55,88 @@ function sanitizeEmailHtml(html: string): string {
     }
   });
 
-  return $.html();
-}
+  // Unwrap layout tables, keeping only data tables.
+  // In email HTML, tables are almost exclusively used for layout.
+  // A data table has <th> elements; everything else is layout.
+  // Must iterate innermost-first so nested layout tables unwrap correctly.
+  let changed = true;
+  while (changed) {
+    changed = false;
+    $("table").each(function () {
+      // Skip tables that contain nested tables — process inner ones first
+      if ($(this).find("table").length > 0) return;
 
-/**
- * Convert HTML string to Markdown, with cheerio sanitization as a preprocessing step.
- */
-async function htmlToMarkdown(html: string): Promise<string> {
-  const sanitized = sanitizeEmailHtml(html);
-  const result = await htmlToMarkdownProcessor.process(sanitized);
-  return String(result);
-}
+      const isDataTable =
+        $(this).find("th").length > 0 ||
+        $(this).attr("role") === "grid" ||
+        $(this).attr("role") === "table";
 
-/**
- * Extract plain text from HTML using cheerio. Used as a fallback
- * when the full Markdown conversion pipeline fails.
- */
-function htmlToText(html: string): string {
-  const $ = load(html);
-  $("script, style, noscript").remove();
-  return $("body").text().trim() || $.root().text().trim();
+      if (!isDataTable) {
+        // Replace the table with the contents of its cells
+        const cellContents: string[] = [];
+        $(this)
+          .find("td, th")
+          .each(function () {
+            const inner = $(this).html()?.trim();
+            if (inner) cellContents.push(inner);
+          });
+        $(this).replaceWith(cellContents.join("\n"));
+        changed = true;
+      }
+    });
+  }
+
+  // Remove all style attributes — they add noise and no value for text extraction
+  $("[style]").removeAttr("style");
+
+  // Remove presentational attributes that add no text value
+  $("[class]").removeAttr("class");
+  $("[bgcolor]").removeAttr("bgcolor");
+  $("[align]").removeAttr("align");
+  $("[valign]").removeAttr("valign");
+  $("[cellpadding]").removeAttr("cellpadding");
+  $("[cellspacing]").removeAttr("cellspacing");
+  $("[border]").removeAttr("border");
+
+  // Clean up leftover table wrapper elements
+  $("tbody, thead, tfoot").each(function () {
+    if ($(this).closest("table").length === 0) {
+      $(this).replaceWith($(this).html() || "");
+    }
+  });
+  $("tr").each(function () {
+    if ($(this).closest("table").length === 0) {
+      $(this).replaceWith($(this).html() || "");
+    }
+  });
+  $("td, th").each(function () {
+    if ($(this).closest("table").length === 0) {
+      $(this).replaceWith($(this).html() || "");
+    }
+  });
+  $("center").each(function () {
+    $(this).replaceWith($(this).html() || "");
+  });
+
+  // Strip HTML comments
+  let result = $.html();
+  result = result.replace(/<!--[\s\S]*?-->/g, "");
+
+  // Collapse runs of blank lines into a single blank line
+  result = result.replace(/\n{3,}/g, "\n\n");
+
+  return result.trim();
 }
 
 /**
  * Get the body content from an email.
- * Prefers htmlBody (converted to Markdown) for consistent output.
- * Concatenates all body parts if multiple exist.
+ * Prefers htmlBody (sanitized) for consistent output.
+ * Falls back to textBody for plain-text emails.
  */
-async function getEmailBody(email: any): Promise<string> {
+function getEmailBody(email: any): string {
   if (!email.bodyValues) return "";
 
-  // Use htmlBody and convert to Markdown
+  // Use htmlBody, sanitized for LLM consumption
   if (email.htmlBody && email.htmlBody.length > 0) {
     const htmlParts: string[] = [];
     for (const part of email.htmlBody) {
@@ -80,13 +146,7 @@ async function getEmailBody(email: any): Promise<string> {
       }
     }
     if (htmlParts.length > 0) {
-      const combinedHtml = htmlParts.join("\n");
-      try {
-        return (await htmlToMarkdown(combinedHtml)).trim();
-      } catch {
-        // Fall back to plain text extraction instead of returning raw HTML
-        return htmlToText(combinedHtml);
-      }
+      return sanitizeEmailHtml(htmlParts.join("\n"));
     }
   }
 
@@ -148,7 +208,7 @@ function formatAddressNodes(
 /**
  * Format a single email as XML
  */
-async function formatEmailXml(email: any): Promise<string> {
+function formatEmailXml(email: any): string {
   const lines: string[] = [];
 
   // Email opening tag with core attributes
@@ -196,7 +256,7 @@ async function formatEmailXml(email: any): Promise<string> {
   }
 
   // Body
-  const body = await getEmailBody(email);
+  const body = getEmailBody(email);
   lines.push(`  <body>\n${body}\n  </body>`);
 
   lines.push("</email>");
@@ -206,9 +266,9 @@ async function formatEmailXml(email: any): Promise<string> {
 
 /**
  * Format emails into XML structure grouped by thread.
- * Converts HTML bodies to Markdown for cleaner LLM consumption.
+ * Sanitizes HTML bodies for cleaner LLM consumption.
  */
-export async function formatEmailsForLLM(emails: any[]): Promise<string> {
+export function formatEmailsForLLM(emails: any[]): string {
   // Group emails by threadId
   const threads = new Map<string, any[]>();
 
@@ -233,7 +293,7 @@ export async function formatEmailsForLLM(emails: any[]): Promise<string> {
   const threadOutputs: string[] = [];
 
   for (const [threadId, threadEmails] of threads) {
-    const emailTags = await Promise.all(threadEmails.map(formatEmailXml));
+    const emailTags = threadEmails.map(formatEmailXml);
     threadOutputs.push(`<thread id="${threadId}">\n${emailTags.join("\n")}\n</thread>`);
   }
 
