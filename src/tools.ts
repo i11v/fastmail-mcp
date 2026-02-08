@@ -83,10 +83,21 @@ export const EmailSendSchema = z.object({
   identityId: z.string().optional(),
 });
 
+export const EmailMoveSchema = z.object({
+  accountId: z.string().optional(),
+  emailIds: z.array(z.string()).min(1).max(50),
+  mailboxId: z
+    .string()
+    .describe(
+      "Target mailbox ID, or a well-known role: 'trash', 'archive', 'inbox', 'drafts', 'junk', 'sent'",
+    ),
+});
+
 // Type exports
 export type EmailQueryArgs = z.infer<typeof EmailQuerySchema>;
 export type EmailGetArgs = z.infer<typeof EmailGetSchema>;
 export type EmailSendArgs = z.infer<typeof EmailSendSchema>;
+export type EmailMoveArgs = z.infer<typeof EmailMoveSchema>;
 
 /**
  * Create JMAP layers for a bearer token
@@ -505,6 +516,65 @@ export async function emailSend(
   };
 }
 
+const WELL_KNOWN_ROLES = ["trash", "archive", "inbox", "drafts", "junk", "sent"] as const;
+
+/**
+ * Tool: Move emails to a mailbox
+ */
+export async function emailMove(
+  args: EmailMoveArgs,
+  extra: RequestHandlerExtra<any, any>,
+): Promise<any> {
+  const bearerToken = extractBearerToken(extra);
+  const layers = createLayers(bearerToken);
+  const accountId = args.accountId || (await getAccountId(bearerToken, layers));
+
+  // Resolve mailboxId: well-known role name or raw ID
+  const isRole = WELL_KNOWN_ROLES.includes(args.mailboxId as any);
+  let targetMailboxId: string;
+
+  if (isRole) {
+    const program = Effect.gen(function* () {
+      const service = yield* MailboxService;
+      const mailboxes = yield* service.findByRole(accountId, args.mailboxId as any);
+      if (mailboxes.length === 0) {
+        return yield* Effect.fail(new Error(`No mailbox found with role '${args.mailboxId}'`));
+      }
+      return mailboxes[0].id;
+    });
+    targetMailboxId = await Effect.runPromise(program.pipe(Effect.provide(layers)));
+  } else {
+    targetMailboxId = args.mailboxId;
+  }
+
+  // Build update map: move each email to the target mailbox
+  const update: Record<string, { mailboxIds: Record<string, boolean> }> = {};
+  for (const emailId of args.emailIds) {
+    update[Common.createId(emailId) as string] = {
+      mailboxIds: { [Common.createId(targetMailboxId) as string]: true },
+    };
+  }
+
+  const program = Effect.gen(function* () {
+    const service = yield* EmailService;
+    return yield* service.set({
+      accountId,
+      update: update as any,
+    });
+  });
+
+  const result = (await Effect.runPromise(program.pipe(Effect.provide(layers)))) as any;
+
+  const updatedCount = result.updated ? Object.keys(result.updated).length : 0;
+  const notUpdated = result.notUpdated ? Object.keys(result.notUpdated) : [];
+
+  return {
+    moved: updatedCount,
+    targetMailboxId,
+    ...(notUpdated.length > 0 && { notUpdated: result.notUpdated }),
+  };
+}
+
 // Tool definitions for MCP
 export const toolDefinitions = {
   mailbox_get: {
@@ -524,6 +594,11 @@ export const toolDefinitions = {
     description:
       "Send an email via Fastmail. Supports plain text, HTML, or multipart/alternative (both) emails.",
     parameters: EmailSendSchema,
+  },
+  email_move: {
+    description:
+      "Move emails to a mailbox. For common actions use well-known names: 'trash' (delete), 'archive', 'inbox', 'junk', 'drafts', 'sent'. For other mailboxes, use mailbox_get to find the mailbox ID.",
+    parameters: EmailMoveSchema,
   },
 };
 
@@ -631,6 +706,34 @@ export function registerTools(server: McpServer) {
               text: `Email sent successfully!\nSubmission ID: ${result.id}\nSent at: ${result.sendAt}`,
             },
           ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
+
+  // Tool: Move emails to a mailbox
+  server.registerTool(
+    "email_move",
+    {
+      description:
+        "Move emails to a mailbox. For common actions use well-known names: 'trash' (delete), 'archive', 'inbox', 'junk', 'drafts', 'sent'. For other mailboxes, use mailbox_get to find the mailbox ID.",
+      inputSchema: EmailMoveSchema,
+    },
+    async (args, extra) => {
+      try {
+        const result = await emailMove(args, extra);
+        return {
+          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
       } catch (error) {
         return {
