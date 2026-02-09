@@ -70,6 +70,12 @@ Send emails with support for plain text, HTML, or both.
 - `htmlBody` (optional): HTML body for multipart/alternative emails
 - `identityId` (optional): Identity ID to send from
 
+### `email_move`
+Move emails to a mailbox. For common actions use well-known names: `trash` (delete), `archive`, `inbox`, `junk`, `drafts`, `sent`. For other mailboxes, use `mailbox_get` to find the mailbox ID.
+- `emailIds` (required): Array of email IDs to move (1-50)
+- `mailboxId` (required): Target mailbox ID, or a well-known role: `trash`, `archive`, `inbox`, `drafts`, `junk`, `sent`
+- `accountId` (optional): Account ID (auto-detected if not provided)
+
 ## API Endpoints
 
 - `POST /mcp` - MCP protocol endpoint
