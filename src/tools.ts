@@ -94,27 +94,23 @@ const FLAG_VALUES = [
   "undraft",
 ] as const;
 
-export const EmailSetSchema = z
-  .object({
-    accountId: z.string().optional(),
-    emailIds: z.array(z.string()).min(1).max(50),
-    mailboxId: z
-      .string()
-      .optional()
-      .describe(
-        "Target mailbox ID or well-known role: 'trash', 'archive', 'inbox', 'drafts', 'junk', 'sent'",
-      ),
-    flags: z
-      .array(z.enum(FLAG_VALUES))
-      .min(1)
-      .optional()
-      .describe(
-        "Flags to set: 'read'/'unread', 'flagged'/'unflagged', 'answered'/'unanswered', 'draft'/'undraft'",
-      ),
-  })
-  .refine((data) => data.mailboxId || data.flags, {
-    message: "At least one of 'mailboxId' or 'flags' must be provided",
-  });
+export const EmailSetSchema = z.object({
+  accountId: z.string().optional(),
+  emailIds: z.array(z.string()).min(1).max(50),
+  mailboxId: z
+    .string()
+    .optional()
+    .describe(
+      "Target mailbox ID or well-known role: 'trash', 'archive', 'inbox', 'drafts', 'junk', 'sent'",
+    ),
+  flags: z
+    .array(z.enum(FLAG_VALUES))
+    .min(1)
+    .optional()
+    .describe(
+      "Flags to set: 'read'/'unread', 'flagged'/'unflagged', 'answered'/'unanswered', 'draft'/'undraft'",
+    ),
+});
 
 export type EmailSetArgs = z.infer<typeof EmailSetSchema>;
 
@@ -598,6 +594,10 @@ export async function emailSet(
   args: EmailSetArgs,
   extra: RequestHandlerExtra<any, any>,
 ): Promise<any> {
+  if (!args.mailboxId && !args.flags) {
+    throw new Error("At least one of 'mailboxId' or 'flags' must be provided");
+  }
+
   const bearerToken = extractBearerToken(extra);
   const layers = createLayers(bearerToken);
   const accountId = args.accountId || (await getAccountId(bearerToken, layers));
