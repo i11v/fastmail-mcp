@@ -60,3 +60,32 @@ pnpm test:watch   # Run tests in watch mode
 | `effect` | Functional programming |
 | `effect-jmap` | JMAP client library |
 | `zod` | Schema validation |
+
+## Documentation
+
+When adding, removing, or renaming tools, update **all three locations**:
+
+1. `src/tools.ts` — `toolDefinitions` object and `registerTools()` function
+2. `README.md` — "Available Tools" section
+3. `public/landing.html` — tools list in the landing page
+
+## Gotchas
+
+### Zod `.refine()` breaks MCP tool input schemas
+
+Do **not** use `.refine()` or `.superRefine()` on Zod schemas passed to `server.registerTool()`. These methods convert `ZodObject` into `ZodEffects`, which strips the property metadata the MCP SDK needs to generate JSON Schema for tool inputs. The MCP inspector will show no input fields.
+
+**Bad:**
+```ts
+const MySchema = z.object({ ... }).refine(data => data.a || data.b);
+```
+
+**Good — validate at runtime instead:**
+```ts
+const MySchema = z.object({ ... });
+
+async function myTool(args: z.infer<typeof MySchema>) {
+  if (!args.a && !args.b) throw new Error("Need a or b");
+  // ...
+}
+```

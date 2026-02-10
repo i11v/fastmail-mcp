@@ -83,21 +83,90 @@ export const EmailSendSchema = z.object({
   identityId: z.string().optional(),
 });
 
-export const EmailMoveSchema = z.object({
+const FLAG_VALUES = [
+  "read",
+  "unread",
+  "flagged",
+  "unflagged",
+  "answered",
+  "unanswered",
+  "draft",
+  "undraft",
+] as const;
+
+export const EmailSetSchema = z.object({
   accountId: z.string().optional(),
   emailIds: z.array(z.string()).min(1).max(50),
   mailboxId: z
     .string()
+    .optional()
     .describe(
-      "Target mailbox ID, or a well-known role: 'trash', 'archive', 'inbox', 'drafts', 'junk', 'sent'",
+      "Target mailbox ID or well-known role: 'trash', 'archive', 'inbox', 'drafts', 'junk', 'sent'",
+    ),
+  flags: z
+    .array(z.enum(FLAG_VALUES))
+    .min(1)
+    .optional()
+    .describe(
+      "Flags to set: 'read'/'unread', 'flagged'/'unflagged', 'answered'/'unanswered', 'draft'/'undraft'",
     ),
 });
+
+export type EmailSetArgs = z.infer<typeof EmailSetSchema>;
+
+// Flag name → JMAP keyword mapping
+const FLAG_TO_KEYWORD: Record<string, { keyword: string; value: boolean }> = {
+  read: { keyword: "$seen", value: true },
+  unread: { keyword: "$seen", value: false },
+  flagged: { keyword: "$flagged", value: true },
+  unflagged: { keyword: "$flagged", value: false },
+  answered: { keyword: "$answered", value: true },
+  unanswered: { keyword: "$answered", value: false },
+  draft: { keyword: "$draft", value: true },
+  undraft: { keyword: "$draft", value: false },
+};
+
+function resolveFlags(flags: readonly string[]): {
+  markRead?: boolean;
+  setFlagged?: boolean;
+  keywordsToAdd: string[];
+  keywordsToRemove: string[];
+} {
+  const result: ReturnType<typeof resolveFlags> = {
+    keywordsToAdd: [],
+    keywordsToRemove: [],
+  };
+
+  const seen = new Map<string, string>(); // keyword → flag name that set it
+
+  for (const flag of flags) {
+    const mapping = FLAG_TO_KEYWORD[flag];
+    if (!mapping) throw new Error(`Unknown flag: '${flag}'`);
+
+    const prev = seen.get(mapping.keyword);
+    if (prev !== undefined && prev !== flag) {
+      throw new Error(`Contradictory flags: '${prev}' and '${flag}'`);
+    }
+    seen.set(mapping.keyword, flag);
+
+    if (mapping.keyword === "$seen") {
+      result.markRead = mapping.value;
+    } else if (mapping.keyword === "$flagged") {
+      result.setFlagged = mapping.value;
+    } else if (mapping.value) {
+      result.keywordsToAdd.push(mapping.keyword);
+    } else {
+      result.keywordsToRemove.push(mapping.keyword);
+    }
+  }
+
+  return result;
+}
 
 // Type exports
 export type EmailQueryArgs = z.infer<typeof EmailQuerySchema>;
 export type EmailGetArgs = z.infer<typeof EmailGetSchema>;
 export type EmailSendArgs = z.infer<typeof EmailSendSchema>;
-export type EmailMoveArgs = z.infer<typeof EmailMoveSchema>;
 
 /**
  * Create JMAP layers for a bearer token
@@ -519,60 +588,92 @@ export async function emailSend(
 const WELL_KNOWN_ROLES = ["trash", "archive", "inbox", "drafts", "junk", "sent"] as const;
 
 /**
- * Tool: Move emails to a mailbox
+ * Tool: Update emails — move to mailbox and/or set flags
  */
-export async function emailMove(
-  args: EmailMoveArgs,
+export async function emailSet(
+  args: EmailSetArgs,
   extra: RequestHandlerExtra<any, any>,
 ): Promise<any> {
+  if (!args.mailboxId && !args.flags) {
+    throw new Error("At least one of 'mailboxId' or 'flags' must be provided");
+  }
+
   const bearerToken = extractBearerToken(extra);
   const layers = createLayers(bearerToken);
   const accountId = args.accountId || (await getAccountId(bearerToken, layers));
 
-  // Resolve mailboxId: well-known role name or raw ID
-  const isRole = WELL_KNOWN_ROLES.includes(args.mailboxId as any);
-  let targetMailboxId: string;
+  const ids = args.emailIds.map((id) => Common.createId(id));
+  let targetMailboxId: string | undefined;
+  const results: Record<string, unknown> = {};
 
-  if (isRole) {
+  // Move to mailbox
+  if (args.mailboxId) {
+    const isRole = WELL_KNOWN_ROLES.includes(args.mailboxId as any);
+
+    if (isRole) {
+      const program = Effect.gen(function* () {
+        const service = yield* MailboxService;
+        const mailboxes = yield* service.findByRole(accountId, args.mailboxId as any);
+        if (mailboxes.length === 0) {
+          return yield* Effect.fail(new Error(`No mailbox found with role '${args.mailboxId}'`));
+        }
+        return mailboxes[0].id;
+      });
+      targetMailboxId = await Effect.runPromise(program.pipe(Effect.provide(layers)));
+    } else {
+      targetMailboxId = args.mailboxId;
+    }
+
+    const update: Record<string, { mailboxIds: Record<string, boolean> }> = {};
+    for (const emailId of args.emailIds) {
+      update[Common.createId(emailId) as string] = {
+        mailboxIds: { [Common.createId(targetMailboxId) as string]: true },
+      };
+    }
+
     const program = Effect.gen(function* () {
-      const service = yield* MailboxService;
-      const mailboxes = yield* service.findByRole(accountId, args.mailboxId as any);
-      if (mailboxes.length === 0) {
-        return yield* Effect.fail(new Error(`No mailbox found with role '${args.mailboxId}'`));
+      const service = yield* EmailService;
+      return yield* service.set({ accountId, update: update as any });
+    });
+
+    const moveResult = (await Effect.runPromise(program.pipe(Effect.provide(layers)))) as any;
+    const movedCount = moveResult.updated ? Object.keys(moveResult.updated).length : 0;
+    results.moved = movedCount;
+    results.targetMailboxId = targetMailboxId;
+    if (moveResult.notUpdated && Object.keys(moveResult.notUpdated).length > 0) {
+      results.notUpdated = moveResult.notUpdated;
+    }
+  }
+
+  // Set flags
+  if (args.flags) {
+    const resolved = resolveFlags(args.flags);
+
+    const flagProgram = Effect.gen(function* () {
+      const service = yield* EmailService;
+
+      if (resolved.markRead !== undefined) {
+        yield* service.markRead(accountId, ids, resolved.markRead);
       }
-      return mailboxes[0].id;
+      if (resolved.setFlagged !== undefined) {
+        yield* service.flag(accountId, ids, resolved.setFlagged);
+      }
+      if (resolved.keywordsToAdd.length > 0 || resolved.keywordsToRemove.length > 0) {
+        yield* service.updateKeywords(
+          accountId,
+          ids,
+          resolved.keywordsToAdd,
+          resolved.keywordsToRemove,
+        );
+      }
     });
-    targetMailboxId = await Effect.runPromise(program.pipe(Effect.provide(layers)));
-  } else {
-    targetMailboxId = args.mailboxId;
+
+    await Effect.runPromise(flagProgram.pipe(Effect.provide(layers)));
+    results.flags = args.flags;
+    results.flagsUpdated = args.emailIds.length;
   }
 
-  // Build update map: move each email to the target mailbox
-  const update: Record<string, { mailboxIds: Record<string, boolean> }> = {};
-  for (const emailId of args.emailIds) {
-    update[Common.createId(emailId) as string] = {
-      mailboxIds: { [Common.createId(targetMailboxId) as string]: true },
-    };
-  }
-
-  const program = Effect.gen(function* () {
-    const service = yield* EmailService;
-    return yield* service.set({
-      accountId,
-      update: update as any,
-    });
-  });
-
-  const result = (await Effect.runPromise(program.pipe(Effect.provide(layers)))) as any;
-
-  const updatedCount = result.updated ? Object.keys(result.updated).length : 0;
-  const notUpdated = result.notUpdated ? Object.keys(result.notUpdated) : [];
-
-  return {
-    moved: updatedCount,
-    targetMailboxId,
-    ...(notUpdated.length > 0 && { notUpdated: result.notUpdated }),
-  };
+  return results;
 }
 
 // Tool definitions for MCP
@@ -595,10 +696,10 @@ export const toolDefinitions = {
       "Send an email via Fastmail. Supports plain text, HTML, or multipart/alternative (both) emails.",
     parameters: EmailSendSchema,
   },
-  email_move: {
+  email_set: {
     description:
-      "Move emails to a mailbox. For common actions use well-known names: 'trash' (delete), 'archive', 'inbox', 'junk', 'drafts', 'sent'. For other mailboxes, use mailbox_get to find the mailbox ID.",
-    parameters: EmailMoveSchema,
+      "Update emails: move to a mailbox and/or set flags. For mailbox, use well-known names: 'trash' (delete), 'archive', 'inbox', 'junk', 'drafts', 'sent', or a mailbox ID. For flags: 'read'/'unread', 'flagged'/'unflagged', 'answered'/'unanswered', 'draft'/'undraft'.",
+    parameters: EmailSetSchema,
   },
 };
 
@@ -721,17 +822,17 @@ export function registerTools(server: McpServer) {
     },
   );
 
-  // Tool: Move emails to a mailbox
+  // Tool: Update emails (move and/or set flags)
   server.registerTool(
-    "email_move",
+    "email_set",
     {
       description:
-        "Move emails to a mailbox. For common actions use well-known names: 'trash' (delete), 'archive', 'inbox', 'junk', 'drafts', 'sent'. For other mailboxes, use mailbox_get to find the mailbox ID.",
-      inputSchema: EmailMoveSchema,
+        "Update emails: move to a mailbox and/or set flags. For mailbox, use well-known names: 'trash' (delete), 'archive', 'inbox', 'junk', 'drafts', 'sent', or a mailbox ID. For flags: 'read'/'unread', 'flagged'/'unflagged', 'answered'/'unanswered', 'draft'/'undraft'.",
+      inputSchema: EmailSetSchema,
     },
     async (args, extra) => {
       try {
-        const result = await emailMove(args, extra);
+        const result = await emailSet(args, extra);
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };

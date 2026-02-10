@@ -70,11 +70,14 @@ Send emails with support for plain text, HTML, or both.
 - `htmlBody` (optional): HTML body for multipart/alternative emails
 - `identityId` (optional): Identity ID to send from
 
-### `email_move`
-Move emails to a mailbox. For common actions use well-known names: `trash` (delete), `archive`, `inbox`, `junk`, `drafts`, `sent`. For other mailboxes, use `mailbox_get` to find the mailbox ID.
-- `emailIds` (required): Array of email IDs to move (1-50)
-- `mailboxId` (required): Target mailbox ID, or a well-known role: `trash`, `archive`, `inbox`, `drafts`, `junk`, `sent`
+### `email_set`
+Update emails: move to a mailbox and/or set flags. Both operations can be combined in a single call.
+- `emailIds` (required): Array of email IDs to update (1-50)
+- `mailboxId` (optional): Target mailbox ID, or a well-known role: `trash`, `archive`, `inbox`, `drafts`, `junk`, `sent`
+- `flags` (optional): Array of flags to set: `read`/`unread`, `flagged`/`unflagged`, `answered`/`unanswered`, `draft`/`undraft`
 - `accountId` (optional): Account ID (auto-detected if not provided)
+
+At least one of `mailboxId` or `flags` must be provided.
 
 ## API Endpoints
 
