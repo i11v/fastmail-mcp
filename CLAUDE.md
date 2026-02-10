@@ -61,6 +61,14 @@ pnpm test:watch   # Run tests in watch mode
 | `effect-jmap` | JMAP client library |
 | `zod` | Schema validation |
 
+## Documentation
+
+When adding, removing, or renaming tools, update **all three locations**:
+
+1. `src/tools.ts` — `toolDefinitions` object and `registerTools()` function
+2. `README.md` — "Available Tools" section
+3. `public/landing.html` — tools list in the landing page
+
 ## Gotchas
 
 ### Zod `.refine()` breaks MCP tool input schemas
