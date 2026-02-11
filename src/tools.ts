@@ -1,9 +1,11 @@
+import { createHash } from "node:crypto";
 import { z } from "zod";
-import { createJMAPClient, type JMAPClientWrapper } from "effect-jmap";
+import { createJMAPClient, type JMAPClientWrapper, type Session } from "effect-jmap";
 import { Common } from "effect-jmap";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import { formatEmailsForLLM } from "./format.js";
+import { getCachedSession, setCachedSession } from "./redis.js";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
@@ -32,12 +34,36 @@ function extractBearerToken(extra: RequestHandlerExtra<any, any>): string {
   return authHeader.substring(7);
 }
 
+function hashToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex").slice(0, 16);
+}
+
 /**
- * Create a JMAP client from the bearer token in the request
+ * Create a JMAP client from the bearer token in the request.
+ * Uses Redis to cache the JMAP session, avoiding an HTTP round-trip
+ * to the session endpoint on every tool call.
  */
 async function getClient(extra: RequestHandlerExtra<any, any>): Promise<JMAPClientWrapper> {
   const bearerToken = extractBearerToken(extra);
-  return createJMAPClient(FASTMAIL_SESSION_ENDPOINT, bearerToken);
+  const tokenHash = hashToken(bearerToken);
+
+  // Try to use cached session from Redis
+  const cached = await getCachedSession(tokenHash).catch(() => null);
+  if (cached) {
+    const session: Session = JSON.parse(cached.json);
+    return createJMAPClient(FASTMAIL_SESSION_ENDPOINT, bearerToken, { session });
+  }
+
+  // No cache — create client (fetches session from Fastmail)
+  const client = await createJMAPClient(FASTMAIL_SESSION_ENDPOINT, bearerToken);
+
+  // Cache the session in Redis for subsequent requests
+  await setCachedSession(tokenHash, {
+    accountId: client.accountId,
+    json: JSON.stringify(client.session),
+  }).catch(() => {}); // Don't fail the request if Redis is down
+
+  return client;
 }
 
 // Zod schemas for validation
