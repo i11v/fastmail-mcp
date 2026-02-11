@@ -1,29 +1,14 @@
-import { z } from "zod";
 import { createHash } from "node:crypto";
-import { Effect, Layer } from "effect";
-import { HttpClient, HttpClientRequest } from "@effect/platform";
-import {
-  JMAPLive,
-  JMAPClientService,
-  MailboxService,
-  EmailService,
-  EmailSubmissionService,
-} from "effect-jmap";
+import { z } from "zod";
+import { createJMAPClient, type JMAPClientWrapper, type Session } from "effect-jmap";
 import { Common } from "effect-jmap";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
-import { getCachedSession, setCachedSession } from "./redis.js";
 import { formatEmailsForLLM } from "./format.js";
+import { getCachedSession, setCachedSession } from "./redis.js";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
-
-/**
- * Hash token for use as Redis key (avoids storing full tokens)
- */
-function hashToken(token: string): string {
-  return createHash("sha256").update(token).digest("hex").substring(0, 16);
-}
 
 /**
  * Extract bearer token from request headers
@@ -47,6 +32,38 @@ function extractBearerToken(extra: RequestHandlerExtra<any, any>): string {
   }
 
   return authHeader.substring(7);
+}
+
+function hashToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex").slice(0, 16);
+}
+
+/**
+ * Create a JMAP client from the bearer token in the request.
+ * Uses Redis to cache the JMAP session, avoiding an HTTP round-trip
+ * to the session endpoint on every tool call.
+ */
+async function getClient(extra: RequestHandlerExtra<any, any>): Promise<JMAPClientWrapper> {
+  const bearerToken = extractBearerToken(extra);
+  const tokenHash = hashToken(bearerToken);
+
+  // Try to use cached session from Redis
+  const cached = await getCachedSession(tokenHash).catch(() => null);
+  if (cached) {
+    const session: Session = JSON.parse(cached.json);
+    return createJMAPClient(FASTMAIL_SESSION_ENDPOINT, bearerToken, { session });
+  }
+
+  // No cache — create client (fetches session from Fastmail)
+  const client = await createJMAPClient(FASTMAIL_SESSION_ENDPOINT, bearerToken);
+
+  // Cache the session in Redis for subsequent requests
+  await setCachedSession(tokenHash, {
+    accountId: client.accountId,
+    json: JSON.stringify(client.session),
+  }).catch(() => {}); // Don't fail the request if Redis is down
+
+  return client;
 }
 
 // Zod schemas for validation
@@ -169,97 +186,35 @@ export type EmailGetArgs = z.infer<typeof EmailGetSchema>;
 export type EmailSendArgs = z.infer<typeof EmailSendSchema>;
 
 /**
- * Create JMAP layers for a bearer token
- */
-function createLayers(bearerToken: string): Layer.Layer<any> {
-  return JMAPLive(FASTMAIL_SESSION_ENDPOINT, bearerToken);
-}
-
-/**
- * Get JMAP session, using Redis cache if available
- */
-async function getSession(bearerToken: string, layers: Layer.Layer<any>): Promise<any> {
-  const tokenHash = hashToken(bearerToken);
-
-  // Try Redis first
-  const cached = await getCachedSession(tokenHash);
-  if (cached) return JSON.parse(cached.json);
-
-  // Fetch from JMAP
-  const program = Effect.gen(function* () {
-    const client = yield* JMAPClientService;
-    return yield* client.getSession;
-  });
-
-  const session = await Effect.runPromise(program.pipe(Effect.provide(layers)));
-
-  // Cache in Redis
-  const accountId =
-    session.primaryAccounts?.["urn:ietf:params:jmap:mail"] || Object.keys(session.accounts)[0];
-  await setCachedSession(tokenHash, {
-    accountId,
-    json: JSON.stringify(session),
-  });
-
-  return session;
-}
-
-/**
- * Get account ID, using Redis cache if available
- */
-async function getAccountId(bearerToken: string, layers: Layer.Layer<any>): Promise<string> {
-  const tokenHash = hashToken(bearerToken);
-
-  // Try Redis first
-  const cached = await getCachedSession(tokenHash);
-  if (cached) return cached.accountId;
-
-  // Fetch session (will cache both)
-  const session = await getSession(bearerToken, layers);
-  return session.primaryAccounts?.["urn:ietf:params:jmap:mail"] || Object.keys(session.accounts)[0];
-}
-
-/**
  * Helper function to get the default identity for sending emails
  */
 async function getDefaultIdentity(
-  accountId: string,
-  layers: Layer.Layer<any>,
+  client: JMAPClientWrapper,
 ): Promise<{ id: string; email: string; name?: string }> {
-  const program = Effect.gen(function* () {
-    const client = yield* JMAPClientService;
-    const callId = `identity-get-${Date.now()}`;
+  const callId = `identity-get-${Date.now()}`;
 
-    const methodCall: ["Identity/get", { accountId: string }, string] = [
-      "Identity/get",
-      { accountId },
-      callId,
-    ];
-    const response = yield* client.batch(
-      [methodCall],
-      ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail", "urn:ietf:params:jmap:submission"],
-    );
+  const response = await client.batch(
+    [["Identity/get", { accountId: client.accountId }, callId]],
+    ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail", "urn:ietf:params:jmap:submission"],
+  );
 
-    const identityResponse = response.methodResponses.find(([method]) => method === "Identity/get");
+  const identityResponse = response.methodResponses.find(([method]) => method === "Identity/get");
 
-    if (!identityResponse) {
-      return yield* Effect.fail(new Error("Identity/get response not found"));
-    }
+  if (!identityResponse) {
+    throw new Error("Identity/get response not found");
+  }
 
-    const [, data] = identityResponse;
-    if (data.list && data.list.length > 0) {
-      const identity = data.list[0];
-      return {
-        id: identity.id,
-        email: identity.email,
-        name: identity.name,
-      };
-    }
+  const [, data] = identityResponse;
+  if (data.list && data.list.length > 0) {
+    const identity = data.list[0];
+    return {
+      id: identity.id,
+      email: identity.email,
+      name: identity.name,
+    };
+  }
 
-    return yield* Effect.fail(new Error("No identities found for account"));
-  });
-
-  return await Effect.runPromise(program.pipe(Effect.provide(layers)));
+  throw new Error("No identities found for account");
 }
 
 /**
@@ -268,39 +223,34 @@ async function getDefaultIdentity(
 async function uploadBlob(
   emailMessage: string,
   bearerToken: string,
-  layers: Layer.Layer<any>,
+  client: JMAPClientWrapper,
 ): Promise<{ blobId: string; size: number; type: string }> {
-  const program = Effect.gen(function* () {
-    const client = yield* JMAPClientService;
-    const session = yield* client.getSession;
-    const httpClient = yield* HttpClient.HttpClient;
+  const uploadUrl = client.session.uploadUrl.replace("{accountId}", client.accountId);
 
-    const uploadUrl = session.uploadUrl.replace(
-      "{accountId}",
-      session.primaryAccounts?.["urn:ietf:params:jmap:mail"] || Object.keys(session.accounts)[0],
-    );
-
-    const uploadRequest = HttpClientRequest.post(uploadUrl).pipe(
-      HttpClientRequest.setHeader("Authorization", `Bearer ${bearerToken}`),
-      HttpClientRequest.setHeader("Content-Type", "message/rfc822"),
-      HttpClientRequest.bodyText(emailMessage),
-    );
-
-    const response = yield* httpClient.execute(uploadRequest);
-    const responseBody = (yield* response.json) as {
-      blobId: string;
-      size: number;
-      type: string;
-    };
-
-    return {
-      blobId: responseBody.blobId,
-      size: responseBody.size,
-      type: responseBody.type,
-    };
+  const response = await fetch(uploadUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${bearerToken}`,
+      "Content-Type": "message/rfc822",
+    },
+    body: emailMessage,
   });
 
-  return await Effect.runPromise(program.pipe(Effect.provide(layers)));
+  if (!response.ok) {
+    throw new Error(`Upload failed: HTTP ${response.status}`);
+  }
+
+  const result = (await response.json()) as {
+    blobId: string;
+    size: number;
+    type: string;
+  };
+
+  return {
+    blobId: result.blobId,
+    size: result.size,
+    type: result.type,
+  };
 }
 
 /**
@@ -380,16 +330,8 @@ function buildEmailMessage(params: {
  * Tool: Get all mailboxes
  */
 export async function mailboxGet(extra: RequestHandlerExtra<any, any>): Promise<any> {
-  const bearerToken = extractBearerToken(extra);
-  const layers = createLayers(bearerToken);
-  const accountId = await getAccountId(bearerToken, layers);
-
-  const program = Effect.gen(function* () {
-    const service = yield* MailboxService;
-    return yield* service.getAll(accountId);
-  });
-
-  return await Effect.runPromise(program.pipe(Effect.provide(layers)));
+  const client = await getClient(extra);
+  return await client.mailbox.getAll();
 }
 
 /**
@@ -399,31 +341,23 @@ export async function emailGet(
   args: EmailGetArgs,
   extra: RequestHandlerExtra<any, any>,
 ): Promise<any> {
-  const bearerToken = extractBearerToken(extra);
-  const layers = createLayers(bearerToken);
-  const accountId = args.accountId || (await getAccountId(bearerToken, layers));
+  const client = await getClient(extra);
+  const accountId = args.accountId || client.accountId;
 
-  const program = Effect.gen(function* () {
-    const service = yield* EmailService;
-    return yield* service.get({
-      accountId: accountId,
-      ids: args.emailIds.map((id) => Common.createId(id)),
-      properties: args.properties,
-      fetchTextBodyValues: args.fetchTextBodyValues,
-      fetchHTMLBodyValues: args.fetchHTMLBodyValues,
-      fetchAllBodyValues: args.fetchAllBodyValues ?? true,
-      maxBodyValueBytes: args.maxBodyValueBytes
-        ? Common.createUnsignedInt(args.maxBodyValueBytes)
-        : undefined,
-    });
+  const emailResult = await client.email.get({
+    accountId: accountId,
+    ids: args.emailIds.map((id) => Common.createId(id)),
+    properties: args.properties,
+    fetchTextBodyValues: args.fetchTextBodyValues,
+    fetchHTMLBodyValues: args.fetchHTMLBodyValues,
+    fetchAllBodyValues: args.fetchAllBodyValues ?? true,
+    maxBodyValueBytes: args.maxBodyValueBytes
+      ? Common.createUnsignedInt(args.maxBodyValueBytes)
+      : undefined,
   });
 
-  const emailResult = await Effect.runPromise(program.pipe(Effect.provide(layers)));
-
-  const emails = (emailResult as any).list;
-
   // Format emails as clean text for LLM consumption
-  return formatEmailsForLLM(emails);
+  return formatEmailsForLLM(emailResult.list as any[]);
 }
 
 /**
@@ -433,9 +367,8 @@ export async function emailQuery(
   args: EmailQueryArgs,
   extra: RequestHandlerExtra<any, any>,
 ): Promise<any> {
-  const bearerToken = extractBearerToken(extra);
-  const layers = createLayers(bearerToken);
-  const accountId = args.accountId || (await getAccountId(bearerToken, layers));
+  const client = await getClient(extra);
+  const accountId = args.accountId || client.accountId;
 
   let filter: any = {};
   if (args.mailboxId) filter.inMailbox = args.mailboxId;
@@ -449,17 +382,12 @@ export async function emailQuery(
 
   const sort = [{ property: args.sort, isAscending: args.ascending }];
 
-  const program = Effect.gen(function* () {
-    const service = yield* EmailService;
-    return yield* service.query({
-      accountId,
-      filter: Object.keys(filter).length > 0 ? filter : undefined,
-      sort,
-      limit: Common.createUnsignedInt(args.limit),
-    });
+  return await client.email.query({
+    accountId,
+    filter: Object.keys(filter).length > 0 ? filter : undefined,
+    sort,
+    limit: Common.createUnsignedInt(args.limit),
   });
-
-  return await Effect.runPromise(program.pipe(Effect.provide(layers)));
 }
 
 /**
@@ -470,48 +398,34 @@ export async function emailSend(
   extra: RequestHandlerExtra<any, any>,
 ): Promise<any> {
   const bearerToken = extractBearerToken(extra);
-  const layers = createLayers(bearerToken);
-  const accountId = await getAccountId(bearerToken, layers);
+  const client = await createJMAPClient(FASTMAIL_SESSION_ENDPOINT, bearerToken);
+  const accountId = client.accountId;
 
   // Get identity
-  const identity = args.identityId
-    ? await (async () => {
-        const program = Effect.gen(function* () {
-          const client = yield* JMAPClientService;
-          const callId = `identity-get-${Date.now()}`;
-          const methodCall: ["Identity/get", { accountId: string; ids: string[] }, string] = [
-            "Identity/get",
-            { accountId, ids: [args.identityId!] },
-            callId,
-          ];
-          const response = yield* client.batch(
-            [methodCall],
-            [
-              "urn:ietf:params:jmap:core",
-              "urn:ietf:params:jmap:mail",
-              "urn:ietf:params:jmap:submission",
-            ],
-          );
-          const identityResponse = response.methodResponses.find(
-            ([method]) => method === "Identity/get",
-          );
-          if (!identityResponse) {
-            return yield* Effect.fail(new Error("Identity/get response not found"));
-          }
-          const [, data] = identityResponse;
-          if (data.list && data.list.length > 0) {
-            const identity = data.list[0];
-            return {
-              id: identity.id,
-              email: identity.email,
-              name: identity.name,
-            };
-          }
-          return yield* Effect.fail(new Error("Identity not found"));
-        });
-        return await Effect.runPromise(program.pipe(Effect.provide(layers)));
-      })()
-    : await getDefaultIdentity(accountId, layers);
+  let identity: { id: string; email: string; name?: string };
+
+  if (args.identityId) {
+    const callId = `identity-get-${Date.now()}`;
+    const response = await client.batch(
+      [["Identity/get", { accountId, ids: [args.identityId] }, callId]],
+      ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail", "urn:ietf:params:jmap:submission"],
+    );
+    const identityResponse = response.methodResponses.find(([method]) => method === "Identity/get");
+    if (!identityResponse) {
+      throw new Error("Identity/get response not found");
+    }
+    const [, data] = identityResponse;
+    if (!data.list || data.list.length === 0) {
+      throw new Error("Identity not found");
+    }
+    identity = {
+      id: data.list[0].id,
+      email: data.list[0].email,
+      name: data.list[0].name,
+    };
+  } else {
+    identity = await getDefaultIdentity(client);
+  }
 
   const identityId = identity.id;
 
@@ -525,63 +439,51 @@ export async function emailSend(
   });
 
   // Upload the email message as a blob
-  const uploadResult = await uploadBlob(emailMessage, bearerToken, layers);
+  const uploadResult = await uploadBlob(emailMessage, bearerToken, client);
 
-  // Import and send
-  const program = Effect.gen(function* () {
-    const emailService = yield* EmailService;
-    const submissionService = yield* EmailSubmissionService;
-    const mailboxService = yield* MailboxService;
+  // Find drafts mailbox
+  const mailboxes = await client.mailbox.getAll();
+  const draftsMailbox = mailboxes.find((mb) => mb.role === "drafts");
 
-    const mailboxes = yield* mailboxService.getAll(accountId);
-    const draftsMailbox = mailboxes.find((mb) => mb.role === "drafts");
+  if (!draftsMailbox) {
+    throw new Error("Drafts mailbox not found");
+  }
 
-    if (!draftsMailbox) {
-      return yield* Effect.fail(new Error("Drafts mailbox not found"));
-    }
-
-    const importResult = yield* emailService.import({
-      accountId,
-      emails: {
-        [`draft-${Date.now()}`]: {
-          blobId: uploadResult.blobId,
-          mailboxIds: { [draftsMailbox.id]: true },
-          keywords: { $draft: true },
-        },
+  // Import the email
+  const importResult = await client.email.import({
+    accountId,
+    emails: {
+      [`draft-${Date.now()}`]: {
+        blobId: uploadResult.blobId,
+        mailboxIds: { [draftsMailbox.id]: true },
+        keywords: { $draft: true },
       },
-    });
-
-    if (!importResult.created) {
-      if (importResult.notCreated) {
-        const errors = Object.entries(importResult.notCreated).map(
-          ([key, error]) => `${key}: ${JSON.stringify(error)}`,
-        );
-        return yield* Effect.fail(new Error(`Failed to import email: ${errors.join(", ")}`));
-      }
-      return yield* Effect.fail(new Error("Failed to import email: no created field in response"));
-    }
-
-    const createdEmails = Object.values(importResult.created);
-    if (createdEmails.length === 0) {
-      return yield* Effect.fail(new Error("No email was created"));
-    }
-
-    const emailId = createdEmails[0].id;
-
-    const submission = yield* submissionService.send(
-      accountId,
-      Common.createId(identityId),
-      emailId,
-    );
-
-    return submission;
+    },
   });
 
-  const result = await Effect.runPromise(program.pipe(Effect.provide(layers)));
+  if (!importResult.created) {
+    if (importResult.notCreated) {
+      const errors = Object.entries(importResult.notCreated).map(
+        ([key, error]) => `${key}: ${JSON.stringify(error)}`,
+      );
+      throw new Error(`Failed to import email: ${errors.join(", ")}`);
+    }
+    throw new Error("Failed to import email: no created field in response");
+  }
+
+  const createdEmails = Object.values(importResult.created);
+  if (createdEmails.length === 0) {
+    throw new Error("No email was created");
+  }
+
+  const emailId = createdEmails[0].id;
+
+  // Send the email
+  const submission = await client.submission.send(Common.createId(identityId), emailId);
 
   return {
-    id: result.id,
-    sendAt: result.sendAt || "immediately",
+    id: submission.id,
+    sendAt: submission.sendAt || "immediately",
   };
 }
 
@@ -598,9 +500,8 @@ export async function emailSet(
     throw new Error("At least one of 'mailboxId' or 'flags' must be provided");
   }
 
-  const bearerToken = extractBearerToken(extra);
-  const layers = createLayers(bearerToken);
-  const accountId = args.accountId || (await getAccountId(bearerToken, layers));
+  const client = await getClient(extra);
+  const accountId = args.accountId || client.accountId;
 
   const ids = args.emailIds.map((id) => Common.createId(id));
   let targetMailboxId: string | undefined;
@@ -611,15 +512,11 @@ export async function emailSet(
     const isRole = WELL_KNOWN_ROLES.includes(args.mailboxId as any);
 
     if (isRole) {
-      const program = Effect.gen(function* () {
-        const service = yield* MailboxService;
-        const mailboxes = yield* service.findByRole(accountId, args.mailboxId as any);
-        if (mailboxes.length === 0) {
-          return yield* Effect.fail(new Error(`No mailbox found with role '${args.mailboxId}'`));
-        }
-        return mailboxes[0].id;
-      });
-      targetMailboxId = await Effect.runPromise(program.pipe(Effect.provide(layers)));
+      const mailboxes = await client.mailbox.findByRole(args.mailboxId as any);
+      if (mailboxes.length === 0) {
+        throw new Error(`No mailbox found with role '${args.mailboxId}'`);
+      }
+      targetMailboxId = mailboxes[0].id;
     } else {
       targetMailboxId = args.mailboxId;
     }
@@ -631,12 +528,7 @@ export async function emailSet(
       };
     }
 
-    const program = Effect.gen(function* () {
-      const service = yield* EmailService;
-      return yield* service.set({ accountId, update: update as any });
-    });
-
-    const moveResult = (await Effect.runPromise(program.pipe(Effect.provide(layers)))) as any;
+    const moveResult = await client.email.set({ accountId, update: update as any });
     const movedCount = moveResult.updated ? Object.keys(moveResult.updated).length : 0;
     results.moved = movedCount;
     results.targetMailboxId = targetMailboxId;
@@ -649,26 +541,21 @@ export async function emailSet(
   if (args.flags) {
     const resolved = resolveFlags(args.flags);
 
-    const flagProgram = Effect.gen(function* () {
-      const service = yield* EmailService;
+    if (resolved.markRead !== undefined) {
+      await client.email.markRead(ids, resolved.markRead, accountId);
+    }
+    if (resolved.setFlagged !== undefined) {
+      await client.email.flag(ids, resolved.setFlagged, accountId);
+    }
+    if (resolved.keywordsToAdd.length > 0 || resolved.keywordsToRemove.length > 0) {
+      await client.email.updateKeywords(
+        ids,
+        resolved.keywordsToAdd,
+        resolved.keywordsToRemove,
+        accountId,
+      );
+    }
 
-      if (resolved.markRead !== undefined) {
-        yield* service.markRead(accountId, ids, resolved.markRead);
-      }
-      if (resolved.setFlagged !== undefined) {
-        yield* service.flag(accountId, ids, resolved.setFlagged);
-      }
-      if (resolved.keywordsToAdd.length > 0 || resolved.keywordsToRemove.length > 0) {
-        yield* service.updateKeywords(
-          accountId,
-          ids,
-          resolved.keywordsToAdd,
-          resolved.keywordsToRemove,
-        );
-      }
-    });
-
-    await Effect.runPromise(flagProgram.pipe(Effect.provide(layers)));
     results.flags = args.flags;
     results.flagsUpdated = args.emailIds.length;
   }

@@ -31,7 +31,7 @@ pnpm test         # Run tests with vitest
 pnpm test:watch   # Run tests in watch mode
 ```
 
-**Always run `pnpm check` before committing.** Pre-commit hooks (lefthook) enforce this automatically.
+**Always run `pnpm check` before committing and pushing.** Pre-commit hooks (lefthook) enforce format, lint, and typecheck automatically, but `pnpm check` also runs tests. Never push to remote without all checks passing.
 
 ## Source Files
 
