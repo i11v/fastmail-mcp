@@ -1,12 +1,6 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import {
-  createJMAPClient,
-  createJMAPClientWithConfig,
-  defaultConfig,
-  type JMAPClientWrapper,
-  type Session,
-} from "effect-jmap";
+import { createJMAPClient, type JMAPClientWrapper, type Session } from "effect-jmap";
 import { Common } from "effect-jmap";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
@@ -57,11 +51,7 @@ async function getClient(extra: RequestHandlerExtra<any, any>): Promise<JMAPClie
   const cached = await getCachedSession(tokenHash).catch(() => null);
   if (cached) {
     const session: Session = JSON.parse(cached.json);
-    const config = {
-      ...defaultConfig(FASTMAIL_SESSION_ENDPOINT, bearerToken),
-      initialSession: session,
-    };
-    return createJMAPClientWithConfig(config as Parameters<typeof createJMAPClientWithConfig>[0]);
+    return createJMAPClient(FASTMAIL_SESSION_ENDPOINT, bearerToken, { session });
   }
 
   // No cache — create client (fetches session from Fastmail)
