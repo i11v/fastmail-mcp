@@ -30,8 +30,8 @@ importers:
         specifier: ^3.17.14
         version: 3.17.14
       effect-jmap:
-        specifier: npm:effect-jmap@pr-20
-        version: 0.0.0-pr.20.e2cf253
+        specifier: 0.10.0
+        version: 0.10.0
       hono:
         specifier: ^4.9.8
         version: 4.11.3
@@ -1138,8 +1138,8 @@ packages:
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
-  effect-jmap@0.0.0-pr.20.e2cf253:
-    resolution: {integrity: sha512-aXtNgd/d+5Zxtp6zFh1iHPC483WeasLgVTsCPeQFMn+hF6LUUqIBfz/MlFdRYXlQXgX3awyOcyrNR0wc116wfQ==}
+  effect-jmap@0.10.0:
+    resolution: {integrity: sha512-LXgMn3J9OloC38LZGxSeuKDA/Vgn6spc5mKDNVHAu8Icz7EzMJvGpg0lSsQV4u518jFnS5e0vRaipWRnFqk1aA==}
     engines: {node: '>=24'}
 
   effect@3.17.14:
@@ -3340,7 +3340,7 @@ snapshots:
 
   ee-first@1.1.1: {}
 
-  effect-jmap@0.0.0-pr.20.e2cf253:
+  effect-jmap@0.10.0:
     dependencies:
       '@effect/platform': 0.91.1(effect@3.17.14)
       effect: 3.17.14
