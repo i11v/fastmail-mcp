@@ -186,38 +186,6 @@ export type EmailGetArgs = z.infer<typeof EmailGetSchema>;
 export type EmailSendArgs = z.infer<typeof EmailSendSchema>;
 
 /**
- * Helper function to get the default identity for sending emails
- */
-async function getDefaultIdentity(
-  client: JMAPClientWrapper,
-): Promise<{ id: string; email: string; name?: string }> {
-  const callId = `identity-get-${Date.now()}`;
-
-  const response = await client.batch(
-    [["Identity/get", { accountId: client.accountId }, callId]],
-    ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail", "urn:ietf:params:jmap:submission"],
-  );
-
-  const identityResponse = response.methodResponses.find(([method]) => method === "Identity/get");
-
-  if (!identityResponse) {
-    throw new Error("Identity/get response not found");
-  }
-
-  const [, data] = identityResponse;
-  if (data.list && data.list.length > 0) {
-    const identity = data.list[0];
-    return {
-      id: identity.id,
-      email: identity.email,
-      name: identity.name,
-    };
-  }
-
-  throw new Error("No identities found for account");
-}
-
-/**
  * Helper function to upload a blob (RFC 5322 email message) to JMAP server
  */
 async function uploadBlob(
@@ -402,29 +370,19 @@ export async function emailSend(
   const accountId = client.accountId;
 
   // Get identity
-  let identity: { id: string; email: string; name?: string };
+  let identity;
 
   if (args.identityId) {
-    const callId = `identity-get-${Date.now()}`;
-    const response = await client.batch(
-      [["Identity/get", { accountId, ids: [args.identityId] }, callId]],
-      ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail", "urn:ietf:params:jmap:submission"],
-    );
-    const identityResponse = response.methodResponses.find(([method]) => method === "Identity/get");
-    if (!identityResponse) {
-      throw new Error("Identity/get response not found");
-    }
-    const [, data] = identityResponse;
-    if (!data.list || data.list.length === 0) {
+    const result = await client.identity.get({
+      accountId,
+      ids: [Common.createId(args.identityId)],
+    });
+    if (!result.list[0]) {
       throw new Error("Identity not found");
     }
-    identity = {
-      id: data.list[0].id,
-      email: data.list[0].email,
-      name: data.list[0].name,
-    };
+    identity = result.list[0];
   } else {
-    identity = await getDefaultIdentity(client);
+    identity = await client.identity.getDefault();
   }
 
   const identityId = identity.id;
