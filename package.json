@@ -1,7 +1,7 @@
 {
   "name": "fastmail-mcp-unofficial",
   "version": "0.5.0",
-  "description": "MCP server for Fastmail using effect-jmap library",
+  "description": "MCP server for Fastmail — JMAP execute proxy",
   "type": "module",
   "engines": {
     "node": "24.x"
@@ -30,20 +30,15 @@
   "author": "Ilnur Khalilov <i@khl.lv>",
   "license": "MIT",
   "dependencies": {
-    "@effect/platform": "^0.91.1",
-    "@effect/platform-node": "^0.97.1",
     "@hono/mcp": "^0.2.3",
     "@hono/node-server": "^1.19.7",
     "@modelcontextprotocol/sdk": "^1.25.1",
     "cheerio": "^1.2.0",
-    "effect": "^3.17.14",
-    "effect-jmap": "0.10.0",
     "hono": "^4.9.8",
     "redis": "^5.10.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@effect/language-service": "^0.56.0",
     "@types/node": "^24.5.2",
     "lefthook": "^2.1.0",
     "oxfmt": "^0.28.0",

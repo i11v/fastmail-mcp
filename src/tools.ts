@@ -1,18 +1,59 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { createJMAPClient, type JMAPClientWrapper, type Session } from "effect-jmap";
-import { Common } from "effect-jmap";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
-import { formatEmailsForLLM } from "./format.js";
 import { getCachedSession, setCachedSession } from "./redis.js";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
 
-/**
- * Extract bearer token from request headers
- */
+const JMAP_USING = [
+  "urn:ietf:params:jmap:core",
+  "urn:ietf:params:jmap:mail",
+  "urn:ietf:params:jmap:submission",
+];
+
+// --- Method allowlist ---
+
+export const ALLOWED_METHODS = new Set([
+  // Core
+  "Core/echo",
+  // Mailbox
+  "Mailbox/get",
+  "Mailbox/query",
+  "Mailbox/queryChanges",
+  "Mailbox/set",
+  // Email
+  "Email/get",
+  "Email/query",
+  "Email/queryChanges",
+  "Email/set",
+  // Thread
+  "Thread/get",
+  // SearchSnippet
+  "SearchSnippet/get",
+  // Identity
+  "Identity/get",
+  // EmailSubmission
+  "EmailSubmission/get",
+  "EmailSubmission/query",
+  "EmailSubmission/set",
+]);
+
+// --- Types ---
+
+export interface JMAPSession {
+  apiUrl: string;
+  uploadUrl: string;
+  accountId: string;
+}
+
+type MethodCall = [string, Record<string, unknown>, string];
+
+export type Safety = "read" | "write" | "destructive";
+
+// --- Auth helpers ---
+
 function extractBearerToken(extra: RequestHandlerExtra<any, any>): string {
   const headers = extra.requestInfo?.headers;
 
@@ -22,7 +63,6 @@ function extractBearerToken(extra: RequestHandlerExtra<any, any>): string {
     );
   }
 
-  // IsomorphicHeaders is Record<string, string | string[] | undefined>
   const authHeader = headers["authorization"] || headers["Authorization"];
 
   if (!authHeader || typeof authHeader !== "string" || !authHeader.startsWith("Bearer ")) {
@@ -38,646 +78,323 @@ function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex").slice(0, 16);
 }
 
-/**
- * Create a JMAP client from the bearer token in the request.
- * Uses Redis to cache the JMAP session, avoiding an HTTP round-trip
- * to the session endpoint on every tool call.
- */
-async function getClient(extra: RequestHandlerExtra<any, any>): Promise<JMAPClientWrapper> {
-  const bearerToken = extractBearerToken(extra);
-  const tokenHash = hashToken(bearerToken);
+// --- Session management ---
 
-  // Try to use cached session from Redis
-  const cached = await getCachedSession(tokenHash).catch(() => null);
-  if (cached) {
-    const session: Session = JSON.parse(cached.json);
-    return createJMAPClient(FASTMAIL_SESSION_ENDPOINT, bearerToken, { session });
-  }
-
-  // No cache — create client (fetches session from Fastmail)
-  const client = await createJMAPClient(FASTMAIL_SESSION_ENDPOINT, bearerToken);
-
-  // Cache the session in Redis for subsequent requests
-  await setCachedSession(tokenHash, {
-    accountId: client.accountId,
-    json: JSON.stringify(client.session),
-  }).catch(() => {}); // Don't fail the request if Redis is down
-
-  return client;
-}
-
-// Zod schemas for validation
-export const EmailQuerySchema = z.object({
-  accountId: z.string().optional(),
-  mailboxId: z.string().optional(),
-  limit: z.number().min(1).max(100).default(10),
-  from: z.string().optional(),
-  to: z.string().optional(),
-  subject: z.string().optional(),
-  hasKeyword: z.string().optional(),
-  notKeyword: z.string().optional(),
-  before: z.string().optional(),
-  after: z.string().optional(),
-  sort: z.enum(["receivedAt", "sentAt", "subject", "from"]).default("receivedAt"),
-  ascending: z.boolean().default(false),
-});
-
-export const EmailGetSchema = z.object({
-  accountId: z.string().optional(),
-  emailIds: z.array(z.string()).min(1).max(50),
-  properties: z.array(z.string()).optional(),
-  fetchTextBodyValues: z.boolean().optional(),
-  fetchHTMLBodyValues: z.boolean().optional(),
-  fetchAllBodyValues: z.boolean().optional(),
-  maxBodyValueBytes: z.number().optional(),
-});
-
-export const EmailSendSchema = z.object({
-  to: z.string().email(),
-  subject: z.string(),
-  body: z.string(),
-  htmlBody: z.string().optional(),
-  identityId: z.string().optional(),
-});
-
-const FLAG_VALUES = [
-  "read",
-  "unread",
-  "flagged",
-  "unflagged",
-  "answered",
-  "unanswered",
-  "draft",
-  "undraft",
-] as const;
-
-export const EmailSetSchema = z.object({
-  accountId: z.string().optional(),
-  emailIds: z.array(z.string()).min(1).max(50),
-  mailboxId: z
-    .string()
-    .optional()
-    .describe(
-      "Target mailbox ID or well-known role: 'trash', 'archive', 'inbox', 'drafts', 'junk', 'sent'",
-    ),
-  flags: z
-    .array(z.enum(FLAG_VALUES))
-    .min(1)
-    .optional()
-    .describe(
-      "Flags to set: 'read'/'unread', 'flagged'/'unflagged', 'answered'/'unanswered', 'draft'/'undraft'",
-    ),
-});
-
-export type EmailSetArgs = z.infer<typeof EmailSetSchema>;
-
-// Flag name → JMAP keyword mapping
-const FLAG_TO_KEYWORD: Record<string, { keyword: string; value: boolean }> = {
-  read: { keyword: "$seen", value: true },
-  unread: { keyword: "$seen", value: false },
-  flagged: { keyword: "$flagged", value: true },
-  unflagged: { keyword: "$flagged", value: false },
-  answered: { keyword: "$answered", value: true },
-  unanswered: { keyword: "$answered", value: false },
-  draft: { keyword: "$draft", value: true },
-  undraft: { keyword: "$draft", value: false },
-};
-
-function resolveFlags(flags: readonly string[]): {
-  markRead?: boolean;
-  setFlagged?: boolean;
-  keywordsToAdd: string[];
-  keywordsToRemove: string[];
-} {
-  const result: ReturnType<typeof resolveFlags> = {
-    keywordsToAdd: [],
-    keywordsToRemove: [],
-  };
-
-  const seen = new Map<string, string>(); // keyword → flag name that set it
-
-  for (const flag of flags) {
-    const mapping = FLAG_TO_KEYWORD[flag];
-    if (!mapping) throw new Error(`Unknown flag: '${flag}'`);
-
-    const prev = seen.get(mapping.keyword);
-    if (prev !== undefined && prev !== flag) {
-      throw new Error(`Contradictory flags: '${prev}' and '${flag}'`);
-    }
-    seen.set(mapping.keyword, flag);
-
-    if (mapping.keyword === "$seen") {
-      result.markRead = mapping.value;
-    } else if (mapping.keyword === "$flagged") {
-      result.setFlagged = mapping.value;
-    } else if (mapping.value) {
-      result.keywordsToAdd.push(mapping.keyword);
-    } else {
-      result.keywordsToRemove.push(mapping.keyword);
-    }
-  }
-
-  return result;
-}
-
-// Type exports
-export type EmailQueryArgs = z.infer<typeof EmailQuerySchema>;
-export type EmailGetArgs = z.infer<typeof EmailGetSchema>;
-export type EmailSendArgs = z.infer<typeof EmailSendSchema>;
-
-/**
- * Helper function to upload a blob (RFC 5322 email message) to JMAP server
- */
-async function uploadBlob(
-  emailMessage: string,
-  bearerToken: string,
-  client: JMAPClientWrapper,
-): Promise<{ blobId: string; size: number; type: string }> {
-  const uploadUrl = client.session.uploadUrl.replace("{accountId}", client.accountId);
-
-  const response = await fetch(uploadUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${bearerToken}`,
-      "Content-Type": "message/rfc822",
-    },
-    body: emailMessage,
+async function fetchSession(bearerToken: string): Promise<JMAPSession> {
+  const response = await fetch(FASTMAIL_SESSION_ENDPOINT, {
+    headers: { Authorization: `Bearer ${bearerToken}` },
   });
 
   if (!response.ok) {
-    throw new Error(`Upload failed: HTTP ${response.status}`);
+    throw new Error(`Session fetch failed: HTTP ${response.status}`);
   }
 
-  const result = (await response.json()) as {
-    blobId: string;
-    size: number;
-    type: string;
+  const session = (await response.json()) as {
+    apiUrl: string;
+    uploadUrl: string;
+    primaryAccounts: Record<string, string>;
   };
+
+  const accountId = session.primaryAccounts["urn:ietf:params:jmap:mail"];
+  if (!accountId) {
+    throw new Error("No mail account found in JMAP session");
+  }
 
   return {
-    blobId: result.blobId,
-    size: result.size,
-    type: result.type,
+    apiUrl: session.apiUrl,
+    uploadUrl: session.uploadUrl,
+    accountId,
   };
 }
 
-/**
- * Generate a unique MIME boundary string
- */
-function generateMimeBoundary(): string {
-  const timestamp = Date.now();
-  const random = Math.random().toString(36).substring(2, 15);
-  return `----=_Part_${timestamp}_${random}`;
-}
-
-/**
- * Build RFC 5322 email message
- */
-function buildEmailMessage(params: {
-  identity: { name?: string; email: string };
-  to: string;
-  subject: string;
-  body: string;
-  htmlBody?: string;
-}): string {
-  const { identity, to, subject, body, htmlBody } = params;
-
-  const messageId = `<${Date.now()}.${Math.random().toString(36).substring(2)}@fastmail-mcp>`;
-
-  const fromHeader = identity.name
-    ? `From: "${identity.name}" <${identity.email}>`
-    : `From: ${identity.email}`;
-
-  const normalizedBody = body.replace(/\r?\n/g, "\r\n");
-  const normalizedHtmlBody = htmlBody?.replace(/\r?\n/g, "\r\n");
-
-  const commonHeaders = [
-    `Message-ID: ${messageId}`,
-    `Date: ${new Date().toUTCString()}`,
-    fromHeader,
-    `To: ${to}`,
-    `Subject: ${subject}`,
-    `MIME-Version: 1.0`,
-  ];
-
-  if (!normalizedHtmlBody) {
-    return [
-      ...commonHeaders,
-      `Content-Type: text/plain; charset=utf-8`,
-      `Content-Transfer-Encoding: 8bit`,
-      ``,
-      normalizedBody,
-    ].join("\r\n");
-  }
-
-  const boundary = generateMimeBoundary();
-
-  return [
-    ...commonHeaders,
-    `Content-Type: multipart/alternative; boundary="${boundary}"`,
-    ``,
-    `This is a multi-part message in MIME format.`,
-    ``,
-    `--${boundary}`,
-    `Content-Type: text/plain; charset=utf-8`,
-    `Content-Transfer-Encoding: 8bit`,
-    ``,
-    normalizedBody,
-    ``,
-    `--${boundary}`,
-    `Content-Type: text/html; charset=utf-8`,
-    `Content-Transfer-Encoding: 8bit`,
-    ``,
-    normalizedHtmlBody,
-    ``,
-    `--${boundary}--`,
-  ].join("\r\n");
-}
-
-/**
- * Tool: Get all mailboxes
- */
-export async function mailboxGet(extra: RequestHandlerExtra<any, any>): Promise<any> {
-  const client = await getClient(extra);
-  return await client.mailbox.getAll();
-}
-
-/**
- * Tool: Get emails by ID
- */
-export async function emailGet(
-  args: EmailGetArgs,
+async function getSession(
   extra: RequestHandlerExtra<any, any>,
-): Promise<any> {
-  const client = await getClient(extra);
-  const accountId = args.accountId || client.accountId;
-
-  const emailResult = await client.email.get({
-    accountId: accountId,
-    ids: args.emailIds.map((id) => Common.createId(id)),
-    properties: args.properties,
-    fetchTextBodyValues: args.fetchTextBodyValues,
-    fetchHTMLBodyValues: args.fetchHTMLBodyValues,
-    fetchAllBodyValues: args.fetchAllBodyValues ?? true,
-    maxBodyValueBytes: args.maxBodyValueBytes
-      ? Common.createUnsignedInt(args.maxBodyValueBytes)
-      : undefined,
-  });
-
-  // Format emails as clean text for LLM consumption
-  return formatEmailsForLLM(emailResult.list as any[]);
-}
-
-/**
- * Tool: Query emails
- */
-export async function emailQuery(
-  args: EmailQueryArgs,
-  extra: RequestHandlerExtra<any, any>,
-): Promise<any> {
-  const client = await getClient(extra);
-  const accountId = args.accountId || client.accountId;
-
-  let filter: any = {};
-  if (args.mailboxId) filter.inMailbox = args.mailboxId;
-  if (args.from) filter.from = args.from;
-  if (args.to) filter.to = args.to;
-  if (args.subject) filter.subject = args.subject;
-  if (args.hasKeyword) filter.hasKeyword = args.hasKeyword;
-  if (args.notKeyword) filter.notKeyword = args.notKeyword;
-  if (args.before) filter.before = args.before;
-  if (args.after) filter.after = args.after;
-
-  const sort = [{ property: args.sort, isAscending: args.ascending }];
-
-  return await client.email.query({
-    accountId,
-    filter: Object.keys(filter).length > 0 ? filter : undefined,
-    sort,
-    limit: Common.createUnsignedInt(args.limit),
-  });
-}
-
-/**
- * Tool: Send email
- */
-export async function emailSend(
-  args: EmailSendArgs,
-  extra: RequestHandlerExtra<any, any>,
-): Promise<any> {
+): Promise<{ session: JMAPSession; bearerToken: string }> {
   const bearerToken = extractBearerToken(extra);
-  const client = await createJMAPClient(FASTMAIL_SESSION_ENDPOINT, bearerToken);
-  const accountId = client.accountId;
+  const tokenHash = hashToken(bearerToken);
 
-  // Get identity
-  let identity;
-
-  if (args.identityId) {
-    const result = await client.identity.get({
-      accountId,
-      ids: [Common.createId(args.identityId)],
-    });
-    if (!result.list[0]) {
-      throw new Error("Identity not found");
-    }
-    identity = result.list[0];
-  } else {
-    identity = await client.identity.getDefault();
+  // Try cached session
+  const cached = await getCachedSession(tokenHash).catch(() => null);
+  if (cached) {
+    const session: JMAPSession = JSON.parse(cached.json);
+    return { session, bearerToken };
   }
 
-  const identityId = identity.id;
+  // Fetch fresh session
+  const session = await fetchSession(bearerToken);
 
-  // Build RFC 5322 email message
-  const emailMessage = buildEmailMessage({
-    identity,
-    to: args.to,
-    subject: args.subject,
-    body: args.body,
-    htmlBody: args.htmlBody,
-  });
+  // Cache it
+  await setCachedSession(tokenHash, {
+    accountId: session.accountId,
+    json: JSON.stringify(session),
+  }).catch(() => {}); // Don't fail if Redis is down
 
-  // Upload the email message as a blob
-  const uploadResult = await uploadBlob(emailMessage, bearerToken, client);
-
-  // Find drafts mailbox
-  const mailboxes = await client.mailbox.getAll();
-  const draftsMailbox = mailboxes.find((mb) => mb.role === "drafts");
-
-  if (!draftsMailbox) {
-    throw new Error("Drafts mailbox not found");
-  }
-
-  // Import the email
-  const importResult = await client.email.import({
-    accountId,
-    emails: {
-      [`draft-${Date.now()}`]: {
-        blobId: uploadResult.blobId,
-        mailboxIds: { [draftsMailbox.id]: true },
-        keywords: { $draft: true },
-      },
-    },
-  });
-
-  if (!importResult.created) {
-    if (importResult.notCreated) {
-      const errors = Object.entries(importResult.notCreated).map(
-        ([key, error]) => `${key}: ${JSON.stringify(error)}`,
-      );
-      throw new Error(`Failed to import email: ${errors.join(", ")}`);
-    }
-    throw new Error("Failed to import email: no created field in response");
-  }
-
-  const createdEmails = Object.values(importResult.created);
-  if (createdEmails.length === 0) {
-    throw new Error("No email was created");
-  }
-
-  const emailId = createdEmails[0].id;
-
-  // Send the email
-  const submission = await client.submission.send(Common.createId(identityId), emailId);
-
-  return {
-    id: submission.id,
-    sendAt: submission.sendAt || "immediately",
-  };
+  return { session, bearerToken };
 }
 
-const WELL_KNOWN_ROLES = ["trash", "archive", "inbox", "drafts", "junk", "sent"] as const;
+// --- Validation ---
 
-/**
- * Tool: Update emails — move to mailbox and/or set flags
- */
-export async function emailSet(
-  args: EmailSetArgs,
+export function validateStructure(methodCalls: unknown): MethodCall[] {
+  if (!Array.isArray(methodCalls)) {
+    throw new Error("methodCalls must be an array");
+  }
+
+  if (methodCalls.length === 0) {
+    throw new Error("methodCalls must not be empty");
+  }
+
+  const callIds = new Set<string>();
+  const validated: MethodCall[] = [];
+
+  for (let i = 0; i < methodCalls.length; i++) {
+    const call = methodCalls[i];
+
+    if (!Array.isArray(call) || call.length !== 3) {
+      throw new Error(
+        `methodCalls[${i}]: must be a triple [methodName, args, callId]. Got ${JSON.stringify(call)}`,
+      );
+    }
+
+    const [method, args, callId] = call;
+
+    if (typeof method !== "string") {
+      throw new Error(`methodCalls[${i}]: method name must be a string`);
+    }
+
+    if (!ALLOWED_METHODS.has(method)) {
+      throw new Error(
+        `methodCalls[${i}]: unknown method "${method}". Allowed: ${[...ALLOWED_METHODS].join(", ")}`,
+      );
+    }
+
+    if (typeof args !== "object" || args === null || Array.isArray(args)) {
+      throw new Error(`methodCalls[${i}]: args must be an object`);
+    }
+
+    if (typeof callId !== "string") {
+      throw new Error(`methodCalls[${i}]: callId must be a string`);
+    }
+
+    if (callIds.has(callId)) {
+      throw new Error(`methodCalls[${i}]: duplicate callId "${callId}"`);
+    }
+
+    callIds.add(callId);
+    validated.push([method, args as Record<string, unknown>, callId]);
+  }
+
+  return validated;
+}
+
+export function validateResultReferences(methodCalls: MethodCall[]): void {
+  const seenCallIds = new Set<string>();
+
+  for (let i = 0; i < methodCalls.length; i++) {
+    const [, args, callId] = methodCalls[i];
+
+    // Check all args for resultOf references
+    for (const [key, value] of Object.entries(args)) {
+      if (
+        typeof value === "object" &&
+        value !== null &&
+        !Array.isArray(value) &&
+        "resultOf" in value
+      ) {
+        const ref = value as Record<string, unknown>;
+        if (typeof ref.resultOf !== "string") {
+          throw new Error(`methodCalls[${i}].${key}: resultOf must be a string`);
+        }
+        if (!seenCallIds.has(ref.resultOf)) {
+          throw new Error(
+            `methodCalls[${i}].${key}: resultOf references "${ref.resultOf}" which has not appeared in an earlier call`,
+          );
+        }
+      }
+    }
+
+    seenCallIds.add(callId);
+  }
+}
+
+export function validateHygiene(methodCalls: MethodCall[]): void {
+  for (let i = 0; i < methodCalls.length; i++) {
+    const [method, args] = methodCalls[i];
+
+    // /get calls must include properties (except Mailbox/get and Identity/get which are small)
+    if (method.endsWith("/get") && method !== "Mailbox/get" && method !== "Identity/get") {
+      // Allow if ids is a resultOf reference (properties still required)
+      if (!("properties" in args) || !Array.isArray(args.properties)) {
+        throw new Error(
+          `methodCalls[${i}]: ${method} requires a "properties" array. ` +
+            `Example: ["from", "subject", "receivedAt", "preview"]. ` +
+            `This prevents fetching unnecessary data.`,
+        );
+      }
+    }
+
+    // /query calls must include limit
+    if (method.endsWith("/query")) {
+      if (!("limit" in args) || typeof args.limit !== "number") {
+        throw new Error(
+          `methodCalls[${i}]: ${method} requires a "limit" (number). Maximum recommended: 50.`,
+        );
+      }
+    }
+
+    // Warn about ids: null on /get calls
+    if (method.endsWith("/get") && "ids" in args && args.ids === null) {
+      throw new Error(
+        `methodCalls[${i}]: ${method} with ids: null fetches ALL items. ` +
+          `Use a /query call first to get specific IDs.`,
+      );
+    }
+  }
+}
+
+export function classifySafety(methodCalls: MethodCall[]): Safety {
+  let safety: Safety = "read";
+
+  for (const [method, args] of methodCalls) {
+    if (method === "EmailSubmission/set") {
+      return "destructive"; // Sending email is destructive (can't unsend)
+    }
+
+    if (method.endsWith("/set")) {
+      const argsObj = args as Record<string, unknown>;
+
+      if (argsObj.destroy && Array.isArray(argsObj.destroy) && argsObj.destroy.length > 0) {
+        return "destructive";
+      }
+
+      if (argsObj.create || argsObj.update) {
+        safety = "write";
+      }
+    }
+  }
+
+  return safety;
+}
+
+// --- Response cleaning ---
+
+const STRIP_KEYS = new Set(["state", "queryState", "canCalculateChanges", "position", "accountId"]);
+
+export function cleanResponse(methodResponses: unknown[]): unknown[] {
+  return methodResponses.map((response) => {
+    if (!Array.isArray(response) || response.length !== 3) {
+      return response; // Pass through malformed responses
+    }
+
+    const [method, result, callId] = response;
+
+    if (typeof result !== "object" || result === null) {
+      return [method, result, callId];
+    }
+
+    const cleaned: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(result as Record<string, unknown>)) {
+      if (!STRIP_KEYS.has(key)) {
+        cleaned[key] = value;
+      }
+    }
+
+    return [method, cleaned, callId];
+  });
+}
+
+// --- Account ID injection ---
+
+export function injectAccountId(methodCalls: MethodCall[], accountId: string): MethodCall[] {
+  return methodCalls.map(([method, args, callId]) => {
+    if (!("accountId" in args)) {
+      return [method, { ...args, accountId }, callId];
+    }
+    return [method, args, callId];
+  });
+}
+
+// --- Execute ---
+
+async function execute(
+  args: { methodCalls: [string, Record<string, unknown>, string][] },
   extra: RequestHandlerExtra<any, any>,
-): Promise<any> {
-  if (!args.mailboxId && !args.flags) {
-    throw new Error("At least one of 'mailboxId' or 'flags' must be provided");
-  }
+): Promise<unknown[]> {
+  // 1. Validate
+  const validated = validateStructure(args.methodCalls);
+  validateResultReferences(validated);
+  validateHygiene(validated);
 
-  const client = await getClient(extra);
-  const accountId = args.accountId || client.accountId;
-
-  const ids = args.emailIds.map((id) => Common.createId(id));
-  let targetMailboxId: string | undefined;
-  const results: Record<string, unknown> = {};
-
-  // Move to mailbox
-  if (args.mailboxId) {
-    const isRole = WELL_KNOWN_ROLES.includes(args.mailboxId as any);
-
-    if (isRole) {
-      const mailboxes = await client.mailbox.findByRole(args.mailboxId as any);
-      if (mailboxes.length === 0) {
-        throw new Error(`No mailbox found with role '${args.mailboxId}'`);
+  // 2. Safety check
+  const safety = classifySafety(validated);
+  if (safety === "destructive") {
+    const destructiveOps: string[] = [];
+    for (const [method, callArgs] of validated) {
+      if (method === "EmailSubmission/set") {
+        destructiveOps.push("send email (EmailSubmission/set)");
+      } else if (method.endsWith("/set")) {
+        const a = callArgs as Record<string, unknown>;
+        if (a.destroy && Array.isArray(a.destroy)) {
+          destructiveOps.push(`destroy ${a.destroy.length} item(s) (${method})`);
+        }
       }
-      targetMailboxId = mailboxes[0].id;
-    } else {
-      targetMailboxId = args.mailboxId;
     }
-
-    const update: Record<string, { mailboxIds: Record<string, boolean> }> = {};
-    for (const emailId of args.emailIds) {
-      update[Common.createId(emailId) as string] = {
-        mailboxIds: { [Common.createId(targetMailboxId) as string]: true },
-      };
-    }
-
-    const moveResult = await client.email.set({ accountId, update: update as any });
-    const movedCount = moveResult.updated ? Object.keys(moveResult.updated).length : 0;
-    results.moved = movedCount;
-    results.targetMailboxId = targetMailboxId;
-    if (moveResult.notUpdated && Object.keys(moveResult.notUpdated).length > 0) {
-      results.notUpdated = moveResult.notUpdated;
-    }
+    throw new Error(
+      `This request contains destructive operations: ${destructiveOps.join(", ")}. ` +
+        `Please confirm with the user before retrying with the same request.`,
+    );
   }
 
-  // Set flags
-  if (args.flags) {
-    const resolved = resolveFlags(args.flags);
+  // 3. Get session and inject accountId
+  const { session, bearerToken } = await getSession(extra);
+  const injectedCalls = injectAccountId(validated, session.accountId);
 
-    if (resolved.markRead !== undefined) {
-      await client.email.markRead(ids, resolved.markRead, accountId);
-    }
-    if (resolved.setFlagged !== undefined) {
-      await client.email.flag(ids, resolved.setFlagged, accountId);
-    }
-    if (resolved.keywordsToAdd.length > 0 || resolved.keywordsToRemove.length > 0) {
-      await client.email.updateKeywords(
-        ids,
-        resolved.keywordsToAdd,
-        resolved.keywordsToRemove,
-        accountId,
-      );
-    }
+  // 4. Send to Fastmail
+  const jmapRequest = {
+    using: JMAP_USING,
+    methodCalls: injectedCalls,
+  };
 
-    results.flags = args.flags;
-    results.flagsUpdated = args.emailIds.length;
+  const response = await fetch(session.apiUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${bearerToken}`,
+    },
+    body: JSON.stringify(jmapRequest),
+  });
+
+  if (!response.ok) {
+    throw new Error(`JMAP request failed: HTTP ${response.status}`);
   }
 
-  return results;
+  const jmapResponse = (await response.json()) as { methodResponses: unknown[] };
+
+  // 5. Clean and return
+  return cleanResponse(jmapResponse.methodResponses);
 }
 
-// Tool definitions for MCP
-export const toolDefinitions = {
-  mailbox_get: {
-    description: "Get all mailboxes using JMAP Mailbox/get method",
-    parameters: z.object({}),
-  },
-  email_get: {
-    description:
-      "Get specific emails by their IDs. Returns formatted text optimized for LLM consumption.",
-    parameters: EmailGetSchema,
-  },
-  email_query: {
-    description: "Query emails with filters and sorting",
-    parameters: EmailQuerySchema,
-  },
-  email_send: {
-    description:
-      "Send an email via Fastmail. Supports plain text, HTML, or multipart/alternative (both) emails.",
-    parameters: EmailSendSchema,
-  },
-  email_set: {
-    description:
-      "Update emails: move to a mailbox and/or set flags. For mailbox, use well-known names: 'trash' (delete), 'archive', 'inbox', 'junk', 'drafts', 'sent', or a mailbox ID. For flags: 'read'/'unread', 'flagged'/'unflagged', 'answered'/'unanswered', 'draft'/'undraft'.",
-    parameters: EmailSetSchema,
-  },
-};
+// --- Zod schema ---
 
-/**
- * Register all tools with the MCP server
- */
+const ExecuteSchema = z.object({
+  methodCalls: z.array(z.tuple([z.string(), z.record(z.unknown()), z.string()])),
+});
+
+// --- Tool registration ---
+
 export function registerTools(server: McpServer) {
-  // Tool: Get all mailboxes
   server.registerTool(
-    "mailbox_get",
-    {
-      description: "Get all mailboxes using JMAP Mailbox/get method",
-      inputSchema: z.object({}),
-    },
-    async (_input, extra) => {
-      try {
-        const result = await mailboxGet(extra);
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
-  );
-
-  // Tool: Get emails by ID
-  server.registerTool(
-    "email_get",
+    "execute",
     {
       description:
-        "Get specific emails by their IDs. Returns formatted text optimized for LLM consumption.",
-      inputSchema: EmailGetSchema,
+        "Execute JMAP method calls against Fastmail. Input: an array of JMAP method call triples [methodName, args, callId]. " +
+        "The server validates the request, injects accountId, sends to Fastmail, and returns cleaned responses. " +
+        "Use resultOf back-references to chain calls (e.g., query then get). " +
+        "Every /get call must include a 'properties' array. Every /query call must include a 'limit'.",
+      inputSchema: ExecuteSchema,
     },
     async (args, extra) => {
       try {
-        const formattedEmails = await emailGet(args, extra);
-        return {
-          content: [{ type: "text", text: formattedEmails }],
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
-  );
-
-  // Tool: Query emails
-  server.registerTool(
-    "email_query",
-    {
-      description: "Query emails with filters and sorting",
-      inputSchema: EmailQuerySchema,
-    },
-    async (args, extra) => {
-      try {
-        const result = await emailQuery(args, extra);
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
-  );
-
-  // Tool: Send email
-  server.registerTool(
-    "email_send",
-    {
-      description:
-        "Send an email via Fastmail. Supports plain text, HTML, or multipart/alternative (both) emails.",
-      inputSchema: EmailSendSchema,
-    },
-    async (args, extra) => {
-      try {
-        const result = await emailSend(args, extra);
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Email sent successfully!\nSubmission ID: ${result.id}\nSent at: ${result.sendAt}`,
-            },
-          ],
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
-  );
-
-  // Tool: Update emails (move and/or set flags)
-  server.registerTool(
-    "email_set",
-    {
-      description:
-        "Update emails: move to a mailbox and/or set flags. For mailbox, use well-known names: 'trash' (delete), 'archive', 'inbox', 'junk', 'drafts', 'sent', or a mailbox ID. For flags: 'read'/'unread', 'flagged'/'unflagged', 'answered'/'unanswered', 'draft'/'undraft'.",
-      inputSchema: EmailSetSchema,
-    },
-    async (args, extra) => {
-      try {
-        const result = await emailSet(args, extra);
+        const result = await execute(args, extra);
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
