@@ -1,0 +1,69 @@
+This branch contains changes to the MCP server. I started the server and connected it to this session. Let's try to test it
+
+---
+
+[Request interrupted by user for tool use]
+
+---
+
+I already started it on the port 3000
+
+---
+
+Does the config have auth token header?
+
+---
+
+Try now
+
+---
+
+[Request interrupted by user]
+
+---
+
+I updated .mcp.json and reconnected usin the mcp slash command
+
+---
+
+It doesn't that matter if you're able to call it, does it?
+
+---
+
+I restarted Claude Code but the MCP server still fails. Couldn't it be because it's on http?
+
+---
+
+I restarted Claude Code and everything seems working now
+
+---
+
+What's in inbox?
+
+---
+
+Try to delete the latest email
+
+---
+
+Try to destroy it completely
+
+---
+
+No, that was a test
+
+---
+
+Review the implementation and suggest what else should we test
+
+---
+
+Try them all
+
+---
+
+Yes please
+
+---
+
+commit and push

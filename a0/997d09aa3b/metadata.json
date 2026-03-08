@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.4.7",
+  "checkpoint_id": "a0997d09aa3b",
+  "strategy": "manual-commit",
+  "branch": "claude/fastmail-mcp-execute-tool-KvXwI",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "src/__tests__/execute.test.ts",
+    "src/tools.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/a0/997d09aa3b/0/metadata.json",
+      "transcript": "/a0/997d09aa3b/0/full.jsonl",
+      "context": "/a0/997d09aa3b/0/context.md",
+      "content_hash": "/a0/997d09aa3b/0/content_hash.txt",
+      "prompt": "/a0/997d09aa3b/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 89,
+    "cache_creation_tokens": 75031,
+    "cache_read_tokens": 1520235,
+    "output_tokens": 7088,
+    "api_call_count": 54
+  }
+}

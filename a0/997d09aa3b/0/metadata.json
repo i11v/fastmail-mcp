@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.4.7",
+  "checkpoint_id": "a0997d09aa3b",
+  "session_id": "7c887168-c1f0-418c-8603-584d9dd0390b",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-08T20:23:29.488811Z",
+  "branch": "claude/fastmail-mcp-execute-tool-KvXwI",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "src/__tests__/execute.test.ts",
+    "src/tools.ts"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "5cb6c267fc4e",
+  "token_usage": {
+    "input_tokens": 89,
+    "cache_creation_tokens": 75031,
+    "cache_read_tokens": 1520235,
+    "output_tokens": 7088,
+    "api_call_count": 54
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-08T20:23:29.404752Z",
+    "agent_lines": 14,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 14,
+    "agent_percentage": 100
+  }
+}
