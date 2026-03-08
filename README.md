@@ -1,6 +1,6 @@
 # Fastmail MCP Server (Unofficial)
 
-Unofficial Model Context Protocol server for Fastmail integration.
+Unofficial Model Context Protocol server for Fastmail integration. Exposes a single `execute` tool that acts as a validated JMAP proxy — the LLM writes raw JMAP method calls, and the server handles validation, authentication, and response cleaning.
 
 ## Setup Instructions
 
@@ -35,49 +35,48 @@ Add the following to your Claude Code MCP settings (`~/.claude/claude_desktop_co
 
 ## Available Tools
 
-### `mailbox_get`
-Get mailbox information (folders) - list all mailboxes or get specific ones by ID.
+### `execute`
 
-### `email_query`
-Query emails with filters and sorting.
-- `mailboxId` (optional): Mailbox ID to search in
-- `limit` (optional, default: 10): Maximum number of emails to return
-- `from` (optional): Filter by sender
-- `to` (optional): Filter by recipient
-- `subject` (optional): Filter by subject text
-- `hasKeyword` (optional): Filter by keyword (e.g., `$seen`, `$flagged`)
-- `notKeyword` (optional): Filter by absence of keyword
-- `before` (optional): Filter by date (ISO format)
-- `after` (optional): Filter by date (ISO format)
-- `sort` (optional, default: `receivedAt`): Sort by property
-- `ascending` (optional, default: false): Sort order
+Execute JMAP method calls against Fastmail. Accepts an array of JMAP method call triples `[methodName, args, callId]`.
 
-### `email_get`
-Get specific emails by their IDs.
-- `emailIds` (required): Array of email IDs to retrieve
-- `accountId` (optional): Account ID (auto-detected if not provided)
-- `properties` (optional): Specific properties to fetch
-- `fetchTextBodyValues` (optional): Fetch text/plain body values
-- `fetchHTMLBodyValues` (optional): Fetch text/html body values
-- `fetchAllBodyValues` (optional): Fetch all text body values
-- `maxBodyValueBytes` (optional): Maximum size in bytes for body values
+**Input:**
+```json
+{
+  "methodCalls": [
+    ["Email/query", {
+      "filter": { "inMailbox": "INBOX_ID" },
+      "sort": [{ "property": "receivedAt", "isAscending": false }],
+      "limit": 10
+    }, "call-0"],
+    ["Email/get", {
+      "ids": { "resultOf": "call-0", "name": "Email/query", "path": "/ids" },
+      "properties": ["from", "subject", "receivedAt", "preview"]
+    }, "call-1"]
+  ]
+}
+```
 
-### `email_send`
-Send emails with support for plain text, HTML, or both.
-- `to` (required): Recipient email address
-- `subject` (required): Email subject
-- `body` (required): Plain text body
-- `htmlBody` (optional): HTML body for multipart/alternative emails
-- `identityId` (optional): Identity ID to send from
+**What the server does:**
+- Validates structure, method names, and hygiene rules
+- Injects `accountId` automatically
+- Sends to Fastmail's JMAP API
+- Strips protocol noise (`state`, `queryState`, `canCalculateChanges`, etc.)
+- Returns cleaned `methodResponses`
 
-### `email_set`
-Update emails: move to a mailbox and/or set flags. Both operations can be combined in a single call.
-- `emailIds` (required): Array of email IDs to update (1-50)
-- `mailboxId` (optional): Target mailbox ID, or a well-known role: `trash`, `archive`, `inbox`, `drafts`, `junk`, `sent`
-- `flags` (optional): Array of flags to set: `read`/`unread`, `flagged`/`unflagged`, `answered`/`unanswered`, `draft`/`undraft`
-- `accountId` (optional): Account ID (auto-detected if not provided)
+**Allowed JMAP methods:**
+- `Core/echo`
+- `Mailbox/get`, `Mailbox/query`, `Mailbox/queryChanges`, `Mailbox/set`
+- `Email/get`, `Email/query`, `Email/queryChanges`, `Email/set`
+- `Thread/get`
+- `SearchSnippet/get`
+- `Identity/get`
+- `EmailSubmission/get`, `EmailSubmission/query`, `EmailSubmission/set`
 
-At least one of `mailboxId` or `flags` must be provided.
+**Validation rules:**
+- Every `/get` call (except `Mailbox/get`, `Identity/get`) must include a `properties` array
+- Every `/query` call must include a `limit`
+- `ids: null` on `/get` calls is rejected (use `/query` first)
+- Destructive operations (`destroy`, `EmailSubmission/set`) return an error asking for user confirmation
 
 ## API Endpoints
 
@@ -88,9 +87,9 @@ At least one of `mailboxId` or `flags` must be provided.
 
 ```bash
 pnpm install   # Install dependencies
-pnpm dev       # Watch mode for TypeScript compilation
 pnpm build     # Build for production
 pnpm start     # Run local server
+pnpm check     # Run all checks (typecheck + lint + fmt + test)
 pnpm deploy    # Deploy to Vercel
 ```
 
