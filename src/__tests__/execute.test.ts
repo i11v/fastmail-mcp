@@ -171,6 +171,14 @@ describe("validateHygiene", () => {
     expect(() => validateHygiene([["Identity/get", {}, "call-0"]])).not.toThrow();
   });
 
+  it("skips properties check for SearchSnippet/get", () => {
+    expect(() =>
+      validateHygiene([
+        ["SearchSnippet/get", { filter: { text: "test" }, emailIds: ["id1"] }, "call-0"],
+      ]),
+    ).not.toThrow();
+  });
+
   it("requires limit on /query calls", () => {
     expect(() => validateHygiene([["Email/query", { filter: {} }, "call-0"]])).toThrow(
       'requires a "limit"',

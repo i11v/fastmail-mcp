@@ -221,7 +221,12 @@ export function validateHygiene(methodCalls: MethodCall[]): void {
     const [method, args] = methodCalls[i];
 
     // /get calls must include properties (except Mailbox/get and Identity/get which are small)
-    if (method.endsWith("/get") && method !== "Mailbox/get" && method !== "Identity/get") {
+    if (
+      method.endsWith("/get") &&
+      method !== "Mailbox/get" &&
+      method !== "Identity/get" &&
+      method !== "SearchSnippet/get"
+    ) {
       // Allow if ids is a resultOf reference (properties still required)
       if (!("properties" in args) || !Array.isArray(args.properties)) {
         throw new Error(
