@@ -368,14 +368,6 @@ export function describeDestructiveAction(methodCalls: MethodCall[]): string {
 
 const ExecuteSchema = z.object({
   methodCalls: z.array(z.tuple([z.string(), z.record(z.unknown()), z.string()])),
-  confirmed: z
-    .boolean()
-    .optional()
-    .describe(
-      "Set to true to confirm destructive operations (e.g. sending email, deleting items) " +
-        "when the server requests confirmation. Do NOT set this on the first call — only after " +
-        "the server returns a confirmation prompt.",
-    ),
 });
 
 // --- Tool registration ---
@@ -419,21 +411,22 @@ export function registerTools(server: McpServer) {
               return { content: [{ type: "text", text: "Operation cancelled by user." }] };
             }
           } catch {
-            // Client doesn't support elicitation (e.g. Claude Desktop)
-            // Require explicit confirmed flag as fallback
-            if (!args.confirmed) {
-              const description = describeDestructiveAction(validated);
-              return {
-                content: [
-                  {
-                    type: "text",
-                    text:
-                      `⚠️ Confirmation required: this will ${description}. ` +
-                      `Call this tool again with the same methodCalls and confirmed: true to proceed.`,
-                  },
-                ],
-              };
-            }
+            // Client doesn't support elicitation — refuse destructive ops entirely.
+            // An LLM agent would just auto-retry any "confirm and retry" fallback,
+            // bypassing the safety gate without real human review.
+            const description = describeDestructiveAction(validated);
+            return {
+              content: [
+                {
+                  type: "text",
+                  text:
+                    `Destructive operation blocked: this would ${description}. ` +
+                    `Your MCP client does not support interactive confirmation (elicitation). ` +
+                    `Please use a client that supports elicitation, or perform this action directly in Fastmail.`,
+                },
+              ],
+              isError: true,
+            };
           }
         }
 
