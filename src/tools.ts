@@ -390,43 +390,25 @@ export function registerTools(server: McpServer) {
         validateResultReferences(validated);
         validateHygiene(validated);
 
-        // Safety gate — elicit confirmation for destructive ops
+        // Safety gate — elicit confirmation for destructive ops.
+        // If the client doesn't support elicitation, this throws and the
+        // outer catch returns it as an error, stopping the operation.
         if (classifySafety(validated) === "destructive") {
-          // Single prompt — SDK only supports one elicitation per handler invocation
-          try {
-            const elicitResult = await server.server.elicitInput({
-              message: `This will ${describeDestructiveAction(validated)}. Proceed?`,
-              requestedSchema: {
-                type: "object" as const,
-                properties: {
-                  confirmed: {
-                    type: "boolean" as const,
-                    description: "Confirm the destructive operation",
-                  },
+          const elicitResult = await server.server.elicitInput({
+            message: `This will ${describeDestructiveAction(validated)}. Proceed?`,
+            requestedSchema: {
+              type: "object" as const,
+              properties: {
+                confirmed: {
+                  type: "boolean" as const,
+                  description: "Confirm the destructive operation",
                 },
-                required: ["confirmed"],
               },
-            });
-            if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
-              return { content: [{ type: "text", text: "Operation cancelled by user." }] };
-            }
-          } catch {
-            // Client doesn't support elicitation — refuse destructive ops entirely.
-            // An LLM agent would just auto-retry any "confirm and retry" fallback,
-            // bypassing the safety gate without real human review.
-            const description = describeDestructiveAction(validated);
-            return {
-              content: [
-                {
-                  type: "text",
-                  text:
-                    `Destructive operation blocked: this would ${description}. ` +
-                    `Your MCP client does not support interactive confirmation (elicitation). ` +
-                    `Please use a client that supports elicitation, or perform this action directly in Fastmail.`,
-                },
-              ],
-              isError: true,
-            };
+              required: ["confirmed"],
+            },
+          });
+          if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
+            return { content: [{ type: "text", text: "Operation cancelled by user." }] };
           }
         }
 
