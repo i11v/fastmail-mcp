@@ -410,7 +410,7 @@ export function registerTools(server: McpServer) {
             if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
               return { content: [{ type: "text", text: "Operation cancelled by user." }] };
             }
-          } catch (elicitError) {
+          } catch {
             // Client doesn't support elicitation (e.g. Claude Desktop) — block destructive ops
             return {
               content: [
