@@ -1,0 +1,38 @@
+{
+  "cli_version": "0.4.7",
+  "checkpoint_id": "0ca44796ca3e",
+  "strategy": "manual-commit",
+  "branch": "claude/add-jmap-skill",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "jmap-skill/SKILL.md",
+    "jmap-skill/core/error-handling.md",
+    "jmap-skill/core/request-format.md",
+    "jmap-skill/email/querying.md",
+    "jmap-skill/email/reading.md",
+    "jmap-skill/email/search.md",
+    "jmap-skill/email/writing.md",
+    "jmap-skill/mailbox/overview.md",
+    "jmap-skill/patterns/move-archive.md",
+    "jmap-skill/patterns/reply.md",
+    "jmap-skill/patterns/unread-inbox.md",
+    "jmap-skill/sending/workflow.md",
+    "jmap-skill/thread/overview.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0c/a44796ca3e/0/metadata.json",
+      "transcript": "/0c/a44796ca3e/0/full.jsonl",
+      "context": "/0c/a44796ca3e/0/context.md",
+      "content_hash": "/0c/a44796ca3e/0/content_hash.txt",
+      "prompt": "/0c/a44796ca3e/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 32,
+    "cache_creation_tokens": 53630,
+    "cache_read_tokens": 677514,
+    "output_tokens": 15862,
+    "api_call_count": 22
+  }
+}

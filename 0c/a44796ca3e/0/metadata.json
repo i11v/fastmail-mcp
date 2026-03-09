@@ -1,0 +1,42 @@
+{
+  "cli_version": "0.4.7",
+  "checkpoint_id": "0ca44796ca3e",
+  "session_id": "2a82b673-75e0-4769-b007-3c5cf1ec816a",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-09T20:06:01.288065Z",
+  "branch": "claude/add-jmap-skill",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "jmap-skill/SKILL.md",
+    "jmap-skill/core/error-handling.md",
+    "jmap-skill/core/request-format.md",
+    "jmap-skill/email/querying.md",
+    "jmap-skill/email/reading.md",
+    "jmap-skill/email/search.md",
+    "jmap-skill/email/writing.md",
+    "jmap-skill/mailbox/overview.md",
+    "jmap-skill/patterns/move-archive.md",
+    "jmap-skill/patterns/reply.md",
+    "jmap-skill/patterns/unread-inbox.md",
+    "jmap-skill/sending/workflow.md",
+    "jmap-skill/thread/overview.md"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "2cb750a1545d",
+  "token_usage": {
+    "input_tokens": 32,
+    "cache_creation_tokens": 53630,
+    "cache_read_tokens": 677514,
+    "output_tokens": 15862,
+    "api_call_count": 22
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-09T20:06:01.15048Z",
+    "agent_lines": 1182,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 1182,
+    "agent_percentage": 100
+  }
+}
