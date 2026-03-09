@@ -350,7 +350,10 @@ export function describeDestructiveAction(methodCalls: MethodCall[]): string {
   const ops: string[] = [];
   for (const [method, args] of methodCalls) {
     if (method === "EmailSubmission/set") {
-      ops.push("send 1 email");
+      const a = args as Record<string, unknown>;
+      const createCount =
+        a.create && typeof a.create === "object" ? Object.keys(a.create).length : 1;
+      ops.push(`send ${createCount} email(s)`);
     } else if (method.endsWith("/set")) {
       const a = args as Record<string, unknown>;
       if (Array.isArray(a.destroy) && a.destroy.length > 0) {

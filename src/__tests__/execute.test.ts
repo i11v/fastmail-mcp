@@ -325,9 +325,17 @@ describe("cleanResponse", () => {
 
 describe("describeDestructiveAction", () => {
   it("describes email send", () => {
-    expect(describeDestructiveAction([["EmailSubmission/set", { create: {} }, "call-0"]])).toBe(
-      "send 1 email",
-    );
+    expect(
+      describeDestructiveAction([["EmailSubmission/set", { create: { sub1: {} } }, "call-0"]]),
+    ).toBe("send 1 email(s)");
+  });
+
+  it("counts multiple email submissions", () => {
+    expect(
+      describeDestructiveAction([
+        ["EmailSubmission/set", { create: { sub1: {}, sub2: {} } }, "call-0"],
+      ]),
+    ).toBe("send 2 email(s)");
   });
 
   it("describes single destroy", () => {
@@ -346,9 +354,9 @@ describe("describeDestructiveAction", () => {
     expect(
       describeDestructiveAction([
         ["Email/set", { destroy: ["id1", "id2"] }, "call-0"],
-        ["EmailSubmission/set", { create: {} }, "call-1"],
+        ["EmailSubmission/set", { create: { sub1: {} } }, "call-1"],
       ]),
-    ).toBe("permanently delete 2 item(s) via Email/set, send 1 email");
+    ).toBe("permanently delete 2 item(s) via Email/set, send 1 email(s)");
   });
 
   it("ignores read-only calls in a mixed batch", () => {
