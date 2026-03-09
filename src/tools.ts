@@ -411,16 +411,9 @@ export function registerTools(server: McpServer) {
               return { content: [{ type: "text", text: "Operation cancelled by user." }] };
             }
           } catch {
-            // Client doesn't support elicitation (e.g. Claude Desktop) — block destructive ops
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: `Cannot execute destructive operation: this will ${describeDestructiveAction(validated)}, but your client does not support confirmation prompts. Use a client that supports MCP elicitation, or perform this action manually.`,
-                },
-              ],
-              isError: true,
-            };
+            // Client doesn't support elicitation (e.g. Claude Desktop)
+            // Fall through — MCP clients already show tool calls for user approval,
+            // so the user has already implicitly confirmed by invoking the tool.
           }
         }
 
