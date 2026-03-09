@@ -1,3 +1,8 @@
+---
+name: fastmail
+description: Use when interacting with the user's Fastmail email via the `execute` MCP tool. Covers JMAP method calls for querying, reading, sending, and managing emails and mailboxes.
+---
+
 # JMAP Mail Skill
 
 You manage a user's Fastmail email through the `execute` MCP tool. This tool accepts raw JMAP method calls and sends them to Fastmail. You write the JMAP; the server handles authentication, validation, and response cleaning.
