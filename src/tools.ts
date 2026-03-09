@@ -368,6 +368,10 @@ export function describeDestructiveAction(methodCalls: MethodCall[]): string {
 
 const ExecuteSchema = z.object({
   methodCalls: z.array(z.tuple([z.string(), z.record(z.unknown()), z.string()])),
+  confirmed: z
+    .boolean()
+    .optional()
+    .describe("Set to true to confirm a destructive operation after the server requests it."),
 });
 
 // --- Tool registration ---
@@ -390,37 +394,43 @@ export function registerTools(server: McpServer) {
         validateResultReferences(validated);
         validateHygiene(validated);
 
-        // Safety gate — elicit confirmation for destructive ops
+        // Safety gate — confirm destructive ops before executing.
         if (classifySafety(validated) === "destructive") {
-          // Single prompt — SDK only supports one elicitation per handler invocation
-          try {
-            const elicitResult = await server.server.elicitInput({
-              message: `This will ${describeDestructiveAction(validated)}. Proceed?`,
-              requestedSchema: {
-                type: "object" as const,
-                properties: {
-                  confirmed: {
-                    type: "boolean" as const,
-                    description: "Confirm the destructive operation",
+          // If the caller already confirmed via the `confirmed` flag, skip.
+          if (!args.confirmed) {
+            // Try elicitation first (rich UI for clients that support it).
+            try {
+              const elicitResult = await server.server.elicitInput({
+                message: `This will ${describeDestructiveAction(validated)}. Proceed?`,
+                requestedSchema: {
+                  type: "object" as const,
+                  properties: {
+                    confirmed: {
+                      type: "boolean" as const,
+                      description: "Confirm the destructive operation",
+                    },
                   },
+                  required: ["confirmed"],
                 },
-                required: ["confirmed"],
-              },
-            });
-            if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
-              return { content: [{ type: "text", text: "Operation cancelled by user." }] };
+              });
+              if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
+                return { content: [{ type: "text", text: "Operation cancelled by user." }] };
+              }
+            } catch {
+              // Elicitation not supported — fall back to two-step confirmation.
+              const description = describeDestructiveAction(validated);
+              return {
+                content: [
+                  {
+                    type: "text",
+                    text:
+                      `⚠️ Confirmation required: this will ${description}. ` +
+                      `IMPORTANT: Do NOT proceed automatically — you MUST ask the user for explicit confirmation first. ` +
+                      `Only if the user confirms, call this tool again with the same methodCalls and confirmed: true.`,
+                  },
+                ],
+              };
             }
-          } catch {
-            // Client doesn't support elicitation (e.g. Claude Desktop) — block destructive ops
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: `Cannot execute destructive operation: this will ${describeDestructiveAction(validated)}, but your client does not support confirmation prompts. Use a client that supports MCP elicitation, or perform this action manually.`,
-                },
-              ],
-              isError: true,
-            };
           }
         }
 
