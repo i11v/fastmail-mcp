@@ -393,21 +393,34 @@ export function registerTools(server: McpServer) {
         // Safety gate — elicit confirmation for destructive ops
         if (classifySafety(validated) === "destructive") {
           // Single prompt — SDK only supports one elicitation per handler invocation
-          const elicitResult = await server.server.elicitInput({
-            message: `This will ${describeDestructiveAction(validated)}. Proceed?`,
-            requestedSchema: {
-              type: "object" as const,
-              properties: {
-                confirmed: {
-                  type: "boolean" as const,
-                  description: "Confirm the destructive operation",
+          try {
+            const elicitResult = await server.server.elicitInput({
+              message: `This will ${describeDestructiveAction(validated)}. Proceed?`,
+              requestedSchema: {
+                type: "object" as const,
+                properties: {
+                  confirmed: {
+                    type: "boolean" as const,
+                    description: "Confirm the destructive operation",
+                  },
                 },
+                required: ["confirmed"],
               },
-              required: ["confirmed"],
-            },
-          });
-          if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
-            return { content: [{ type: "text", text: "Operation cancelled by user." }] };
+            });
+            if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
+              return { content: [{ type: "text", text: "Operation cancelled by user." }] };
+            }
+          } catch (elicitError) {
+            // Client doesn't support elicitation (e.g. Claude Desktop) — block destructive ops
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Cannot execute destructive operation: this will ${describeDestructiveAction(validated)}, but your client does not support confirmation prompts. Use a client that supports MCP elicitation, or perform this action manually.`,
+                },
+              ],
+              isError: true,
+            };
           }
         }
 
