@@ -30,9 +30,9 @@
   "author": "Ilnur Khalilov <i@khl.lv>",
   "license": "MIT",
   "dependencies": {
-    "@hono/mcp": "^0.2.3",
+    "@hono/mcp": "^0.2.4",
     "@hono/node-server": "^1.19.7",
-    "@modelcontextprotocol/sdk": "^1.25.1",
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "cheerio": "^1.2.0",
     "hono": "^4.9.8",
     "redis": "^5.10.0",
