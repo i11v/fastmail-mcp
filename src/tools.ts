@@ -318,6 +318,32 @@ export function injectAccountId(methodCalls: MethodCall[], accountId: string): M
   });
 }
 
+// --- JMAP network call ---
+
+async function runJMAP(
+  validatedCalls: MethodCall[],
+  extra: RequestHandlerExtra<any, any>,
+): Promise<unknown[]> {
+  const { session, bearerToken } = await getSession(extra);
+  const injectedCalls = injectAccountId(validatedCalls, session.accountId);
+
+  const response = await fetch(session.apiUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${bearerToken}`,
+    },
+    body: JSON.stringify({ using: JMAP_USING, methodCalls: injectedCalls }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`JMAP request failed: HTTP ${response.status}`);
+  }
+
+  const jmapResponse = (await response.json()) as { methodResponses: unknown[] };
+  return cleanResponse(jmapResponse.methodResponses);
+}
+
 // --- Execute ---
 
 async function execute(
@@ -349,33 +375,8 @@ async function execute(
     );
   }
 
-  // 3. Get session and inject accountId
-  const { session, bearerToken } = await getSession(extra);
-  const injectedCalls = injectAccountId(validated, session.accountId);
-
-  // 4. Send to Fastmail
-  const jmapRequest = {
-    using: JMAP_USING,
-    methodCalls: injectedCalls,
-  };
-
-  const response = await fetch(session.apiUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${bearerToken}`,
-    },
-    body: JSON.stringify(jmapRequest),
-  });
-
-  if (!response.ok) {
-    throw new Error(`JMAP request failed: HTTP ${response.status}`);
-  }
-
-  const jmapResponse = (await response.json()) as { methodResponses: unknown[] };
-
-  // 5. Clean and return
-  return cleanResponse(jmapResponse.methodResponses);
+  // 3. Send validated calls
+  return runJMAP(validated, extra);
 }
 
 // --- Zod schema ---
