@@ -344,39 +344,21 @@ async function runJMAP(
   return cleanResponse(jmapResponse.methodResponses);
 }
 
-// --- Execute ---
+// --- Destructive action description ---
 
-async function execute(
-  args: { methodCalls: [string, Record<string, unknown>, string][] },
-  extra: RequestHandlerExtra<any, any>,
-): Promise<unknown[]> {
-  // 1. Validate
-  const validated = validateStructure(args.methodCalls);
-  validateResultReferences(validated);
-  validateHygiene(validated);
-
-  // 2. Safety check
-  const safety = classifySafety(validated);
-  if (safety === "destructive") {
-    const destructiveOps: string[] = [];
-    for (const [method, callArgs] of validated) {
-      if (method === "EmailSubmission/set") {
-        destructiveOps.push("send email (EmailSubmission/set)");
-      } else if (method.endsWith("/set")) {
-        const a = callArgs as Record<string, unknown>;
-        if (a.destroy && Array.isArray(a.destroy)) {
-          destructiveOps.push(`destroy ${a.destroy.length} item(s) (${method})`);
-        }
+export function describeDestructiveAction(methodCalls: MethodCall[]): string {
+  const ops: string[] = [];
+  for (const [method, args] of methodCalls) {
+    if (method === "EmailSubmission/set") {
+      ops.push("send 1 email");
+    } else if (method.endsWith("/set")) {
+      const a = args as Record<string, unknown>;
+      if (Array.isArray(a.destroy) && a.destroy.length > 0) {
+        ops.push(`permanently delete ${a.destroy.length} item(s) via ${method}`);
       }
     }
-    throw new Error(
-      `This request contains destructive operations: ${destructiveOps.join(", ")}. ` +
-        `Please confirm with the user before retrying with the same request.`,
-    );
   }
-
-  // 3. Send validated calls
-  return runJMAP(validated, extra);
+  return ops.join(", ");
 }
 
 // --- Zod schema ---
@@ -400,10 +382,34 @@ export function registerTools(server: McpServer) {
     },
     async (args, extra) => {
       try {
-        const result = await execute(args, extra);
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        };
+        // Validate
+        const validated = validateStructure(args.methodCalls);
+        validateResultReferences(validated);
+        validateHygiene(validated);
+
+        // Safety gate — elicit confirmation for destructive ops
+        if (classifySafety(validated) === "destructive") {
+          // Single prompt — SDK only supports one elicitation per handler invocation
+          const elicitResult = await server.server.elicitInput({
+            message: `This will ${describeDestructiveAction(validated)}. Proceed?`,
+            requestedSchema: {
+              type: "object" as const,
+              properties: {
+                confirmed: {
+                  type: "boolean" as const,
+                  description: "Confirm the destructive operation",
+                },
+              },
+              required: ["confirmed"],
+            },
+          });
+          if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
+            return { content: [{ type: "text", text: "Operation cancelled by user." }] };
+          }
+        }
+
+        const result = await runJMAP(validated, extra);
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       } catch (error) {
         return {
           content: [

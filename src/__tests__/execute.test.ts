@@ -4,6 +4,7 @@ import {
   validateResultReferences,
   validateHygiene,
   classifySafety,
+  describeDestructiveAction,
   cleanResponse,
   injectAccountId,
   ALLOWED_METHODS,
@@ -319,6 +320,49 @@ describe("cleanResponse", () => {
   it("handles null result", () => {
     const result = cleanResponse([["error", null, "call-0"]]);
     expect(result).toEqual([["error", null, "call-0"]]);
+  });
+});
+
+describe("describeDestructiveAction", () => {
+  it("describes email send", () => {
+    expect(describeDestructiveAction([["EmailSubmission/set", { create: {} }, "call-0"]])).toBe(
+      "send 1 email",
+    );
+  });
+
+  it("describes single destroy", () => {
+    expect(describeDestructiveAction([["Email/set", { destroy: ["id1"] }, "call-0"]])).toBe(
+      "permanently delete 1 item(s) via Email/set",
+    );
+  });
+
+  it("describes multiple destroys", () => {
+    expect(
+      describeDestructiveAction([["Email/set", { destroy: ["id1", "id2", "id3"] }, "call-0"]]),
+    ).toBe("permanently delete 3 item(s) via Email/set");
+  });
+
+  it("combines multiple destructive ops", () => {
+    expect(
+      describeDestructiveAction([
+        ["Email/set", { destroy: ["id1", "id2"] }, "call-0"],
+        ["EmailSubmission/set", { create: {} }, "call-1"],
+      ]),
+    ).toBe("permanently delete 2 item(s) via Email/set, send 1 email");
+  });
+
+  it("ignores read-only calls in a mixed batch", () => {
+    expect(
+      describeDestructiveAction([
+        ["Email/query", { limit: 10 }, "call-0"],
+        ["Email/get", { ids: ["id1"], properties: ["subject"] }, "call-1"],
+        ["Email/set", { destroy: ["id1"] }, "call-2"],
+      ]),
+    ).toBe("permanently delete 1 item(s) via Email/set");
+  });
+
+  it("ignores /set with empty destroy array", () => {
+    expect(describeDestructiveAction([["Email/set", { destroy: [] }, "call-0"]])).toBe("");
   });
 });
 
