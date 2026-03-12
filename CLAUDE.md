@@ -5,7 +5,7 @@
 Unofficial MCP server for Fastmail integration. Enables AI assistants to interact with Fastmail accounts through the Model Context Protocol for email management, querying, and sending.
 
 - **Node.js:** v24.x (see `.nvmrc`)
-- **Deployment:** Vercel (https://fastmail-mcp.vercel.app)
+- **Deployment:** Cloudflare Workers
 
 ## Package Manager
 
@@ -14,8 +14,17 @@ Always use `pnpm` instead of `npm` for this project.
 ```bash
 pnpm install      # Install dependencies
 pnpm build        # Build TypeScript to dist/
-pnpm start        # Run local server on port 3000
-pnpm deploy       # Deploy to Vercel (production)
+pnpm dev          # Run local dev server via wrangler dev
+pnpm deploy       # Deploy to Cloudflare Workers (production)
+```
+
+### One-time Cloudflare setup
+
+Before first deploy, create the KV namespace and update `wrangler.toml` with the returned IDs:
+
+```bash
+pnpm wrangler kv namespace create SESSION_KV          # production
+pnpm wrangler kv namespace create SESSION_KV --preview # preview/dev
 ```
 
 ## Quality Commands
@@ -38,7 +47,7 @@ pnpm test:watch   # Run tests in watch mode
 - `src/index.ts` - Server setup, Hono routes, MCP initialization
 - `src/tools.ts` - Tool implementations, Zod schemas, JMAP integration
 - `src/format.ts` - Email formatting for LLM consumption (XML output, HTML→Markdown)
-- `src/redis.ts` - Redis client setup, session caching
+- `src/cache.ts` - Cloudflare KV session caching
 
 ## Tooling
 
@@ -67,7 +76,7 @@ When adding, removing, or renaming tools, update **all three locations**:
 
 1. `src/tools.ts` — `toolDefinitions` object and `registerTools()` function
 2. `README.md` — "Available Tools" section
-3. `public/landing.html` — tools list in the landing page
+3. `public/index.html` — tools list in the landing page
 
 ## Gotchas
 
