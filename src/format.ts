@@ -259,6 +259,50 @@ function formatEmailXml(email: any): string {
 }
 
 /**
+ * Extract body content from an email for the reader UI.
+ * Returns both sanitized HTML and plain text forms.
+ */
+export function formatEmailBody(email: any): {
+  html: string | null;
+  text: string | null;
+  content: string;
+} {
+  if (!email.bodyValues) return { html: null, text: null, content: "" };
+
+  let html: string | null = null;
+  let text: string | null = null;
+
+  if (email.htmlBody && email.htmlBody.length > 0) {
+    const htmlParts: string[] = [];
+    for (const part of email.htmlBody) {
+      const body = email.bodyValues[part.partId];
+      if (body?.value) {
+        htmlParts.push(body.value);
+      }
+    }
+    if (htmlParts.length > 0) {
+      html = sanitizeEmailHtml(htmlParts.join("\n"));
+    }
+  }
+
+  if (email.textBody && email.textBody.length > 0) {
+    const textParts: string[] = [];
+    for (const part of email.textBody) {
+      const body = email.bodyValues[part.partId];
+      if (body?.value) {
+        textParts.push(body.value);
+      }
+    }
+    if (textParts.length > 0) {
+      text = textParts.join("\n").trim();
+    }
+  }
+
+  const content = html || text || "";
+  return { html, text, content };
+}
+
+/**
  * Format emails into XML structure grouped by thread.
  * Sanitizes HTML bodies for cleaner LLM consumption.
  */

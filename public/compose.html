@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compose Email</title>
+  <style>
+    :root {
+      --bg: var(--color-background-primary, light-dark(#ffffff, #171717));
+      --bg-secondary: var(--color-background-secondary, light-dark(#f5f5f5, #262626));
+      --text: var(--color-text-primary, light-dark(#171717, #fafafa));
+      --text-secondary: var(--color-text-secondary, light-dark(#525252, #a3a3a3));
+      --border: var(--color-border-primary, light-dark(#e5e5e5, #404040));
+      --accent: var(--color-accent-primary, light-dark(#2563eb, #60a5fa));
+      --font: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+      --mono: var(--font-mono, "Courier New", monospace);
+      --radius: var(--border-radius-md, 8px);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--bg);
+      padding: 16px;
+      line-height: 1.5;
+    }
+    .form-group { margin-bottom: 12px; }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 14px;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+    textarea {
+      min-height: 200px;
+      resize: vertical;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      justify-content: flex-end;
+    }
+    button {
+      padding: 8px 20px;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-secondary);
+      color: var(--text);
+      transition: opacity 0.15s;
+    }
+    button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .status {
+      margin-top: 12px;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      display: none;
+    }
+    .status.error {
+      display: block;
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+    .status.success {
+      display: block;
+      background: #f0fdf4;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
+    .toggle-btn {
+      font-size: 12px;
+      padding: 2px 8px;
+      border: none;
+      background: none;
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="form-group">
+    <label for="to">To</label>
+    <input type="text" id="to" placeholder="recipient@example.com" />
+  </div>
+  <div id="cc-bcc-toggle" style="margin-bottom: 12px;">
+    <button type="button" class="toggle-btn" onclick="toggleCcBcc()">Show CC/BCC</button>
+  </div>
+  <div id="cc-bcc-fields" class="hidden">
+    <div class="row">
+      <div class="form-group">
+        <label for="cc">CC</label>
+        <input type="text" id="cc" placeholder="cc@example.com" />
+      </div>
+      <div class="form-group">
+        <label for="bcc">BCC</label>
+        <input type="text" id="bcc" placeholder="bcc@example.com" />
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="subject">Subject</label>
+    <input type="text" id="subject" placeholder="Email subject" />
+  </div>
+  <div class="form-group">
+    <label for="body">Body</label>
+    <textarea id="body" placeholder="Write your email here..."></textarea>
+  </div>
+  <div class="actions">
+    <button type="button" onclick="saveDraft()">Save Draft</button>
+    <button type="button" class="primary" onclick="sendEmail()">Send</button>
+  </div>
+  <div id="status" class="status"></div>
+
+  <script>
+    let nextId = 1;
+
+    function sendRequest(method, params) {
+      const id = nextId++;
+      window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+      return new Promise((resolve, reject) => {
+        function listener(event) {
+          if (event.data?.id === id) {
+            window.removeEventListener("message", listener);
+            if (event.data?.error) {
+              reject(new Error(event.data.error.message || JSON.stringify(event.data.error)));
+            } else {
+              resolve(event.data?.result);
+            }
+          }
+        }
+        window.addEventListener("message", listener);
+      });
+    }
+
+    function toggleCcBcc() {
+      document.getElementById("cc-bcc-fields").classList.toggle("hidden");
+      const btn = document.querySelector("#cc-bcc-toggle .toggle-btn");
+      btn.textContent = document.getElementById("cc-bcc-fields").classList.contains("hidden")
+        ? "Show CC/BCC" : "Hide CC/BCC";
+    }
+
+    function showStatus(message, type) {
+      const el = document.getElementById("status");
+      el.textContent = message;
+      el.className = "status " + type;
+    }
+
+    function getFormData() {
+      const to = document.getElementById("to").value.trim();
+      const cc = document.getElementById("cc").value.trim();
+      const bcc = document.getElementById("bcc").value.trim();
+      const subject = document.getElementById("subject").value.trim();
+      const body = document.getElementById("body").value;
+      return { to, cc, bcc, subject, body };
+    }
+
+    function parseAddresses(str) {
+      if (!str) return [];
+      return str.split(/[,;]\s*/).filter(Boolean).map(function(addr) {
+        const match = addr.match(/^(.+?)\s*<(.+?)>$/);
+        if (match) return { name: match[1].trim(), email: match[2].trim() };
+        return { email: addr.trim() };
+      });
+    }
+
+    async function saveDraft() {
+      const data = getFormData();
+      if (!data.to) { showStatus("Please enter a recipient.", "error"); return; }
+      try {
+        await sendRequest("tools/call", {
+          name: "execute",
+          arguments: {
+            methodCalls: [
+              ["Email/set", {
+                create: {
+                  draft: {
+                    to: parseAddresses(data.to),
+                    cc: parseAddresses(data.cc),
+                    bcc: parseAddresses(data.bcc),
+                    subject: data.subject,
+                    keywords: { "$draft": true },
+                    bodyValues: { body: { value: data.body, isEncodingProblem: false } },
+                    textBody: [{ partId: "body", type: "text/plain" }],
+                  }
+                }
+              }, "save"]
+            ]
+          }
+        });
+        showStatus("Draft saved.", "success");
+      } catch (err) {
+        showStatus("Failed to save draft: " + err.message, "error");
+      }
+    }
+
+    async function sendEmail() {
+      const data = getFormData();
+      if (!data.to) { showStatus("Please enter a recipient.", "error"); return; }
+      if (!data.subject && !data.body) { showStatus("Please enter a subject or body.", "error"); return; }
+      try {
+        await sendRequest("tools/call", {
+          name: "execute",
+          arguments: {
+            methodCalls: [
+              ["Identity/get", {}, "id"],
+              ["Email/set", {
+                create: {
+                  msg: {
+                    to: parseAddresses(data.to),
+                    cc: parseAddresses(data.cc),
+                    bcc: parseAddresses(data.bcc),
+                    subject: data.subject,
+                    from: [{ "#resultOf": "id", "name": "Identity/get", "path": "/list/0/email" }],
+                    bodyValues: { body: { value: data.body, isEncodingProblem: false } },
+                    textBody: [{ partId: "body", type: "text/plain" }],
+                    mailboxIds: {}
+                  }
+                }
+              }, "create"],
+              ["EmailSubmission/set", {
+                create: {
+                  sub: {
+                    emailId: "#msg",
+                    identityId: { "resultOf": "id", "name": "Identity/get", "path": "/list/0/id" }
+                  }
+                }
+              }, "send"]
+            ],
+            confirmed: true
+          }
+        });
+        showStatus("Email sent.", "success");
+        await sendRequest("ui/message", {
+          role: "user",
+          content: { type: "text", text: "Email sent to " + data.to + " with subject: " + data.subject }
+        });
+      } catch (err) {
+        showStatus("Failed to send: " + err.message, "error");
+      }
+    }
+
+    // Handle tool input from host — pre-fill form fields
+    window.addEventListener("message", function(event) {
+      if (event.data?.method === "ui/notifications/tool-input" ||
+          event.data?.method === "ui/notifications/tool-result") {
+        const args = event.data.params?.arguments || {};
+        const content = event.data.params?.content;
+
+        // Try to extract data from tool result content
+        let resultData = args;
+        if (content && Array.isArray(content)) {
+          for (const block of content) {
+            if (block.type === "text" && block.text) {
+              try { resultData = Object.assign(resultData, JSON.parse(block.text)); } catch {}
+            }
+          }
+        }
+
+        if (resultData.to) document.getElementById("to").value = resultData.to;
+        if (resultData.cc) {
+          document.getElementById("cc").value = resultData.cc;
+          document.getElementById("cc-bcc-fields").classList.remove("hidden");
+        }
+        if (resultData.bcc) {
+          document.getElementById("bcc").value = resultData.bcc;
+          document.getElementById("cc-bcc-fields").classList.remove("hidden");
+        }
+        if (resultData.subject) document.getElementById("subject").value = resultData.subject;
+        if (resultData.body) document.getElementById("body").value = resultData.body;
+      }
+    });
+
+    // Initialize with host
+    (async function() {
+      try {
+        await sendRequest("ui/initialize", {
+          capabilities: { tools: { listChanged: false } },
+          clientInfo: { name: "Fastmail Compose", version: "1.0.0" },
+          protocolVersion: "2026-01-26"
+        });
+      } catch {}
+    })();
+  </script>
+</body>
+</html>

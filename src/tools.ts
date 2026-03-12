@@ -320,12 +320,16 @@ export function injectAccountId(methodCalls: MethodCall[], accountId: string): M
 
 // --- JMAP network call ---
 
-async function runJMAP(
-  validatedCalls: MethodCall[],
-  extra: RequestHandlerExtra<any, any>,
+/**
+ * Low-level JMAP call with explicit session and token.
+ * Used by apps.ts to make JMAP calls outside the execute tool.
+ */
+export async function runJMAPDirect(
+  methodCalls: MethodCall[],
+  session: JMAPSession,
+  bearerToken: string,
 ): Promise<unknown[]> {
-  const { session, bearerToken } = await getSession(extra);
-  const injectedCalls = injectAccountId(validatedCalls, session.accountId);
+  const injectedCalls = injectAccountId(methodCalls, session.accountId);
 
   const response = await fetch(session.apiUrl, {
     method: "POST",
@@ -342,6 +346,23 @@ async function runJMAP(
 
   const jmapResponse = (await response.json()) as { methodResponses: unknown[] };
   return cleanResponse(jmapResponse.methodResponses);
+}
+
+/**
+ * Get session from request extra. Exported for use by apps.ts.
+ */
+export async function getSessionFromExtra(
+  extra: RequestHandlerExtra<any, any>,
+): Promise<{ session: JMAPSession; bearerToken: string }> {
+  return getSession(extra);
+}
+
+async function runJMAP(
+  validatedCalls: MethodCall[],
+  extra: RequestHandlerExtra<any, any>,
+): Promise<unknown[]> {
+  const { session, bearerToken } = await getSession(extra);
+  return runJMAPDirect(validatedCalls, session, bearerToken);
 }
 
 // --- Destructive action description ---

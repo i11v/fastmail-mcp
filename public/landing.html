@@ -100,6 +100,14 @@
       <div class="tool-name">execute</div>
       <div class="tool-desc">Execute JMAP method calls against Fastmail. Accepts raw JMAP method call triples — the server validates, injects accountId, and returns cleaned responses. Supports batching and resultOf back-references.</div>
     </div>
+    <div class="tool">
+      <div class="tool-name">compose_email <span style="font-size:0.8em;color:#2563eb;">(MCP App)</span></div>
+      <div class="tool-desc">Open an interactive email compose form. Pre-fill fields like to, cc, bcc, subject, and body. On supported hosts, renders an inline compose UI with send and save-draft buttons.</div>
+    </div>
+    <div class="tool">
+      <div class="tool-name">read_email <span style="font-size:0.8em;color:#2563eb;">(MCP App)</span></div>
+      <div class="tool-desc">Display the full content of an email in a rich reader view. Fetches the email by ID and renders headers, sanitized body, and action buttons (reply, reply all, forward).</div>
+    </div>
   </div>
 
   <h2>API Endpoints</h2>

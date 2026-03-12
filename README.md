@@ -78,6 +78,30 @@ Execute JMAP method calls against Fastmail. Accepts an array of JMAP method call
 - `ids: null` on `/get` calls is rejected (use `/query` first)
 - Destructive operations (`destroy`, `EmailSubmission/set`) return an error asking for user confirmation
 
+### `compose_email` (MCP App)
+
+Open an interactive email compose form. Optionally pre-fill fields (to, cc, bcc, subject, body). On hosts that support MCP Apps, renders an inline compose UI with send and save-draft buttons. Falls back to structured text on other hosts.
+
+**Input:**
+```json
+{
+  "to": "recipient@example.com",
+  "subject": "Hello",
+  "body": "Message text..."
+}
+```
+
+### `read_email` (MCP App)
+
+Display the full content of an email in a rich reader view. Fetches the email by JMAP ID and renders headers, sanitized body, and action buttons (reply, reply all, forward). Falls back to structured text on hosts without MCP Apps support.
+
+**Input:**
+```json
+{
+  "emailId": "M1234abcd"
+}
+```
+
 ## API Endpoints
 
 - `POST /mcp` - MCP protocol endpoint
