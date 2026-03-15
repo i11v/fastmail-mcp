@@ -99,8 +99,10 @@ export function registerApps(server: McpServer) {
     {
       title: "Read Email",
       description:
-        "Display the full content of an email in a rich reader view. " +
-        "Fetches the email by ID and renders it with headers, body, and action buttons (reply, forward).",
+        "Display the full content of an email in a rich reader view widget shown to the user. " +
+        "Fetches the email by ID and renders it with headers, body, and action buttons (reply, forward). " +
+        "The full email is displayed to the user as an interactive widget; " +
+        "the assistant receives only a brief confirmation with metadata.",
       inputSchema: ReadEmailSchema,
       annotations: { title: "Read Email", readOnlyHint: true },
       _meta: {
@@ -179,8 +181,25 @@ export function registerApps(server: McpServer) {
           body: body.content,
         };
 
+        // structuredContent powers the widget; content text is a brief summary for the AI
+        const from = email.from?.[0];
+        const fromStr = from
+          ? from.name
+            ? `${from.name} <${from.email}>`
+            : from.email
+          : "unknown";
+        const summary = [
+          `Email displayed in widget.`,
+          `From: ${fromStr}`,
+          `Subject: ${email.subject ?? "(no subject)"}`,
+          `Date: ${email.sentAt ?? email.receivedAt ?? "unknown"}`,
+          email.hasAttachment ? "Has attachments." : "",
+        ]
+          .filter(Boolean)
+          .join("\n");
+
         return {
-          content: [{ type: "text", text: JSON.stringify(emailData) }],
+          content: [{ type: "text", text: summary }],
           structuredContent: emailData,
         };
       } catch (error) {
