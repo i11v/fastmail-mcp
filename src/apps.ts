@@ -10,10 +10,10 @@ import {
 } from "@modelcontextprotocol/ext-apps/server";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const publicDir = join(__dirname, "..", "public");
+const appsDir = join(__dirname, "..", "dist", "apps");
 
-const composeHtml = readFileSync(join(publicDir, "compose.html"), "utf-8");
-const readEmailHtml = readFileSync(join(publicDir, "read-email.html"), "utf-8");
+const composeHtml = readFileSync(join(appsDir, "compose.html"), "utf-8");
+const readEmailHtml = readFileSync(join(appsDir, "read-email.html"), "utf-8");
 
 // --- Zod schemas ---
 
@@ -88,6 +88,7 @@ export function registerApps(server: McpServer) {
           { type: "text", text: JSON.stringify(prefill) },
           { type: "text", text },
         ],
+        structuredContent: prefill,
       };
     },
   );
@@ -180,6 +181,7 @@ export function registerApps(server: McpServer) {
 
         return {
           content: [{ type: "text", text: JSON.stringify(emailData) }],
+          structuredContent: emailData,
         };
       } catch (error) {
         return {

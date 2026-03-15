@@ -302,14 +302,21 @@
     window.addEventListener("message", function(event) {
       if (event.data?.method === "ui/notifications/tool-input" ||
           event.data?.method === "ui/notifications/tool-result") {
-        var args = event.data.params?.arguments || {};
-        var content = event.data.params?.content;
-
+        var params = event.data.params || {};
         var data = {};
-        // Merge arguments
-        Object.assign(data, args);
 
-        // Parse content blocks
+        // Prefer structuredContent (primary data channel for Apps)
+        if (params.structuredContent) {
+          Object.assign(data, params.structuredContent);
+        }
+
+        // Merge tool arguments
+        if (params.arguments) {
+          Object.assign(data, params.arguments);
+        }
+
+        // Fallback: parse content text blocks
+        var content = params.content;
         if (content && Array.isArray(content)) {
           for (var i = 0; i < content.length; i++) {
             if (content[i].type === "text" && content[i].text) {
@@ -328,8 +335,8 @@
     (async function() {
       try {
         await sendRequest("ui/initialize", {
-          capabilities: { tools: { listChanged: false } },
-          clientInfo: { name: "Fastmail Reader", version: "1.0.0" },
+          appCapabilities: {},
+          appInfo: { name: "Fastmail Reader", version: "1.0.0" },
           protocolVersion: "2026-01-26"
         });
       } catch {}

@@ -280,15 +280,25 @@
     window.addEventListener("message", function(event) {
       if (event.data?.method === "ui/notifications/tool-input" ||
           event.data?.method === "ui/notifications/tool-result") {
-        const args = event.data.params?.arguments || {};
-        const content = event.data.params?.content;
+        const params = event.data.params || {};
+        let resultData = {};
 
-        // Try to extract data from tool result content
-        let resultData = args;
+        // Prefer structuredContent (primary data channel for Apps)
+        if (params.structuredContent) {
+          Object.assign(resultData, params.structuredContent);
+        }
+
+        // Merge tool arguments
+        if (params.arguments) {
+          Object.assign(resultData, params.arguments);
+        }
+
+        // Fallback: parse content text blocks
+        const content = params.content;
         if (content && Array.isArray(content)) {
           for (const block of content) {
             if (block.type === "text" && block.text) {
-              try { resultData = Object.assign(resultData, JSON.parse(block.text)); } catch {}
+              try { Object.assign(resultData, JSON.parse(block.text)); } catch {}
             }
           }
         }
@@ -311,8 +321,8 @@
     (async function() {
       try {
         await sendRequest("ui/initialize", {
-          capabilities: { tools: { listChanged: false } },
-          clientInfo: { name: "Fastmail Compose", version: "1.0.0" },
+          appCapabilities: {},
+          appInfo: { name: "Fastmail Compose", version: "1.0.0" },
           protocolVersion: "2026-01-26"
         });
       } catch {}

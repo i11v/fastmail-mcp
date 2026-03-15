@@ -8,7 +8,8 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm build:apps && tsc",
+    "build:apps": "INPUT=apps/read-email.html vite build -c vite.apps.config.ts && INPUT=apps/compose.html vite build -c vite.apps.config.ts",
     "start": "node dist/index.js",
     "deploy": "vercel --prod",
     "typecheck": "tsc --noEmit",
@@ -46,6 +47,8 @@
     "oxlint": "^1.43.0",
     "typescript": "^5.9.2",
     "vercel": "^39.2.4",
+    "vite": "^8.0.0",
+    "vite-plugin-singlefile": "^2.3.0",
     "vitest": "^4.0.18"
   }
 }
