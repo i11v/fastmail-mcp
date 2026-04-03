@@ -38,6 +38,7 @@ pnpm test:watch   # Run tests in watch mode
 - `src/index.ts` - Server setup, Hono routes, MCP initialization
 - `src/tools.ts` - Tool implementations, Zod schemas, JMAP integration
 - `src/format.ts` - Email formatting for LLM consumption (XML output, HTML→Markdown)
+- `src/apps.ts` - MCP Apps UI resources and tools (compose_email, read_email)
 - `src/redis.ts` - Redis client setup, session caching
 
 ## Tooling

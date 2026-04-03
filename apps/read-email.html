@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Read Email</title>
+  <style>
+    :root {
+      --bg: var(--color-background-primary, light-dark(#ffffff, #171717));
+      --bg-secondary: var(--color-background-secondary, light-dark(#f5f5f5, #262626));
+      --text: var(--color-text-primary, light-dark(#171717, #fafafa));
+      --text-secondary: var(--color-text-secondary, light-dark(#525252, #a3a3a3));
+      --border: var(--color-border-primary, light-dark(#e5e5e5, #404040));
+      --accent: var(--color-accent-primary, light-dark(#2563eb, #60a5fa));
+      --font: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+      --mono: var(--font-mono, "Courier New", monospace);
+      --radius: var(--border-radius-md, 8px);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--bg);
+      padding: 16px;
+      line-height: 1.6;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+    .header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .subject {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+    .meta {
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .meta-row {
+      display: flex;
+      gap: 8px;
+    }
+    .meta-label {
+      font-weight: 600;
+      min-width: 40px;
+      color: var(--text-secondary);
+    }
+    .meta-value {
+      color: var(--text);
+    }
+    .badges {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .badge.unread { background: #dbeafe; color: #1d4ed8; }
+    .badge.flagged { background: #fef3c7; color: #b45309; }
+    .badge.draft { background: #f3e8ff; color: #7c3aed; }
+    .badge.attachment { background: #ecfdf5; color: #059669; }
+    .body-content {
+      font-size: 14px;
+      line-height: 1.7;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+    .body-content pre {
+      background: var(--bg-secondary);
+      padding: 12px;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    button {
+      padding: 6px 16px;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-secondary);
+      color: var(--text);
+      transition: opacity 0.15s;
+    }
+    button:hover { opacity: 0.85; }
+    .error {
+      padding: 16px;
+      background: #fef2f2;
+      color: #dc2626;
+      border-radius: var(--radius);
+      border: 1px solid #fecaca;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading" class="loading">Loading email...</div>
+  <div id="email" style="display:none">
+    <div class="header">
+      <div class="subject" id="subject"></div>
+      <div class="meta">
+        <div class="meta-row">
+          <span class="meta-label">From</span>
+          <span class="meta-value" id="from"></span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">To</span>
+          <span class="meta-value" id="to"></span>
+        </div>
+        <div id="cc-row" class="meta-row" style="display:none">
+          <span class="meta-label">CC</span>
+          <span class="meta-value" id="cc"></span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Date</span>
+          <span class="meta-value" id="date"></span>
+        </div>
+        <div id="badges" class="badges"></div>
+      </div>
+    </div>
+    <div class="body-content" id="body"></div>
+    <div class="actions">
+      <button id="reply-btn">Reply</button>
+      <button id="reply-all-btn">Reply All</button>
+      <button id="forward-btn">Forward</button>
+    </div>
+  </div>
+  <div id="error" class="error" style="display:none"></div>
+  <script type="module" src="./read-email.ts"></script>
+</body>
+</html>

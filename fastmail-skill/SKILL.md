@@ -1,6 +1,6 @@
 ---
 name: fastmail
-description: Use when interacting with the user's Fastmail email via the `execute` MCP tool. Covers JMAP method calls for querying, reading, sending, and managing emails and mailboxes.
+description: Use when interacting with the user's Fastmail email via the `execute`, `send_email`, `save_draft`, `compose_email`, and `read_email` MCP tools. Covers JMAP method calls for querying, reading, sending, and managing emails and mailboxes, plus interactive UI widgets for composing and reading emails.
 ---
 
 # JMAP Mail Skill
@@ -49,6 +49,67 @@ The server injects `accountId` automatically — never include it yourself.
 | `EmailSubmission/set` | Send an email | [sending/workflow](sending/workflow.md) |
 
 Less common: `Mailbox/queryChanges`, `Email/queryChanges`, `EmailSubmission/get`, `EmailSubmission/query`, `Core/echo`.
+
+## Email Tools
+
+Purpose-built tools for sending emails and saving drafts. These handle all JMAP complexity (identity lookup, drafts mailbox, submission) server-side — just pass plain form fields.
+
+### `send_email`
+
+Send an email immediately. The `to` field is required; all other fields are optional.
+
+```json
+{
+  "to": "recipient@example.com",
+  "cc": "other@example.com",
+  "subject": "Hello",
+  "body": "Message text..."
+}
+```
+
+### `save_draft`
+
+Save an email as a draft. All fields are optional.
+
+```json
+{
+  "to": "recipient@example.com",
+  "subject": "Hello",
+  "body": "Message text..."
+}
+```
+
+## UI Tools (MCP Apps)
+
+These tools render interactive widgets on hosts that support MCP Apps. They do **not** use the `execute` tool — they are standalone tools with their own inputs.
+
+### `compose_email`
+
+Opens an interactive email compose form. Pre-fill any combination of fields; the user can edit before sending or saving as draft.
+
+```json
+{
+  "to": "recipient@example.com",
+  "cc": "other@example.com",
+  "bcc": "secret@example.com",
+  "subject": "Hello",
+  "body": "Message text..."
+}
+```
+
+All fields are optional. On hosts without MCP Apps, falls back to structured text.
+
+### `read_email`
+
+Displays an email in a rich reader widget with full HTML rendering, headers, and action buttons (reply, reply all, forward). The widget is shown to the user; the assistant receives only a brief metadata summary.
+
+```json
+{
+  "emailId": "M1234abcd"
+}
+```
+
+Use this instead of `Email/get` via `execute` when the goal is to **show** the email to the user rather than extract data for the assistant.
 
 ## Quick Reference
 

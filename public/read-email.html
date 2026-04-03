@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Read Email</title>
+  <style>
+    :root {
+      --bg: var(--color-background-primary, light-dark(#ffffff, #171717));
+      --bg-secondary: var(--color-background-secondary, light-dark(#f5f5f5, #262626));
+      --text: var(--color-text-primary, light-dark(#171717, #fafafa));
+      --text-secondary: var(--color-text-secondary, light-dark(#525252, #a3a3a3));
+      --border: var(--color-border-primary, light-dark(#e5e5e5, #404040));
+      --accent: var(--color-accent-primary, light-dark(#2563eb, #60a5fa));
+      --font: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+      --mono: var(--font-mono, "Courier New", monospace);
+      --radius: var(--border-radius-md, 8px);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--bg);
+      padding: 16px;
+      line-height: 1.6;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+    .header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .subject {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+    .meta {
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .meta-row {
+      display: flex;
+      gap: 8px;
+    }
+    .meta-label {
+      font-weight: 600;
+      min-width: 40px;
+      color: var(--text-secondary);
+    }
+    .meta-value {
+      color: var(--text);
+    }
+    .badges {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .badge.unread { background: #dbeafe; color: #1d4ed8; }
+    .badge.flagged { background: #fef3c7; color: #b45309; }
+    .badge.draft { background: #f3e8ff; color: #7c3aed; }
+    .badge.attachment { background: #ecfdf5; color: #059669; }
+    .body-content {
+      font-size: 14px;
+      line-height: 1.7;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+    .body-content a { color: var(--accent); }
+    .body-content img { max-width: 100%; height: auto; }
+    .body-content blockquote {
+      border-left: 3px solid var(--border);
+      padding-left: 12px;
+      margin: 8px 0;
+      color: var(--text-secondary);
+    }
+    .body-content pre {
+      background: var(--bg-secondary);
+      padding: 12px;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    button {
+      padding: 6px 16px;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-secondary);
+      color: var(--text);
+      transition: opacity 0.15s;
+    }
+    button:hover { opacity: 0.85; }
+    .error {
+      padding: 16px;
+      background: #fef2f2;
+      color: #dc2626;
+      border-radius: var(--radius);
+      border: 1px solid #fecaca;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading" class="loading">Loading email...</div>
+  <div id="email" style="display:none">
+    <div class="header">
+      <div class="subject" id="subject"></div>
+      <div class="meta">
+        <div class="meta-row">
+          <span class="meta-label">From</span>
+          <span class="meta-value" id="from"></span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">To</span>
+          <span class="meta-value" id="to"></span>
+        </div>
+        <div id="cc-row" class="meta-row" style="display:none">
+          <span class="meta-label">CC</span>
+          <span class="meta-value" id="cc"></span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Date</span>
+          <span class="meta-value" id="date"></span>
+        </div>
+        <div id="badges" class="badges"></div>
+      </div>
+    </div>
+    <div class="body-content" id="body"></div>
+    <div class="actions">
+      <button onclick="reply()">Reply</button>
+      <button onclick="replyAll()">Reply All</button>
+      <button onclick="forward()">Forward</button>
+    </div>
+  </div>
+  <div id="error" class="error" style="display:none"></div>
+
+  <script>
+    let emailData = null;
+    let nextId = 1;
+
+    function sendRequest(method, params) {
+      const id = nextId++;
+      window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+      return new Promise(function(resolve, reject) {
+        function listener(event) {
+          if (event.data?.id === id) {
+            window.removeEventListener("message", listener);
+            if (event.data?.error) {
+              reject(new Error(event.data.error.message || JSON.stringify(event.data.error)));
+            } else {
+              resolve(event.data?.result);
+            }
+          }
+        }
+        window.addEventListener("message", listener);
+      });
+    }
+
+    function formatAddress(addr) {
+      if (!addr) return "";
+      if (Array.isArray(addr)) return addr.map(formatAddress).join(", ");
+      if (addr.name) return addr.name + " <" + addr.email + ">";
+      return addr.email || String(addr);
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "";
+      try {
+        var d = new Date(dateStr);
+        return d.toLocaleDateString(undefined, {
+          weekday: "short", year: "numeric", month: "short", day: "numeric",
+          hour: "2-digit", minute: "2-digit"
+        });
+      } catch { return dateStr; }
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function renderEmail(data) {
+      emailData = data;
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("email").style.display = "";
+
+      document.getElementById("subject").textContent = data.subject || "(no subject)";
+      document.getElementById("from").textContent = formatAddress(data.from);
+      document.getElementById("to").textContent = formatAddress(data.to);
+
+      if (data.cc && data.cc.length > 0) {
+        document.getElementById("cc-row").style.display = "";
+        document.getElementById("cc").textContent = formatAddress(data.cc);
+      }
+
+      document.getElementById("date").textContent = formatDate(data.receivedAt || data.sentAt);
+
+      // Badges
+      var badgesEl = document.getElementById("badges");
+      badgesEl.innerHTML = "";
+      if (data.keywords) {
+        if (!data.keywords["$seen"]) addBadge(badgesEl, "unread", "Unread");
+        if (data.keywords["$flagged"]) addBadge(badgesEl, "flagged", "Flagged");
+        if (data.keywords["$draft"]) addBadge(badgesEl, "draft", "Draft");
+      }
+      if (data.hasAttachment) addBadge(badgesEl, "attachment", "Attachment");
+
+      // Body content
+      var bodyEl = document.getElementById("body");
+      if (data.htmlBody) {
+        bodyEl.innerHTML = data.htmlBody;
+      } else if (data.textBody) {
+        bodyEl.innerHTML = "<pre>" + escapeHtml(data.textBody) + "</pre>";
+      } else if (data.body) {
+        // If body is HTML (contains tags), render as HTML
+        if (/<[a-z][\s\S]*>/i.test(data.body)) {
+          bodyEl.innerHTML = data.body;
+        } else {
+          bodyEl.innerHTML = "<pre>" + escapeHtml(data.body) + "</pre>";
+        }
+      } else {
+        bodyEl.textContent = "(empty message)";
+      }
+    }
+
+    function addBadge(container, cls, text) {
+      var el = document.createElement("span");
+      el.className = "badge " + cls;
+      el.textContent = text;
+      container.appendChild(el);
+    }
+
+    function reply() {
+      if (!emailData) return;
+      var replyTo = emailData.replyTo || emailData.from;
+      sendRequest("ui/message", {
+        role: "user",
+        content: {
+          type: "text",
+          text: "Reply to this email from " + formatAddress(replyTo) +
+                " with subject: Re: " + (emailData.subject || "")
+        }
+      });
+    }
+
+    function replyAll() {
+      if (!emailData) return;
+      var replyTo = emailData.replyTo || emailData.from;
+      var allRecipients = [formatAddress(replyTo)];
+      if (emailData.to) allRecipients.push(formatAddress(emailData.to));
+      if (emailData.cc) allRecipients.push(formatAddress(emailData.cc));
+      sendRequest("ui/message", {
+        role: "user",
+        content: {
+          type: "text",
+          text: "Reply all to this email. Recipients: " + allRecipients.join(", ") +
+                " with subject: Re: " + (emailData.subject || "")
+        }
+      });
+    }
+
+    function forward() {
+      if (!emailData) return;
+      sendRequest("ui/message", {
+        role: "user",
+        content: {
+          type: "text",
+          text: "Forward this email with subject: Fwd: " + (emailData.subject || "")
+        }
+      });
+    }
+
+    // Handle tool result from host
+    window.addEventListener("message", function(event) {
+      if (event.data?.method === "ui/notifications/tool-input" ||
+          event.data?.method === "ui/notifications/tool-result") {
+        var params = event.data.params || {};
+        var data = {};
+
+        // Prefer structuredContent (primary data channel for Apps)
+        if (params.structuredContent) {
+          Object.assign(data, params.structuredContent);
+        }
+
+        // Merge tool arguments
+        if (params.arguments) {
+          Object.assign(data, params.arguments);
+        }
+
+        // Fallback: parse content text blocks
+        var content = params.content;
+        if (content && Array.isArray(content)) {
+          for (var i = 0; i < content.length; i++) {
+            if (content[i].type === "text" && content[i].text) {
+              try { Object.assign(data, JSON.parse(content[i].text)); } catch {}
+            }
+          }
+        }
+
+        if (data.subject || data.from || data.body || data.htmlBody || data.textBody) {
+          renderEmail(data);
+        }
+      }
+    });
+
+    // Initialize with host
+    (async function() {
+      try {
+        await sendRequest("ui/initialize", {
+          appCapabilities: {},
+          appInfo: { name: "Fastmail Reader", version: "1.0.0" },
+          protocolVersion: "2026-01-26"
+        });
+      } catch {}
+    })();
+  </script>
+</body>
+</html>

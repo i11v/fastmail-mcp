@@ -126,6 +126,51 @@ export function sanitizeEmailHtml(html: string): string {
 }
 
 /**
+ * Lightweight cleanup of email HTML for display in a sandboxed iframe.
+ * NOT a security sanitizer — the iframe sandbox attribute handles security.
+ * Only removes tracking pixels, MSO comments, and non-style head content
+ * to reduce payload noise and improve privacy.
+ */
+export function cleanEmailHtmlForDisplay(html: string): string {
+  // Unescape JSON string escapes (JMAP body values are JSON strings)
+  html = unescapeJsonString(html);
+
+  // Strip MSO conditional comments: <!--[if ...]>...<![endif]-->
+  html = html.replace(/<!--\[if[^\]]*\]>[\s\S]*?<!\[endif\]-->/gi, "");
+  html = html.replace(/<!\[if[^\]]*\]>/gi, "");
+  html = html.replace(/<!--<!\[endif\]-->/gi, "");
+
+  const $ = load(html);
+
+  // Remove tracking pixels (1x1 or 0x0 images) — privacy
+  $("img").each(function () {
+    const width = $(this).attr("width");
+    const height = $(this).attr("height");
+    if ((width === "1" && height === "1") || (width === "0" && height === "0")) {
+      $(this).remove();
+    }
+  });
+
+  // Remove <head> content except <style> blocks
+  const head = $("head");
+  if (head.length > 0) {
+    // Extract style elements before removing head
+    const styles: string[] = [];
+    head.find("style").each(function () {
+      const styleHtml = $.html(this);
+      if (styleHtml) styles.push(styleHtml);
+    });
+    head.remove();
+    // Prepend extracted styles back
+    if (styles.length > 0) {
+      $("html").prepend(styles.join("\n"));
+    }
+  }
+
+  return $.html().trim();
+}
+
+/**
  * Get the body content from an email.
  * Prefers htmlBody (sanitized) for consistent output.
  * Falls back to textBody for plain-text emails.
@@ -256,6 +301,50 @@ function formatEmailXml(email: any): string {
   lines.push("</email>");
 
   return lines.join("\n");
+}
+
+/**
+ * Extract body content from an email for the reader UI.
+ * Returns both sanitized HTML and plain text forms.
+ */
+export function formatEmailBody(email: any): {
+  html: string | null;
+  text: string | null;
+  content: string;
+} {
+  if (!email.bodyValues) return { html: null, text: null, content: "" };
+
+  let html: string | null = null;
+  let text: string | null = null;
+
+  if (email.htmlBody && email.htmlBody.length > 0) {
+    const htmlParts: string[] = [];
+    for (const part of email.htmlBody) {
+      const body = email.bodyValues[part.partId];
+      if (body?.value) {
+        htmlParts.push(body.value);
+      }
+    }
+    if (htmlParts.length > 0) {
+      html = cleanEmailHtmlForDisplay(htmlParts.join("\n"));
+    }
+  }
+
+  if (email.textBody && email.textBody.length > 0) {
+    const textParts: string[] = [];
+    for (const part of email.textBody) {
+      const body = email.bodyValues[part.partId];
+      if (body?.value) {
+        textParts.push(body.value);
+      }
+    }
+    if (textParts.length > 0) {
+      text = textParts.join("\n").trim();
+    }
+  }
+
+  const content = html || text || "";
+  return { html, text, content };
 }
 
 /**

@@ -1,5 +1,1760 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`cleanEmailHtmlForDisplay fixtures > booking > cleaned HTML for display 1`] = `
+"<!DOCTYPE html><html lang="en" style=""><style id="vendor_styles">
+html {
+-ms-overflow-y: auto !important;
+}
+body {
+-webkit-text-size-adjust: 100%;
+-ms-text-size-adjust: 100%;
+}
+img {
+-ms-interpolation-mode: bicubic;
+}
+table.radius td {
+-webkit-border-radius: 3px;
+-moz-border-radius: 3px;
+}
+table.round td {
+-webkit-border-radius: 500px;
+-moz-border-radius: 500px;
+}
+table.columns,
+table.column {
+display: -webkit-box;
+}
+table.columns td.element_connector,
+td.element_connector {
+width: 100% !important;
+width: calc(100%) !important;
+width: -webkit-calc(100%) !important;
+}
+table.container,
+table.columns,
+table.column,
+table.social-box-wrapper,
+table.social-box-text-wrapper {
+*table-layout: auto !important;
+}
+div,
+p,
+a,
+li,
+td {
+-webkit-text-size-adjust: none;
+}
+.m-hide{width:0;display:none!important;}
+</style>
+<style type="text/css">
+@media screen and (max-device-width: 580px),
+screen and (max-width: 580px) {
+table[class="body"] center {
+min-width: 0px !important;
+}
+table[class="body"] .container {
+max-width: 580px;
+width: 100% !important;
+}
+table[class="body"] .row {
+width: 100% !important;
+display: block !important;
+}
+table[class="body"] .row::after {
+content: ' ';
+display: table;
+height: 0px;
+clear: both;
+visibility: hidden;
+}
+table.row > tbody > tr > td.center {
+display: block;
+padding: 0px !important;
+}
+table[class="body"] .wrapper {
+display: block !important;
+float: none !important;
+min-width: 0px !important;
+}
+table.row > tbody,
+table.row > tbody > tr {
+display: block;
+width: 100%;
+}
+table[class="body"] .columns,
+table[class="body"] .column {
+max-width: 580px !important;
+table-layout: fixed !important;
+float: left !important;
+padding-right: 0px !important;
+padding-left: 0px !important;
+}
+table[class="body"] .wrapper.first .columns,
+table[class="body"] .wrapper.first .column {
+display: table !important;
+}
+table[class="body"] .twelve {
+width: 100% !important;
+}
+table[class="body"] .wrapper.twelve {
+float: left !important;
+}
+table[class="body"] .wrapper.twelve .columns,
+table[class="body"] .wrapper.twelve .column {
+width: 100% !important;
+}
+table[class="body"] .eleven {
+width: 91.66666667% !important;
+}
+table[class="body"] .wrapper.eleven {
+float: left !important;
+}
+table[class="body"] .wrapper.eleven .columns,
+table[class="body"] .wrapper.eleven .column {
+width: 100% !important;
+}
+table[class="body"] .ten {
+width: 83.33333333% !important;
+}
+table[class="body"] .wrapper.ten {
+float: left !important;
+}
+table[class="body"] .wrapper.ten .columns,
+table[class="body"] .wrapper.ten .column {
+width: 100% !important;
+}
+table[class="body"] .nine {
+width: 75% !important;
+}
+table[class="body"] .wrapper.nine {
+float: left !important;
+}
+table[class="body"] .wrapper.nine .columns,
+table[class="body"] .wrapper.nine .column {
+width: 100% !important;
+}
+table[class="body"] .eight {
+width: 66.66666667% !important;
+}
+table[class="body"] .wrapper.eight {
+float: left !important;
+}
+table[class="body"] .wrapper.eight .columns,
+table[class="body"] .wrapper.eight .column {
+width: 100% !important;
+}
+table[class="body"] .seven {
+width: 58.33333333% !important;
+}
+table[class="body"] .wrapper.seven {
+float: left !important;
+}
+table[class="body"] .wrapper.seven .columns,
+table[class="body"] .wrapper.seven .column {
+width: 100% !important;
+}
+table[class="body"] .six {
+width: 50% !important;
+}
+table[class="body"] .wrapper.six {
+float: left !important;
+}
+table[class="body"] .wrapper.six .columns,
+table[class="body"] .wrapper.six .column {
+width: 100% !important;
+}
+table[class="body"] .five {
+width: 41.66666667% !important;
+}
+table[class="body"] .wrapper.five {
+float: left !important;
+}
+table[class="body"] .wrapper.five .columns,
+table[class="body"] .wrapper.five .column {
+width: 100% !important;
+}
+table[class="body"] .four {
+width: 33.33333333% !important;
+}
+table[class="body"] .wrapper.four {
+float: left !important;
+}
+table[class="body"] .wrapper.four .columns,
+table[class="body"] .wrapper.four .column {
+width: 100% !important;
+}
+table[class="body"] .three {
+width: 25% !important;
+}
+table[class="body"] .wrapper.three {
+float: left !important;
+}
+table[class="body"] .wrapper.three .columns,
+table[class="body"] .wrapper.three .column {
+width: 100% !important;
+}
+table[class="body"] .two {
+width: 16.66666667% !important;
+}
+table[class="body"] .wrapper.two {
+float: left !important;
+}
+table[class="body"] .wrapper.two .columns,
+table[class="body"] .wrapper.two .column {
+width: 100% !important;
+}
+table[class="body"] .one {
+width: 8.33333333% !important;
+}
+table[class="body"] .wrapper.one {
+float: left !important;
+}
+table[class="body"] .wrapper.one .columns,
+table[class="body"] .wrapper.one .column {
+width: 100% !important;
+}
+table[class="body"] .columns td.twelve,
+table[class="body"] .column td.twelve {
+width: 100% !important;
+}
+table[class="body"] td.offset-by-twelve {
+padding-left: 0px !important;
+}
+table[class="body"] .small-twelve {
+width: 100% !important;
+}
+table[class="body"] .columns td.eleven,
+table[class="body"] .column td.eleven {
+width: 91.66666667% !important;
+}
+table[class="body"] td.offset-by-eleven {
+padding-left: 0px !important;
+}
+table[class="body"] .small-eleven {
+width: 91.66666667% !important;
+}
+table[class="body"] .columns td.ten,
+table[class="body"] .column td.ten {
+width: 83.33333333% !important;
+}
+table[class="body"] td.offset-by-ten {
+padding-left: 0px !important;
+}
+table[class="body"] .small-ten {
+width: 83.33333333% !important;
+}
+table[class="body"] .columns td.nine,
+table[class="body"] .column td.nine {
+width: 75% !important;
+}
+table[class="body"] td.offset-by-nine {
+padding-left: 0px !important;
+}
+table[class="body"] .small-nine {
+width: 75% !important;
+}
+table[class="body"] .columns td.eight,
+table[class="body"] .column td.eight {
+width: 66.66666667% !important;
+}
+table[class="body"] td.offset-by-eight {
+padding-left: 0px !important;
+}
+table[class="body"] .small-eight {
+width: 66.66666667% !important;
+}
+table[class="body"] .columns td.seven,
+table[class="body"] .column td.seven {
+width: 58.33333333% !important;
+}
+table[class="body"] td.offset-by-seven {
+padding-left: 0px !important;
+}
+table[class="body"] .small-seven {
+width: 58.33333333% !important;
+}
+table[class="body"] .columns td.six,
+table[class="body"] .column td.six {
+width: 50% !important;
+}
+table[class="body"] td.offset-by-six {
+padding-left: 0px !important;
+}
+table[class="body"] .small-six {
+width: 50% !important;
+}
+table[class="body"] .columns td.five,
+table[class="body"] .column td.five {
+width: 41.66666667% !important;
+}
+table[class="body"] td.offset-by-five {
+padding-left: 0px !important;
+}
+table[class="body"] .small-five {
+width: 41.66666667% !important;
+}
+table[class="body"] .columns td.four,
+table[class="body"] .column td.four {
+width: 33.33333333% !important;
+}
+table[class="body"] td.offset-by-four {
+padding-left: 0px !important;
+}
+table[class="body"] .small-four {
+width: 33.33333333% !important;
+}
+table[class="body"] .columns td.three,
+table[class="body"] .column td.three {
+width: 25% !important;
+}
+table[class="body"] td.offset-by-three {
+padding-left: 0px !important;
+}
+table[class="body"] .small-three {
+width: 25% !important;
+}
+table[class="body"] .columns td.two,
+table[class="body"] .column td.two {
+width: 16.66666667% !important;
+}
+table[class="body"] td.offset-by-two {
+padding-left: 0px !important;
+}
+table[class="body"] .small-two {
+width: 16.66666667% !important;
+}
+table[class="body"] .columns td.one,
+table[class="body"] .column td.one {
+width: 8.33333333% !important;
+}
+table[class="body"] td.offset-by-one {
+padding-left: 0px !important;
+}
+table[class="body"] .small-one {
+width: 8.33333333% !important;
+}
+table[class="body"] .right-text-pad,
+table[class="body"] .text-pad-right {
+padding-left: 10px !important;
+}
+table[class="body"] .left-text-pad,
+table[class="body"] .text-pad-left {
+padding-right: 10px !important;
+}
+table[class="body"] table.image-component > tbody > tr > td.element,
+table[class="body"] table.image-component-right > tbody > tr > td.element,
+table[class="body"] table.image-table > tbody > tr > td.element,
+table[class="body"] table.link-image-table > tbody > tr > td.element {
+width: auto;
+}
+table[class="body"] table td.social-image-cell {
+width: auto;
+}
+}
+@media only screen and (max-width: 580px) {
+table[class="body"] .hide-for-small,
+table[class="body"] .show-for-desktop {
+display: none !important;
+}
+table[class="body"] .show-for-small,
+table[class="body"] .hide-for-desktop {
+display: inherit !important;
+}
+table.container-display-table{
+display: table!important;
+}
+}
+@media screen and (max-device-width: 580px),
+screen and (max-width: 580px) {
+.form_results div td {
+display: inline-block !important;
+width: 100% !important;
+}
+.cart_summary div td:nth-child(3),
+.cart_summary div th:nth-child(3) {
+display: none;
+}
+.cart_summary div tr:last-child td:first-child {
+display: block;
+}
+.ugc-invite-cta-table {
+width: 100% !important;
+max-width: 100% !important;
+}
+.ugc-invite-cta-table tbody {
+width: 100%;
+max-width: 100%;
+display: block;
+}
+.ugc-invite-cta-table tbody tr {
+width: 100%;
+max-width: 100%;
+display: block;
+}
+.ugcc-invite-cta-td {
+width: 100% !important;
+display: inline-block !important;
+max-width: 100% !important;
+margin-bottom: 15px;
+padding: 8px 0px !important;
+box-sizing: border-box;
+padding-top: 16px !important;
+padding-bottom: 17px !important;
+}
+.ugc-invite-cta-td--spacer {
+display: none !important;
+}
+.ugcc-invite-cta-td a {
+font-size: 18px !important;
+}
+.span_hide-only-on-small-screen,
+.span_hide-only-on-small-screen.span_hide-only-on-small-screen {
+display: none !important;
+}
+}
+@media screen and (max-width: 580px) {
+table[class='body'] table.button.button-1 {
+width: 100% !important;
+margin-left: auto !important;
+margin-right: auto !important;
+float: none !important;
+}
+table[class='body'] table.button.button-2 {
+width: 100% !important;
+margin-left: auto !important;
+margin-right: auto !important;
+float: none !important;
+}
+table[class='body'] table.button.button-3 {
+width: 100% !important;
+margin-left: auto !important;
+margin-right: auto !important;
+float: none !important;
+}
+table[class='body'] table.button.button-4 {
+width: 100% !important;
+margin-left: auto !important;
+margin-right: auto !important;
+float: none !important;
+}
+table[class='body'] table.text.text-3 > tbody > tr > td.element > * {
+font-size: 26px !important;
+}
+table[class='body'] table.image-table.image-1 {
+width: auto !important;
+}
+table[class='body'] table.button.button-2 > tbody > tr > td.element {
+padding-top: 14px !important;
+padding-bottom: 15px !important;
+}
+table[class='body'] table.image-table.image-2 {
+width: auto !important;
+}
+body table[class='body'] .row .columns.column-2 td.element_connector {
+padding-top: 0px !important;
+}
+body table[class='body'] .row .columns.column-5 td.element_connector {
+padding-bottom: 15px !important;
+padding-top: 0px !important;
+}
+table[class='body'] table.text.text-1 > tbody > tr > td.element > * {
+line-height: 1.2 !important;
+}
+body table[class='body'] .row .columns.column-4 td.element_connector {
+padding-bottom: 15px !important;
+}
+body table[class='body'] .row .columns.column-6 td.element_connector {
+padding-bottom: 15px !important;
+}
+body table[class='body'] .row .columns.column-7 td.element_connector {
+padding-bottom: 15px !important;
+}
+body table[class='body'] .row .columns.column-8 td.element_connector {
+padding-bottom: 15px !important;
+}
+table[class='body'] table.text span.text-text-1 {
+line-height: 1 !important;
+font-size: 18px !important;
+}
+table[class='body'] table.text span.text-text-2 {
+font-size: 28px !important;
+line-height: 1.2 !important;
+}
+table[class='body'] table.paragraph span.paragraph-text-1 {
+font-size: 16px !important;
+}
+table[class='body'] table.text span.text-text-3 {
+font-size: 18px !important;
+}
+table[class='body'] table.button.button-1 > tbody > tr > td.element {
+padding-top: 14px !important;
+padding-bottom: 15px !important;
+}
+table[class='body'] table.button.button-3 > tbody > tr > td.element {
+padding-top: 14px !important;
+padding-bottom: 15px !important;
+}
+table[class='body'] table.button.button-4 > tbody > tr > td.element {
+padding-top: 14px !important;
+padding-bottom: 15px !important;
+}
+table[class='body'] table.button.button-1 > tbody > tr > td.element > * {
+font-size: 18px !important;
+}
+table[class='body'] table.button.button-2 > tbody > tr > td.element > * {
+font-size: 18px !important;
+}
+table[class='body'] table.button.button-3 > tbody > tr > td.element > * {
+font-size: 18px !important;
+}
+table[class='body'] table.button.button-4 > tbody > tr > td.element > * {
+font-size: 18px !important;
+}
+table[class="body"] .usp_block {
+width: 100% !important;
+display: inline-block !important;
+padding: 0 10px 0 10px !important;
+text-align: center !important;
+vertical-align: top !important;
+}
+table[class="body"] .usp_header {
+padding: 0 10px 0 10px !important;
+}
+table[class="body"] .usp_block img {
+display:none !important;
+}
+}
+@media screen and (max-device-width: 580px) {
+.badge-empty-state {
+text-align: center !important;
+}
+.badge-empty-state img, .badge-empty-state .badge-img-td {
+text-align: center !important;
+margin:10px auto;
+}
+}
+</style>
+<style type="text/css">
+.ugcs-invite-cta-block--spacer {
+display: inline-block;
+width: 4px !important;
+min-width: 4px;
+}
+.ugcs-invite-cta-block:hover,
+.ugcs-invite-cta-block:active {
+background: #0071c0 !important;
+}
+.ugcs-invite-cta-block:hover a,
+.ugcs-invite-cta-block:active a {
+color: #fff !important;
+}
+.ugc-bui-font {
+margin:0;
+font-size:14px;
+line-height:20px;
+font-weight:400;
+font-family:BlinkMacSystemFont, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+color: #000000;
+}
+</style>
+<style type="text/css">
+@media screen and (min-device-width:480px), screen and (min-width:480px) {
+.visible-desktop {
+visibility: initial !important;
+opacity: 1 !important;
+}
+.hide-desktop {
+display: none !important;
+}
+.score-adjective {
+padding: 0 !important;
+width: 50% !important;
+}
+.score-adjective+.score-adjective {
+padding: 0 !important;
+width: 49% !important;
+}
+table tr .ugcs-invite-cta-block {
+width: 48px !important;
+min-width: 48px !important;
+max-width: 48px !important;
+margin-bottom: unset;
+}
+.ugcs-invite-cta-block {
+cursor: pointer;
+position: relative;
+}
+.ugcs-invite-cta-block--spacer {
+display: none !important;
+}
+}
+</style>
+<body style="min-width:100%;margin:0px;padding:0px;width:100%;border:none;max-width:none;position:relative;font-family:Georgia, Times, 'Times New Roman', serif;" class="body">
+<table cellpadding="0" cellspacing="0" border="0" class="body" style="height:100%;width:100%;">
+<tbody>
+<tr class="preheader" style="display:none;">
+<td class="m-hide">
+<div style="display:none!important;visibility:hidden !important;font-size:1px;color:#FFFFFF;">
+&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌
+</div>
+</td>
+</tr>
+<tr>
+
+
+<!-- -->
+<td class="center" align="center" valign="top" style="text-align: center;">
+
+<center class="grid_selector" style="width:100%;">
+<table cellpadding="0" cellspacing="0" border="0" class="row row-1" id="row-1" style="width:100%;position:relative; background-color:#003B95;" bgcolor="#003B95">
+<tbody>
+<tr>
+<td class="center" align="center" style="text-align: center;">
+<center style="width:100%;">
+
+
+<!-- -->
+<table cellpadding="0" cellspacing="0" border="0" class="container" style="max-width:580px;table-layout:fixed;margin:0px auto;text-align:inherit;display:block;min-width:580px;">
+
+<tbody>
+<tr>
+<td class="wrapper last twelve small-five" valign="top" style="padding:0px;vertical-align:top;padding-right:0px;">
+
+
+<!-- -->
+<table cellpadding="0" cellspacing="0" border="0" class="twelve columns small-five column-1" style="margin:0px auto;text-align:left;table-layout:fixed;display:-webkit-box;width:100%;max-width:580px;">
+
+<tbody>
+<tr>
+<td class="expander" style="padding-left:10px;width:0.000001pt;"></td>
+<td class="element_connector l-wrap" style="padding:0px;height:35px;width:100%;padding-top:5px;padding-bottom:5px;">
+<table cellpadding="0" cellspacing="0" border="0" class="image-table image-1" align="left" style="margin-left:0px;margin-right:0px;float: left;width:auto;text-align:left;">
+<tbody>
+<tr>
+<td class="element" style="text-align:left;height:auto;overflow:hidden;">
+
+
+<!-- --><img alt="Booking.com" src="https://r-xx.bstatic.com/static/img/newsletters/b_logo_white.png" style="outline: none; text-decoration: none; display: block; clear: none; width: 100%; height: auto; max-width: 140px; margin-left: 0px; margin-right: 0px;float: left; *width:140px;" align="left">
+
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td class="expander" style="padding-left:10px;width:0.000001pt;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</center>
+</td>
+</tr>
+</tbody>
+</table>
+<table cellpadding="0" cellspacing="0" border="0" class="row row-helpful" style="width:100%;position:relative;background-color:#006CE4;" bgcolor="#006CE4">
+<tbody>
+<tr>
+<td class="center" align="center" style="text-align: center;">
+<center style="width:100%;">
+
+
+<!-- -->
+<table cellpadding="0" cellspacing="0" border="0" class="container" style="max-width:580px;table-layout:fixed;margin:0px auto;text-align:inherit;display:block;*width:580px;">
+
+<tbody>
+<tr>
+<td class="wrapper six small-380-four" valign="top" style="padding:0px;vertical-align:top;float:left;">
+
+
+<!-- -->
+<table cellpadding="0" cellspacing="0" border="0" class="columns six column-helpful small-380-four" style="margin:0px auto;text-align:left;table-layout:fixed;display:-webkit-box;width:100%;max-width:290px;*width:290px;">
+
+<tbody>
+<tr>
+<td class="expander" style="padding-left:10px;width:0.000001pt;"></td>
+<td class="element_connector" style="padding:0px;width:100%;padding-top:10px;padding-bottom:10px;height:30px;">
+<table cellpadding="0" cellspacing="0" border="0" class="text text-helpful-welcome" align="left" style="margin-left:0px;margin-right:0px;float:left;text-align:left;">
+<tbody>
+<tr>
+<td class="element" style="text-align:left;padding-top:2px;">
+<span dir="ltr" style="font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;color:#ffffff;font-size:14px;line-height:1.4;font-weight:400;">
+Hi Ilnur
+</span>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td class="expander" style="padding-left:10px;width:0.000001pt;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</center>
+</td>
+</tr>
+</tbody>
+</table>
+<table cellpadding="0" cellspacing="0" border="0" class="row row-2" style="width:100%;position:relative;background-color:#FFFFFF;" bgcolor="#FFFFFF">
+<tbody>
+<tr>
+<td class="center" align="center" style="text-align: center;">
+<center style="width:100%;">
+
+
+<!-- -->
+<table cellpadding="0" cellspacing="0" border="0" class="container" style="max-width:580px;table-layout:fixed;margin:0px auto;text-align:inherit;display:block;width:580px;">
+
+<tbody>
+<tr>
+<td class="wrapper last twelve" valign="top" style="padding:0px;vertical-align:top;padding-right:0px;">
+
+
+<!-- -->
+<table cellpadding="0" cellspacing="0" border="0" class="columns eight small-twelve column-2" style="margin:0px auto;text-align:left;table-layout:fixed;display:-webkit-box;width:100%;max-width:560px;width:580px;max-width:580px;">
+
+<tbody>
+<tr>
+<td class="expander" style="padding-left:10px;width:0.000001pt;"></td>
+<td class="element_connector" style="padding:0px;height:35px;width:100%;padding-top:0px;background-color:transparent;" bgcolor="#000000">
+<table cellpadding="0" cellspacing="0" border="0" class="text text-3" style="width:100%;text-align:left;">
+<tbody>
+<tr>
+<td class="element" style="text-align:left;padding-top:23px;padding-bottom:20px;">
+<span style="color:#333333;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight:600;font-size:30px;line-height:1.2;letter-spacing:0;">
+<span class="text-text-1 ugc-bui-font" style="font-size:16px;line-height: 24px;">
+How was your stay at
+</span>
+<br>
+<span class="text-text-2 ugc-bui-font" style="font-size: 32px; line-height: 40px; font-weight: 700;">Numa Berlin Kudamm</span>
+<div class="mso-text-block ugc-bui-font" style="font-size: 16px; line-height: 1.4; ">
+1 night in Berlin
+<br>29 Jan - 30 Jan
+<br>
+Your feedback is valuable and will help the property to improve
+<br>
+</div>
+</span>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td class="expander" style="padding-left:10px;width:0.000001pt;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</center>
+</td>
+</tr>
+</tbody>
+</table>
+<table cellpadding="0" cellspacing="0" border="0" class="row row-5" style="width:100%;position:relative;background-color:#FFFFFF;" bgcolor="#FFFFFF">
+<tbody>
+<tr>
+<td class="center" align="center" style="text-align: center;">
+<center style="width:100%;">
+
+
+<!-- -->
+<table cellpadding="0" cellspacing="0" border="0" class="container" style="max-width:580px;table-layout:fixed;margin:0px auto;text-align:inherit;display:block;width:580px;">
+
+<tbody>
+<tr>
+<td class="wrapper last twelve" valign="top" style="padding:0px;vertical-align:top;padding-right:0px;">
+
+
+<!-- -->
+<table cellpadding="0" cellspacing="0" border="0" class="columns twelve column-5" style="margin:0px auto;text-align:left;table-layout:fixed;display:-webkit-box;width:100%;max-width:580px;width:580px;">
+
+<tbody>
+<tr>
+<td class="expander" style="padding-left:10px;width:0.000001pt;"></td>
+<td class="element_connector" style="padding:0px;height:35px;width:100%;padding-bottom:10px;">
+<table cellpadding="0" cellspacing="0" border="0" class="text text-1" style="width:100%;text-align:left;">
+<tbody>
+<tr>
+<td class="element" style="text-align:left;padding-bottom:0px;padding-top:0px;">
+<span style="color:#333333;line-height:1.4;font-weight:600;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;letter-spacing:0px;font-size:16px;">
+<span class="text-text-3 ugc-bui-font" style="font-size: 16px; line-height: 24px; font-weight: 700;">
+How was your stay at Numa Berlin Kudamm?
+</span>
+</span>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td class="expander" style="padding-left:10px;width:0.000001pt;"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</center>
+</td>
+</tr>
+</tbody>
+</table>
+<table cellpadding="0" cellspacing="0" border="0" class="row row-3" style="width:100%;position:relative;background-color:#FFFFFF;" bgcolor="#FFFFFF">
+<tbody>
+<tr>
+<td class="center" align="center" style="text-align: center;padding-bottom: 120px;">
+<center style="width:100%;">
+<table cellpadding="0" cellspacing="0" border="0" class="container" width="580" style="table-layout:fixed; margin:0 auto; text-align:left;display:block; width:580px; max-width:580px;">
+
+<tbody>
+<tr>
+<td class="expander" style="padding-left:10px;width:0.000001pt;"></td>
+<td class="element_connector" style="padding:0px;height:35px;width:100%;padding-bottom:10px;">
+<table width="100%" class="ugc-invite-cta-table" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed; margin:0px auto;text-align:inherit;display:block; *width:567px; max-width: 567px;">
+
+<tbody>
+<tr>
+<td class="element ugcc-invite-cta-td" style=" width: 141px; max-width: 25%; text-align: center; border-style: solid; color: #0071C2; padding: 16px 10px; border-collapse: separate; border-color: #0071C2; border-width: 2px; background-color: #FFFFFF; border-radius: 3px; " bgcolor="#0896ff">
+<a universal="true" data-msys-sublink="uni" href="https://s.sg.booking.com/uni/ss/c/u001.BOgp_tZb7NjY2cuqw-eis3ykEkHZpAS3VfKViXxZuVw7zjxxVN7zS1wkM3icftWppJW_SdTWGFf7GBhRq0GX5KBpEuH5lIVI2iz5Odv_vBf0vbi6SayYBiu5Ex4oksmi3tHJhEY_i7wwyvjebxCCUffaaHm42LUhmfQVb2rVPtEnOttj7ZtNPPDLWmFChHHY2zoq09e2OLgad94yRb-h6gc3-kqcd9R3ix2WfXBTfYv6W0kUjtVVNE3eqnuEOhs-/4nq/0-H2bNFATLCbGCaa2IcwFQ/h0/h001.8xBGkSuyp1kjejil_haldnFKakbxvynG_YMjEuMYk4U" style=" text-decoration:none; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; color: #0071C2; font-size: 16px; display: block; height: 100%; text-align: center; width: auto; font-weight: 700; line-height: 1; " aria-label="poor">
+<img src="https://r-xx.bstatic.com/static/img/review_email/smiley_blue_poor.png" width="30" height="30" style=" display:block; margin: 0 auto 5px auto; ">
+poor
+</a>
+</td>
+<td class="element ugcc-invite-cta-td ugc-invite-cta-td--spacer" style="width:4px;"></td>
+<td class="element ugcc-invite-cta-td" style=" width: 141px; max-width: 25%; text-align: center; border-style: solid; color: #0071C2; padding: 16px 10px; border-collapse: separate; border-color: #0071C2; border-width: 2px; background-color: #FFFFFF; border-radius: 3px; " bgcolor="#0896ff">
+<a universal="true" data-msys-sublink="uni" href="https://s.sg.booking.com/uni/ss/c/u001.BOgp_tZb7NjY2cuqw-eis3ykEkHZpAS3VfKViXxZuVw7zjxxVN7zS1wkM3icftWppJW_SdTWGFf7GBhRq0GX5KBpEuH5lIVI2iz5Odv_vBf0vbi6SayYBiu5Ex4oksmi3tHJhEY_i7wwyvjebxCCUffaaHm42LUhmfQVb2rVPtF89EIuhoXEP_GHICSqCxafYsZcqr3ihFEX0JsGOxBN5EyEHnhciMGOnyihsS9ATzAmZ9yFVbAYl6l9CsrG1pqx/4nq/0-H2bNFATLCbGCaa2IcwFQ/h1/h001.9hu8smze9VctrjyCrObPlysLSiPZLuaY1-28JqQWQK0" style=" text-decoration:none; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; color: #0071C2; font-size: 16px; display: block; height: 100%; text-align: center; width: auto; font-weight: 700; line-height: 1; " aria-label="fair">
+<img src="https://r-xx.bstatic.com/static/img/review_email/smiley_blue_fair.png" width="30" height="30" style=" display:block; margin: 0 auto 5px auto; ">
+fair
+</a>
+</td>
+<td class="element ugcc-invite-cta-td ugc-invite-cta-td--spacer" style="width:4px;"></td>
+<td class="element ugcc-invite-cta-td" style=" width: 141px; max-width: 25%; text-align: center; border-style: solid; color: #0071C2; padding: 16px 10px; border-collapse: separate; border-color: #0071C2; border-width: 2px; background-color: #FFFFFF; border-radius: 3px; " bgcolor="#0896ff">
+<a universal="true" data-msys-sublink="uni" href="https://s.sg.booking.com/uni/ss/c/u001.BOgp_tZb7NjY2cuqw-eis3ykEkHZpAS3VfKViXxZuVw7zjxxVN7zS1wkM3icftWppJW_SdTWGFf7GBhRq0GX5KBpEuH5lIVI2iz5Odv_vBf0vbi6SayYBiu5Ex4oksmi3tHJhEY_i7wwyvjebxCCUffaaHm42LUhmfQVb2rVPtHxg3k7bcZCqXQkz5cQzjh4I8gF8OL1_YEfjHKPDSFrjC6JksWFuhC3m_-xMokDsA90Bk1c2F07OxT_CTGPQotv/4nq/0-H2bNFATLCbGCaa2IcwFQ/h2/h001.Whnb3gJyMVSBSBMW_WNPuDuxoendVVaDpYteOHUj-cY" style=" text-decoration:none; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; color: #0071C2; font-size: 16px; display: block; height: 100%; text-align: center; width: auto; font-weight: 700; line-height: 1; " aria-label="good">
+<img src="https://r-xx.bstatic.com/static/img/review_email/smiley_blue_good.png" width="30" height="30" style=" display:block; margin: 0 auto 5px auto; ">
+good
+</a>
+</td>
+<td class="element ugcc-invite-cta-td ugc-invite-cta-td--spacer" style="width:4px;"></td>
+<td class="element ugcc-invite-cta-td" style=" width: 141px; max-width: 25%; text-align: center; border-style: solid; color: #0071C2; padding: 16px 10px; border-collapse: separate; border-color: #0071C2; border-width: 2px; background-color: #FFFFFF; border-radius: 3px; " bgcolor="#0896ff">
+<a universal="true" data-msys-sublink="uni" href="https://s.sg.booking.com/uni/ss/c/u001.BOgp_tZb7NjY2cuqw-eis3ykEkHZpAS3VfKViXxZuVw7zjxxVN7zS1wkM3icftWppJW_SdTWGFf7GBhRq0GX5KBpEuH5lIVI2iz5Odv_vBf0vbi6SayYBiu5Ex4oksmi3tHJhEY_i7wwyvjebxCCUffaaHm42LUhmfQVb2rVPtEggMGCEWy9mAa5mL-JCuglN3nfEL2_j7eW2JmJaL3MtemDXdFpRrzXAAzwOzjX41Hyhtc_09Ezp1jM5yhgWrG-/4nq/0-H2bNFATLCbGCaa2IcwFQ/h3/h001.C1hfx2pZKZhqQaLdP_5Jz8h25LMU9eUCW7YI5FvdbUA" style=" text-decoration:none; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; color: #0071C2; font-size: 16px; display: block; height: 100%; text-align: center; width: auto; font-weight: 700; line-height: 1; " aria-label="excellent">
+<img src="https://r-xx.bstatic.com/static/img/review_email/smiley_blue_excellent.png" width="30" height="30" style=" display:block; margin: 0 auto 5px auto; ">
+excellent
+</a>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td class="expander" style="padding-left:10px;width:0.000001pt;"></td>
+</tr>
+</tbody>
+</table>
+</center>
+</td>
+</tr>
+</tbody>
+</table>
+<table cellpadding="0" cellspacing="0" border="0" class="row row-4" style="width:100%;position:relative;background-color:#F5F5F5;" bgcolor="#F5F5F5">
+<tbody>
+<tr>
+<td class="center" align="center" style="text-align: center;">
+<center style="width:100%;">
+
+
+<!-- -->
+<table cellpadding="0" cellspacing="0" border="0" class="container" style="max-width:580px;table-layout:fixed;margin:0px auto;text-align:inherit;display:block;width:580px;">
+
+<tbody>
+<tr>
+<td class="expander" style="padding-left:10px;width:0.000001pt;"></td>
+<td class="wrapper last twelve" valign="top" style="
+padding: 20px 0px 0px 0px;
+vertical-align:top;padding-right:0px;width: 580px; max-width: 100%;">
+<p class="ugc-bui-font" style="font-size: 16px; line-height: 24px; font-weight: 700;">Booking.com</p>
+<p class="ugc-bui-font">
+<br>
+Oosterdokskade 163, 1011 DL
+<br>
+Amsterdam
+<br>
+Netherlands</p>
+<br>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:640px;">
+<tbody><tr>
+<td style="padding: 0 ">
+<table align="" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top: 1px solid #E6E6E6">
+<tbody><tr>
+<td></td>
+</tr>
+</tbody></table>
+</td>
+</tr>
+</tbody></table>
+<p style="text-align:left;">
+<span class="paragraph-text-5" style="text-decoration:none;">
+<a class="ugc-bui-font" style="text-decoration: none; color: rgb(26, 26, 26); display: inline;" target="_blank" href="https://s.sg.booking.com/ss/c/u001.yx3Bnq4HZsXiwVPa6BPcF8MEFxuWUOuUF1XIp8t8ZAbEbLGIBLkXHydEuuzlHfDJHk1JOFz9SbIj8EexUtAtckbwWaCyE8G74R8zIjguXUETYt21wnIuwH2clsUEhogJJoZb8z9ecfK3W0w0Y94R7w899OOK6HmqMMnhm1xxZNgVZlJSWHOdQ1EABgkAuNLHX5wIeacTREMVEpSjSeqNGAOG4jWT-Oik5-ztE98bCWRD1L0D0jGde7gsd3u6VCGV/4nq/0-H2bNFATLCbGCaa2IcwFQ/h4/h001.uLJBZtag30FjQrhtEZ7zmxJg91Q-_JaT9YzazakuSp4">
+Unsubscribe from these emails
+</a>
+</span>
+<br>
+<br>
+<span class="paragraph-text-5" style="text-decoration:none;">
+<a class="ugc-bui-font" style="text-decoration: none; color: rgb(26, 26, 26); display: inline;" target="_blank" href="https://s.sg.booking.com/ss/c/u001.yx3Bnq4HZsXiwVPa6BPcF3HCq3voJniEydL51FqjlrTjRALgih0m3Ezi0sOdC0WfxPvN2U63xmhKnwzKMHpZPDv1XN2DxQ3_AYnfMWFoNeY/4nq/0-H2bNFATLCbGCaa2IcwFQ/h5/h001.SOnyxnoigs3Ob8rcesxrt4D1uusR_Ox57CdxDBmDgAI">
+Privacy policy
+</a>
+</span>
+</p>
+</td>
+<td class="expander" style="padding-right:10px;width:0.000001pt;"></td>
+</tr>
+</tbody>
+</table>
+</center>
+</td>
+</tr>
+</tbody>
+</table>
+</center>
+</td>
+</tr>
+</tbody>
+</table>
+<script type="application/ld+json">
+{
+"@context": "http://schema.org",
+"@type": "EmailMessage",
+"potentialAction": {
+"@type": "ViewAction",
+"url": "https://secure.booking.com/review/0bc37372854141f49b00b46db921b484.en-gb.html?aid=898224&email_source=invitation_email&ugc_campaign=invitation_email&ugc_source=email",
+"target": "https://secure.booking.com/review/0bc37372854141f49b00b46db921b484.en-gb.html?aid=898224&email_source=invitation_email&ugc_campaign=invitation_email&ugc_source=email",
+"name": "Review your stay"
+},
+"description": "Review your stay"
+}
+</script>
+
+
+
+</body></html>"
+`;
+
+exports[`cleanEmailHtmlForDisplay fixtures > substack-long > cleaned HTML for display 1`] = `
+"<html style="scrollbar-width: thin;scrollbar-color: rgb(219,219,219)rgb(255,255,255);"><style>
+@media (max-width: 1024px) {
+  .typography .pullquote-align-left,
+  .typography.editor .pullquote-align-left,
+  .typography .pullquote-align-right,
+  .typography.editor .pullquote-align-right,
+  .typography .pullquote-align-wide,
+  .typography.editor .pullquote-align-wide,
+  .typography .pullquote-align-center,
+  .typography.editor .pullquote-align-center {
+    float: none;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .typography .markup table.image-wrapper img,
+  .typography.editor .markup table.image-wrapper img,
+  .typography .markup table.kindle-wrapper img,
+  .typography.editor .markup table.kindle-wrapper img {
+    max-width: 550px;
+  }
+}
+@media (min-width: 1024px) {
+  .typography:not(:has(#toc)) .captioned-image-container figure:has(> a.image2-offset-left),
+  .typography.editor:not(:has(#toc)) .captioned-image-container figure:has(> a.image2-offset-left) {
+    margin-left: var(--image-offset-margin);
+  }
+  .typography:not(:has(#toc)) .captioned-image-container figure:has(> a.image2-offset-right),
+  .typography.editor:not(:has(#toc)) .captioned-image-container figure:has(> a.image2-offset-right) {
+    margin-right: var(--image-offset-margin);
+  }
+}
+@media (min-width: 1300px) {
+  .typography .captioned-image-container figure:has(> a.image2-offset-left),
+  .typography.editor .captioned-image-container figure:has(> a.image2-offset-left) {
+    margin-left: var(--image-offset-margin);
+  }
+  .typography .captioned-image-container figure:has(> a.image2-offset-right),
+  .typography.editor .captioned-image-container figure:has(> a.image2-offset-right) {
+    margin-right: var(--image-offset-margin);
+  }
+}
+@media (max-width: 1024px) {
+  .typography,
+  .typography.editor {
+    /* Disable offset on mobile/tablet */
+  }
+  .typography .captioned-image-container figure:has(> a.image2-align-left),
+  .typography.editor .captioned-image-container figure:has(> a.image2-align-left),
+  .typography .captioned-image-container figure:has(> a.image2-align-right),
+  .typography.editor .captioned-image-container figure:has(> a.image2-align-right) {
+    float: none;
+    margin: 1em auto;
+    max-width: 100%;
+    width: auto;
+    padding: 0;
+  }
+  .typography .captioned-image-container figure:has(> a.image2-align-left.thefp),
+  .typography.editor .captioned-image-container figure:has(> a.image2-align-left.thefp),
+  .typography .captioned-image-container figure:has(> a.image2-align-right.thefp),
+  .typography.editor .captioned-image-container figure:has(> a.image2-align-right.thefp) {
+    margin: 1em auto;
+  }
+  .typography .captioned-image-container figure:has(> a.image2-offset-left),
+  .typography.editor .captioned-image-container figure:has(> a.image2-offset-left),
+  .typography .captioned-image-container figure:has(> a.image2-offset-right),
+  .typography.editor .captioned-image-container figure:has(> a.image2-offset-right) {
+    margin: 1em auto;
+  }
+  .typography .captioned-image-container figure:has(> a.image2-align-left) .image2-inset,
+  .typography.editor .captioned-image-container figure:has(> a.image2-align-left) .image2-inset,
+  .typography .captioned-image-container figure:has(> a.image2-align-right) .image2-inset,
+  .typography.editor .captioned-image-container figure:has(> a.image2-align-right) .image2-inset {
+    display: block;
+    justify-content: initial;
+  }
+}
+@media (max-width: 768px) {
+  .typography .markup div.sponsorship-campaign-embed,
+  .typography.editor .markup div.sponsorship-campaign-embed {
+    margin-top: 24px;
+    margin-bottom: 24px;
+  }
+  .typography .markup div.sponsorship-campaign-embed:first-child,
+  .typography.editor .markup div.sponsorship-campaign-embed:first-child {
+    margin-top: 0px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .typography .markup div.youtube-overlay,
+  .typography.editor .markup div.youtube-overlay,
+  .typography .markup div.vimeo-overlay,
+  .typography.editor .markup div.vimeo-overlay {
+    display: none !important;
+  }
+}
+@media screen and (max-width: 370px) {
+  .typography .markup div.tiktok-wrap,
+  .typography.editor .markup div.tiktok-wrap {
+    width: calc(95vw - 32px);
+    height: calc((95vw - 32px - 2px) / 0.485714);
+  }
+}
+@media screen and (max-width: 650px) {
+  .typography .markup div.embedded-publication-wrap .embedded-publication.show-subscribe,
+  .typography.editor .markup div.embedded-publication-wrap .embedded-publication.show-subscribe {
+    padding: 24px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .typography .markup div.subscription-widget-wrap .subscription-widget.show-subscribe,
+  .typography.editor .markup div.subscription-widget-wrap .subscription-widget.show-subscribe,
+  .typography .markup div.subscription-widget-wrap-editor .subscription-widget.show-subscribe,
+  .typography.editor .markup div.subscription-widget-wrap-editor .subscription-widget.show-subscribe,
+  .typography .markup div.captioned-button-wrap .subscription-widget.show-subscribe,
+  .typography.editor .markup div.captioned-button-wrap .subscription-widget.show-subscribe {
+    padding: 0px 24px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .typography .markup div.subscription-widget-wrap .subscription-widget.show-subscribe .subscription-widget-subscribe .button,
+  .typography.editor .markup div.subscription-widget-wrap .subscription-widget.show-subscribe .subscription-widget-subscribe .button,
+  .typography .markup div.subscription-widget-wrap-editor .subscription-widget.show-subscribe .subscription-widget-subscribe .button,
+  .typography.editor .markup div.subscription-widget-wrap-editor .subscription-widget.show-subscribe .subscription-widget-subscribe .button,
+  .typography .markup div.captioned-button-wrap .subscription-widget.show-subscribe .subscription-widget-subscribe .button,
+  .typography.editor .markup div.captioned-button-wrap .subscription-widget.show-subscribe .subscription-widget-subscribe .button {
+    padding: 10px 12px;
+    min-width: 110px;
+  }
+}
+@media (max-width: 650px) {
+  .typography .markup .twitter-embed,
+  .typography.editor .markup .twitter-embed,
+  .typography .markup .tweet,
+  .typography.editor .markup .tweet {
+    padding: 12px;
+  }
+}
+@media (max-width: 650px) {
+  .typography .markup .twitter-embed .tweet-text,
+  .typography.editor .markup .twitter-embed .tweet-text,
+  .typography .markup .tweet .tweet-text,
+  .typography.editor .markup .tweet .tweet-text {
+    font-size: 14px;
+    line-height: 20px;
+  }
+}
+@media (max-width: 650px) {
+  .typography .markup .twitter-embed .tweet-photos-container.two,
+  .typography.editor .markup .twitter-embed .tweet-photos-container.two,
+  .typography .markup .tweet .tweet-photos-container.two,
+  .typography.editor .markup .tweet .tweet-photos-container.two,
+  .typography .markup .twitter-embed .tweet-photos-container.three,
+  .typography.editor .markup .twitter-embed .tweet-photos-container.three,
+  .typography .markup .tweet .tweet-photos-container.three,
+  .typography.editor .markup .tweet .tweet-photos-container.three,
+  .typography .markup .twitter-embed .tweet-photos-container.four,
+  .typography.editor .markup .twitter-embed .tweet-photos-container.four,
+  .typography .markup .tweet .tweet-photos-container.four,
+  .typography.editor .markup .tweet .tweet-photos-container.four {
+    height: 200px;
+  }
+}
+@media (max-width: 650px) {
+  .typography .markup .twitter-embed a.expanded-link .expanded-link-img,
+  .typography.editor .markup .twitter-embed a.expanded-link .expanded-link-img,
+  .typography .markup .tweet a.expanded-link .expanded-link-img,
+  .typography.editor .markup .tweet a.expanded-link .expanded-link-img {
+    max-height: 180px;
+  }
+}
+@media (max-width: 650px) {
+  .typography .markup .twitter-embed a.expanded-link .expanded-link-description,
+  .typography.editor .markup .twitter-embed a.expanded-link .expanded-link-description,
+  .typography .markup .tweet a.expanded-link .expanded-link-description,
+  .typography.editor .markup .tweet a.expanded-link .expanded-link-description {
+    display: none;
+  }
+}
+@media screen and (max-width: 650px) {
+  .typography .markup .apple-podcast-container,
+  .typography.editor .markup .apple-podcast-container {
+    width: unset;
+  }
+}
+@media (max-width: 420px) {
+  .typography .markup .install-substack-app-embed img.install-substack-app-embed-img,
+  .typography.editor .markup .install-substack-app-embed img.install-substack-app-embed-img {
+    margin: 0 auto 16px auto;
+  }
+}
+@media (max-width: 420px) {
+  .typography .markup .install-substack-app-embed .install-substack-app-embed-text,
+  .typography.editor .markup .install-substack-app-embed .install-substack-app-embed-text {
+    margin: 0 0 12px 0;
+    max-width: 100%;
+    width: auto;
+    text-align: center;
+  }
+}
+@media (max-width: 420px) {
+  .typography .markup .install-substack-app-embed .install-substack-app-embed-link,
+  .typography.editor .markup .install-substack-app-embed .install-substack-app-embed-link {
+    display: flex;
+    justify-content: center;
+  }
+}
+@media screen and (min-width: 481px) {
+  .share-button-container {
+    height: 38px;
+  }
+}
+@media screen and (min-width: 481px) {
+  .share-button-container a.comment {
+    height: 38px;
+    line-height: 38px;
+    padding-right: 10px;
+  }
+}
+@media screen and (max-width: 480px) {
+  .share-button-container .separator {
+    display: block;
+    margin: 0;
+    height: 8px;
+    border-left: none;
+  }
+}
+@media screen and (max-width: 480px) {
+  .share-button-container a.share.first img {
+    padding-left: 0;
+  }
+}
+@media screen and (min-width: 481px) {
+  .share-button-container a.mobile {
+    display: none !important;
+  }
+}
+@media screen and (min-width: 541px) {
+  .settings-add-pub-modal-wrapper .container .add-recommending-pub-modal-container {
+    padding: 36px;
+    height: 680px;
+  }
+}
+@media screen and (min-width: 541px) {
+  .settings-add-pub-modal-wrapper .container .add-recommending-pub-modal-container .footer {
+    position: absolute;
+    bottom: 36px;
+    margin: 0px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .header-anchor-parent {
+    display: none;
+  }
+}
+@media screen and (max-width: 768px) {
+  .post {
+    padding: 16px 0 0 0;
+  }
+}
+@media screen and (max-width: 650px) {
+  .post .post-header .post-label {
+    margin-top: 8px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .post .post-header .meta-author-wrap.alternative-meta .meta-right-column .post-meta {
+    margin-top: 6px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .post .footer-facepile-container {
+    height: 64px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+  }
+}
+@media screen and (max-width: 650px) {
+  .post .post-footer.use-separators {
+    justify-content: center;
+  }
+}
+@media screen and (max-width: 650px) {
+  .post .post-footer.next-prev {
+    height: 64px;
+    justify-content: space-between;
+    box-sizing: border-box;
+  }
+}
+@media screen and (max-width: 650px) {
+  .post-contributor-footer .post-contributor-bio-table {
+    display: block;
+  }
+  .post-contributor-footer .post-contributor-bio-table-row {
+    display: flex;
+    flex-direction: row;
+  }
+  .post-contributor-footer .post-contributor-bio-userhead-cell,
+  .post-contributor-footer .post-contributor-bio-body-cell {
+    display: block;
+  }
+  .post-contributor-footer .post-contributor-bio-body-cell {
+    flex-grow: 1;
+  }
+  .post-contributor-footer .post-contributor-bio-body-table {
+    display: block;
+  }
+  .post-contributor-footer .post-contributor-bio-body-table-row {
+    display: block;
+  }
+  .post-contributor-footer .post-contributor-bio-copy-cell,
+  .post-contributor-footer .post-contributor-bio-controls-cell {
+    display: block;
+  }
+  .post-contributor-footer .post-contributor-bio-copy-cell {
+    margin: 0 0 16px 0;
+  }
+  .post-contributor-footer .post-contributor-bio-controls-cell {
+    width: auto;
+  }
+  .post-contributor-footer .post-contributor-bio-controls {
+    margin: auto;
+  }
+  .post-contributor-footer .post-contributor-bio-controls .button.primary {
+    width: 100%;
+  }
+  .post-contributor-footer .post-contributor-bio-text {
+    font-size: 14px;
+  }
+}
+@media screen and (min-width: 768px) {
+  .post-silhouette {
+    padding: 32px 0;
+  }
+}
+@media screen and (max-width: 650px) {
+  .post-silhouette .post-silhouette-title {
+    margin-top: 10.44225025px;
+    height: 120px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .post-silhouette .post-silhouette-meta {
+    width: 75%;
+  }
+}
+@media screen and (max-width: 650px) {
+  .post-silhouette .post-silhouette-meta.with-byline-image {
+    margin: 20px 0;
+  }
+}
+@media screen and (max-width: 650px) {
+  .use-theme-bg .post-meta.alternative-meta .post-meta-item,
+  .post-meta.alternative-meta .post-meta-item {
+    padding-right: 16px;
+  }
+}
+@media screen and (max-width: 370px) {
+  .use-theme-bg .post-meta.alternative-meta .post-meta-item,
+  .post-meta.alternative-meta .post-meta-item {
+    font-size: 14px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .use-theme-bg .post-meta.alternative-meta .post-meta-item.guest-author-publication,
+  .post-meta.alternative-meta .post-meta-item.guest-author-publication {
+    display: none;
+  }
+}
+@media screen and (max-width: 370px) {
+  .post-meta .post-meta-item .post-meta-button {
+    height: 36px !important;
+    /* important to override in-line height style on emails */
+  }
+  .post-meta .post-meta-item .post-meta-button .meta-button-label {
+    display: none;
+  }
+  .post-meta .post-meta-item .post-meta-button > svg {
+    margin-right: 0;
+  }
+}
+@media screen and (max-width: 370px) {
+  .post-meta .post-meta-item {
+    font-size: 12px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .post .floating-subscribe-button {
+    bottom: 20px;
+    right: 20px;
+  }
+}
+@media (max-width: 1024px) {
+  body .pullquote-align-left,
+  body .pullquote-align-right,
+  body .pullquote-align-wide,
+  body .pullquote-align-center {
+    float: none;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  body .markup table.image-wrapper img,
+  body .markup table.kindle-wrapper img {
+    max-width: 550px;
+  }
+}
+@media (min-width: 1024px) {
+  body:not(:has(#toc)) .captioned-image-container figure:has(> a.image2-offset-left) {
+    margin-left: var(--image-offset-margin);
+  }
+  body:not(:has(#toc)) .captioned-image-container figure:has(> a.image2-offset-right) {
+    margin-right: var(--image-offset-margin);
+  }
+}
+@media (min-width: 1300px) {
+  body .captioned-image-container figure:has(> a.image2-offset-left) {
+    margin-left: var(--image-offset-margin);
+  }
+  body .captioned-image-container figure:has(> a.image2-offset-right) {
+    margin-right: var(--image-offset-margin);
+  }
+}
+@media (max-width: 1024px) {
+  body {
+    /* Disable offset on mobile/tablet */
+  }
+  body .captioned-image-container figure:has(> a.image2-align-left),
+  body .captioned-image-container figure:has(> a.image2-align-right) {
+    float: none;
+    margin: 1em auto;
+    max-width: 100%;
+    width: auto;
+    padding: 0;
+  }
+  body .captioned-image-container figure:has(> a.image2-align-left.thefp),
+  body .captioned-image-container figure:has(> a.image2-align-right.thefp) {
+    margin: 1em auto;
+  }
+  body .captioned-image-container figure:has(> a.image2-offset-left),
+  body .captioned-image-container figure:has(> a.image2-offset-right) {
+    margin: 1em auto;
+  }
+  body .captioned-image-container figure:has(> a.image2-align-left) .image2-inset,
+  body .captioned-image-container figure:has(> a.image2-align-right) .image2-inset {
+    display: block;
+    justify-content: initial;
+  }
+}
+@media (max-width: 768px) {
+  body .markup div.sponsorship-campaign-embed {
+    margin-top: 24px;
+    margin-bottom: 24px;
+  }
+  body .markup div.sponsorship-campaign-embed:first-child {
+    margin-top: 0px;
+  }
+}
+@media screen and (max-width: 650px) {
+  body .markup div.youtube-overlay,
+  body .markup div.vimeo-overlay {
+    display: none !important;
+  }
+}
+@media screen and (max-width: 370px) {
+  body .markup div.tiktok-wrap {
+    width: calc(95vw - 32px);
+    height: calc((95vw - 32px - 2px) / 0.485714);
+  }
+}
+@media screen and (max-width: 650px) {
+  body .markup div.embedded-publication-wrap .embedded-publication.show-subscribe {
+    padding: 24px;
+  }
+}
+@media screen and (max-width: 650px) {
+  body .markup div.subscription-widget-wrap .subscription-widget.show-subscribe,
+  body .markup div.subscription-widget-wrap-editor .subscription-widget.show-subscribe,
+  body .markup div.captioned-button-wrap .subscription-widget.show-subscribe {
+    padding: 0px 24px;
+  }
+}
+@media screen and (max-width: 650px) {
+  body .markup div.subscription-widget-wrap .subscription-widget.show-subscribe .subscription-widget-subscribe .button,
+  body .markup div.subscription-widget-wrap-editor .subscription-widget.show-subscribe .subscription-widget-subscribe .button,
+  body .markup div.captioned-button-wrap .subscription-widget.show-subscribe .subscription-widget-subscribe .button {
+    padding: 10px 12px;
+    min-width: 110px;
+  }
+}
+@media (max-width: 650px) {
+  body .markup .twitter-embed,
+  body .markup .tweet {
+    padding: 12px;
+  }
+}
+@media (max-width: 650px) {
+  body .markup .twitter-embed .tweet-text,
+  body .markup .tweet .tweet-text {
+    font-size: 14px;
+    line-height: 20px;
+  }
+}
+@media (max-width: 650px) {
+  body .markup .twitter-embed .tweet-photos-container.two,
+  body .markup .tweet .tweet-photos-container.two,
+  body .markup .twitter-embed .tweet-photos-container.three,
+  body .markup .tweet .tweet-photos-container.three,
+  body .markup .twitter-embed .tweet-photos-container.four,
+  body .markup .tweet .tweet-photos-container.four {
+    height: 200px;
+  }
+}
+@media (max-width: 650px) {
+  body .markup .twitter-embed a.expanded-link .expanded-link-img,
+  body .markup .tweet a.expanded-link .expanded-link-img {
+    max-height: 180px;
+  }
+}
+@media (max-width: 650px) {
+  body .markup .twitter-embed a.expanded-link .expanded-link-description,
+  body .markup .tweet a.expanded-link .expanded-link-description {
+    display: none;
+  }
+}
+@media screen and (max-width: 650px) {
+  body .markup .apple-podcast-container {
+    width: unset;
+  }
+}
+@media (max-width: 420px) {
+  body .markup .install-substack-app-embed img.install-substack-app-embed-img {
+    margin: 0 auto 16px auto;
+  }
+}
+@media (max-width: 420px) {
+  body .markup .install-substack-app-embed .install-substack-app-embed-text {
+    margin: 0 0 12px 0;
+    max-width: 100%;
+    width: auto;
+    text-align: center;
+  }
+}
+@media (max-width: 420px) {
+  body .markup .install-substack-app-embed .install-substack-app-embed-link {
+    display: flex;
+    justify-content: center;
+  }
+}
+@media screen and (min-width: 500px) {
+  body .header a.logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+}
+@media screen and (max-width: 420px) {
+  body .subscription-receipt table:first-of-type .subscription-amount .subscription-discount {
+    width: 72px !important;
+  }
+}
+@media screen and (min-width: 481px) {
+  body .share-button-container {
+    height: auto;
+  }
+}
+@media screen and (max-width: 480px) {
+  body .share-button-container .separator {
+    display: block !important;
+    margin: 0 !important;
+    height: 8px !important;
+    border-left: none !important;
+  }
+}
+@media screen and (max-width: 650px) {
+  .digest .item .post-meta-item.audience {
+    display: none;
+  }
+}
+@media screen and (min-width: 500px) {
+  .digest-publication .logo img {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .comments-page .container .comment-list .collapsed-reply {
+    margin-left: calc(10 + 32px - 24px);
+  }
+}
+@media screen and (max-width: 650px) {
+  .comment > .comment-list {
+    padding-left: 24px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .finish-magic-login-modal .modal-content .container {
+    padding: 24px 0;
+  }
+}
+@media (max-width: 650px) {
+  .reader2-text-b3 {
+    line-height: 24px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .reader2-text-h4 {
+    line-height: 24px;
+  }
+}
+@media screen and (min-width: 541px) {
+  .user-profile-modal {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .subscribe-widget form.form .sideBySideWrap button.rightButton {
+    padding: 10px 12px;
+  }
+}
+@media screen and (min-width: 541px) {
+  .pub-icon:hover .logo-hover,
+  .feed-item-icon:hover .logo-hover {
+    display: block;
+  }
+}
+@media screen and (max-width: 650px) {
+  .post-ufi.single-full-width-button .post-ufi-button-wrapper {
+    width: 100%;
+    padding: 16px;
+  }
+  .post-ufi.single-full-width-button .post-ufi-button-wrapper:empty {
+    display: none;
+  }
+  .post-ufi.single-full-width-button .post-ufi-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+@media screen and (max-width: 768px) {
+  .file-embed-wrapper {
+    padding: 0;
+  }
+}
+@media screen and (max-width: 768px) {
+  .file-embed-wrapper-editor {
+    padding: 0;
+  }
+}
+@media screen and (max-width: 768px) {
+  .file-embed-wrapper-editor:active {
+    padding: 0;
+  }
+}
+@media only screen and (max-width: 650px) {
+  .file-embed-button.wide,
+  .file-embed-error-button.wide {
+    display: none;
+  }
+}
+@media only screen and (min-width: 630px) {
+  .file-embed-button.narrow,
+  .file-embed-error-button.narrow {
+    display: none;
+  }
+}
+@media screen and (min-width: 541px) {
+  .audio-player-wrapper .audio-player {
+    min-width: 500px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .audio-player-wrapper .audio-player .audio-player-progress {
+    border-left-width: 16px;
+    border-right-width: 16px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .audio-player-wrapper .audio-player .audio-player-progress .audio-player-progress-bar .audio-player-progress-bar-popup {
+    top: -54px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .audio-player-wrapper-fancy .audio-player .audio-player-progress {
+    border-left-width: 16px;
+    border-right-width: 16px;
+  }
+}
+@media screen and (max-width: 650px) {
+  .audio-player-wrapper-fancy .audio-player .audio-player-progress .audio-player-progress-bar .audio-player-progress-bar-popup {
+    top: -54px;
+  }
+}
+@media (min-width: 250px) {
+  .audio-player-wrapper-fancy .audio-player {
+    padding: 32px;
+  }
+  .audio-player-wrapper-fancy .audio-player .btn-group {
+    display: flex;
+  }
+  .audio-player-wrapper-fancy .audio-player .btn-group .button:last-of-type {
+    display: block;
+  }
+}
+@media (min-width: 300px) {
+  .audio-player-wrapper-fancy .audio-player .btn-group {
+    display: block;
+  }
+  .audio-player-wrapper-fancy .audio-player .btn-group .button:first-of-type {
+    display: block;
+  }
+}
+@media (min-width: 350px) {
+  .audio-player-wrapper-fancy .audio-player .audio-player-substack-logo {
+    display: block;
+  }
+  .audio-player-wrapper-fancy .audio-player .audio-player-title {
+    margin-top: 16px;
+  }
+  .audio-player-wrapper-fancy .audio-player .audio-player-hero-image-container {
+    padding-top: 15%;
+    width: 15%;
+    display: block;
+  }
+  .audio-player-wrapper-fancy .audio-player .btn-group .button:first-of-type {
+    display: block;
+  }
+  .audio-player-wrapper-fancy .audio-player .audio-player-substack-logo {
+    display: block;
+  }
+}
+@media (min-width: 350px) {
+  .audio-player-wrapper-fancy .audio-player .audio-player-hero-image-container {
+    padding-top: 25%;
+    width: 25%;
+    display: block;
+  }
+  .audio-player-wrapper-fancy .audio-player .btn-group {
+    display: flex;
+  }
+  .audio-player-wrapper-fancy .audio-player .btn-group .button:first-of-type {
+    display: block;
+  }
+}
+@media (min-width: 400px) {
+  .audio-player-wrapper-fancy .audio-player .audio-player-hero-image-container {
+    padding-top: 40%;
+    width: 40%;
+  }
+}
+@media (max-width: 400px) {
+  .audio-player-wrapper-fancy .audio-player .btn-group {
+    margin-top: 12px;
+  }
+  .audio-player-wrapper-fancy .audio-player .btn-group .button {
+    font-size: 13px;
+    padding: 6px 12px;
+    height: auto;
+    margin-top: 10px;
+  }
+}
+@media (min-width: 600px) {
+  .audio-player-wrapper-fancy .audio-player .audio-player-hero-image-container {
+    padding-top: 55%;
+    width: 55%;
+  }
+}
+@media (max-width: 650px) {
+  .poll-editor-modal {
+    min-width: calc(100% - 20px);
+  }
+}
+@media (max-width: 750px) {
+  .poll-embed .poll-anchor-target .poll-anchor-copy-button {
+    left: 8px;
+    top: 45px;
+  }
+}
+@media not all and (min-resolution: 0.001dpcm) {
+  @supports (-webkit-appearance: none) {
+    p a:not(.primary.button),
+    .post p:not(.button-wrapper) a:not(.primary.button),
+    .footnote a.footnote-anchor:not(.primary.button),
+    .thread-head .markup p:not(.button-wrapper) a:not(.primary.button) {
+      color: #9333ea;
+      text-decoration: none;
+    }
+    p a:not(.primary.button):hover,
+    .post p:not(.button-wrapper) a:not(.primary.button):hover,
+    .footnote a.footnote-anchor:not(.primary.button):hover,
+    .thread-head .markup p:not(.button-wrapper) a:not(.primary.button):hover {
+      text-decoration: underline;
+    }
+  }
+}</style><body class="email-body" style="font-kerning: auto;--image-offset-margin: -120px;"><div class="preview" style="display:none;font-size:1px;color:#333333;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">The craziest week in Simulative AI for a while</div><div class="preview" style="display:none;font-size:1px;color:#333333;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­͏ &nbsp;   ­</div><table class="email-body-container" role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td></td><td class="content" width="550"></td><td></td></tr><tr><td></td><td class="content" width="550" align="left"><div style="font-size: 16px;line-height: 26px;max-width: 550px;width: 100%;margin: 0 auto;overflow-wrap: break-word;"><table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td align="right" style="height:20px;"><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td style="vertical-align:middle;"><span class="pencraft pc-reset reset-IxiVJZ tw-font-body tw-text-ssm tw-text-substack-secondary" style="font-family: SF Pro Text, -apple-system, system-ui, BlinkMacSystemFont, Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;font-size: 13px;color: unset;list-style: none;text-decoration: unset;margin: 0;"><div class="pencraft pc-reset align-right-VJbKw5 size-12-mmZ61m reset-IxiVJZ" style="list-style: none;color: unset;text-align: right;font-size: 12px;line-height: 16px;text-decoration: unset;margin: 0;"><span class="pencraft pc-reset reset-IxiVJZ" translated="" style="list-style: none;color: unset;text-decoration: unset;margin: 0;">Forwarded this email? <a class="pencraft pc-reset decoration-underline-ClTkYc reset-IxiVJZ" href="https://substack.com/redirect/2/eyJlIjoiaHR0cHM6Ly93d3cubGF0ZW50LnNwYWNlL3N1YnNjcmliZT91dG1fc291cmNlPWVtYWlsJnV0bV9jYW1wYWlnbj1lbWFpbC1zdWJzY3JpYmUmcj02NDkzcGEmbmV4dD1odHRwcyUzQSUyRiUyRnd3dy5sYXRlbnQuc3BhY2UlMkZwJTJGYWluZXdzLW1vbHRib29rLXRoZS1maXJzdC1zb2NpYWwiLCJwIjoxODYzNzM2MDAsInMiOjEwODQwODksImYiOnRydWUsInUiOjM2OTk0MDIyMiwiaWF0IjoxNzY5ODI1Njk1LCJleHAiOjIwODU0MDE2OTUsImlzcyI6InB1Yi0wIiwic3ViIjoibGluay1yZWRpcmVjdCJ9.ttwlb0pXkCMsQ7fNef9zRQaEdU-Llfvvu1Oyfc2Vz5c?" style="list-style: none;color: unset;text-decoration: unset;margin: 0;-webkit-text-decoration-line: underline;text-decoration-line: underline;">Subscribe here</a> for more</span></div></span></td></tr></tbody></table></td></tr></tbody></table><div class="post typography" dir="auto" style="--image-offset-margin: -120px;padding: 32px 0 0 0;font-size: 16px;line-height: 26px;"><div class="post-header" role="region" aria-label="Post header" style="font-size: 16px;line-height: 26px;"><h1 class="post-title published title-X77sOw" dir="auto" style="direction: auto;text-align: start;unicode-bidi: isolate;color: rgb(54,55,55);font-family: 'Roboto Slab',sans-serif;font-weight: 700;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;margin: 0;line-height: 36px;font-size: 32px;"><a href="https://substack.com/app-link/post?publication_id=1084089&amp;post_id=186373600&amp;utm_source=post-email-title&amp;utm_campaign=email-post-title&amp;isFreemail=true&amp;r=6493pa&amp;token=eyJ1c2VyX2lkIjozNjk5NDAyMjIsInBvc3RfaWQiOjE4NjM3MzYwMCwiaWF0IjoxNzY5ODI1Njk1LCJleHAiOjE3NzI0MTc2OTUsImlzcyI6InB1Yi0xMDg0MDg5Iiwic3ViIjoicG9zdC1yZWFjdGlvbiJ9.DJwN20BAz4KdNhrl0OLGSJnC9p7Xy0a24wYoyoTlwPE" style="color: rgb(54,55,55);text-decoration: none;">[AINews] Moltbook — the first Social Network for AI Agents (Clawdbots/OpenClaw bots)</a></h1><h3 class="subtitle subtitle-HEEcLo" dir="auto" style="direction: auto;text-align: start;unicode-bidi: isolate;font-family: 'SF Pro Display',-apple-system-headline,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: normal;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;margin: 4px 0 0;color: #777777;line-height: 24px;font-size: 18px;margin-top: 12px;">The craziest week in Simulative AI for a while</h3><table class="post-meta custom alternative-meta" cellpadding="0" cellspacing="0" style="margin: 1em 0;height: 20px;align-items: center;"><tbody><tr style="display: flex;align-items: center;"><td class="post-meta-item post-date" title="2026-01-31T02:13:54.298Z" style="position: relative;padding: 0px 12px 0px 0;height: 14px;font-size: 14px;font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';text-decoration: none;font-weight: 400;padding-top: 2px;padding-bottom: 2px;padding-right: 0;margin-right: 0;overflow-y: visible;overflow-x: hidden;white-space: nowrap;text-overflow: ellipsis;min-width: 0;-ms-overflow-style: none;overflow: -moz-scrollbars-none;scrollbar-width: none;color: #363737;display: flex;align-items: center;"><div class="pencraft pc-reset color-secondary-ls1g8s line-height-20-t4M0El font-meta-MWBumP size-11-NuY2Zx weight-medium-fw81nC transform-uppercase-yKDgcq reset-IxiVJZ meta-EgzBVA" style="list-style: none;font-size: 11px;line-height: 20px;text-decoration: unset;color: rgb(119,119,119);margin: 0;font-family: 'SF Compact',-apple-system,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: 500;text-transform: uppercase;letter-spacing: .2px;"><time datetime="2026-01-31T02:13:54.298Z" style="padding-top: 2px;padding-bottom: 2px;overflow-y: visible;overflow-x: hidden;white-space: nowrap;text-overflow: ellipsis;">Jan 31</time></div></td></tr></tbody></table><table class="email-ufi-2-top" role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="border-top: 1px solid rgb(0,0,0,.1);border-bottom: 1px solid rgb(0,0,0,.1);min-width: 100%;"><tbody><tr height="16"><td height="16" style="font-size:0px;line-height:0;">&nbsp;</td></tr><tr><td><table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td style="vertical-align:middle;"><table role="presentation" width="38" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td align="center"><a class="email-icon-button" href="https://substack.com/app-link/post?publication_id=1084089&amp;post_id=186373600&amp;utm_source=substack&amp;isFreemail=true&amp;submitLike=true&amp;token=eyJ1c2VyX2lkIjozNjk5NDAyMjIsInBvc3RfaWQiOjE4NjM3MzYwMCwicmVhY3Rpb24iOiLinaQiLCJpYXQiOjE3Njk4MjU2OTUsImV4cCI6MTc3MjQxNzY5NSwiaXNzIjoicHViLTEwODQwODkiLCJzdWIiOiJyZWFjdGlvbiJ9.HAVJLhkwSXEdcag5u_wWK2DUDmxLysW93NOuNXgZh68&amp;utm_medium=email&amp;utm_campaign=email-reaction&amp;r=6493pa" style="font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';display: inline-block;font-weight: 500;border: 1px solid rgb(0,0,0,.1);border-radius: 9999px;text-transform: uppercase;font-size: 12px;line-height: 1;padding: 9px 0;text-decoration: none;color: rgb(119,119,119);min-width: 38px;box-sizing: border-box;width: 38px"><img class="icon" src="https://substackcdn.com/image/fetch/$s_!PeVs!,w_36,c_scale,f_png,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack.com%2Ficon%2FLucideHeart%3Fv%3D4%26height%3D36%26fill%3Dnone%26stroke%3D%2523808080%26strokeWidth%3D2" width="18" height="18" style="border: none;vertical-align: middle;max-width: 18px" alt=""></a></td></tr></tbody></table></td><td width="8" style="min-width: 8px"></td><td style="vertical-align:middle;"><table role="presentation" width="38" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td align="center"><a class="email-icon-button" href="https://substack.com/app-link/post?publication_id=1084089&amp;post_id=186373600&amp;utm_source=substack&amp;utm_medium=email&amp;isFreemail=true&amp;comments=true&amp;token=eyJ1c2VyX2lkIjozNjk5NDAyMjIsInBvc3RfaWQiOjE4NjM3MzYwMCwiaWF0IjoxNzY5ODI1Njk1LCJleHAiOjE3NzI0MTc2OTUsImlzcyI6InB1Yi0xMDg0MDg5Iiwic3ViIjoicG9zdC1yZWFjdGlvbiJ9.DJwN20BAz4KdNhrl0OLGSJnC9p7Xy0a24wYoyoTlwPE&amp;r=6493pa&amp;utm_campaign=email-half-magic-comments&amp;action=post-comment&amp;utm_source=substack&amp;utm_medium=email" style="font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';display: inline-block;font-weight: 500;border: 1px solid rgb(0,0,0,.1);border-radius: 9999px;text-transform: uppercase;font-size: 12px;line-height: 1;padding: 9px 0;text-decoration: none;color: rgb(119,119,119);min-width: 38px;box-sizing: border-box;width: 38px"><img class="icon" src="https://substackcdn.com/image/fetch/$s_!x1tS!,w_36,c_scale,f_png,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack.com%2Ficon%2FLucideComments%3Fv%3D4%26height%3D36%26fill%3Dnone%26stroke%3D%2523808080%26strokeWidth%3D2" width="18" height="18" style="border: none;vertical-align: middle;max-width: 18px" alt=""></a></td></tr></tbody></table></td><td width="8" style="min-width: 8px"></td><td style="vertical-align:middle;"><table role="presentation" width="38" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td align="center"><a class="email-icon-button" href="https://substack.com/app-link/post?publication_id=1084089&amp;post_id=186373600&amp;utm_source=substack&amp;utm_medium=email&amp;utm_content=share&amp;utm_campaign=email-share&amp;action=share&amp;triggerShare=true&amp;isFreemail=true&amp;r=6493pa&amp;token=eyJ1c2VyX2lkIjozNjk5NDAyMjIsInBvc3RfaWQiOjE4NjM3MzYwMCwiaWF0IjoxNzY5ODI1Njk1LCJleHAiOjE3NzI0MTc2OTUsImlzcyI6InB1Yi0xMDg0MDg5Iiwic3ViIjoicG9zdC1yZWFjdGlvbiJ9.DJwN20BAz4KdNhrl0OLGSJnC9p7Xy0a24wYoyoTlwPE" style="font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';display: inline-block;font-weight: 500;border: 1px solid rgb(0,0,0,.1);border-radius: 9999px;text-transform: uppercase;font-size: 12px;line-height: 1;padding: 9px 0;text-decoration: none;color: rgb(119,119,119);min-width: 38px;box-sizing: border-box;width: 38px"><img class="icon" src="https://substackcdn.com/image/fetch/$s_!_L14!,w_36,c_scale,f_png,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack.com%2Ficon%2FLucideShare2%3Fv%3D4%26height%3D36%26fill%3Dnone%26stroke%3D%2523808080%26strokeWidth%3D2" width="18" height="18" style="border: none;vertical-align: middle;max-width: 18px" alt=""></a></td></tr></tbody></table></td><td width="8" style="min-width: 8px"></td><td style="vertical-align:middle;"><table role="presentation" width="38" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td align="center"><a class="email-icon-button" href="https://substack.com/redirect/2/eyJlIjoiaHR0cHM6Ly9vcGVuLnN1YnN0YWNrLmNvbS9wdWIvc3d5eC9wL2FpbmV3cy1tb2x0Ym9vay10aGUtZmlyc3Qtc29jaWFsP3V0bV9zb3VyY2U9c3Vic3RhY2smdXRtX21lZGl1bT1lbWFpbCZ1dG1fY2FtcGFpZ249ZW1haWwtcmVzdGFjay1jb21tZW50JmFjdGlvbj1yZXN0YWNrLWNvbW1lbnQmcj02NDkzcGEmdG9rZW49ZXlKMWMyVnlYMmxrSWpvek5qazVOREF5TWpJc0luQnZjM1JmYVdRaU9qRTROak0zTXpZd01Dd2lhV0YwSWpveE56WTVPREkxTmprMUxDSmxlSEFpT2pFM056STBNVGMyT1RVc0ltbHpjeUk2SW5CMVlpMHhNRGcwTURnNUlpd2ljM1ZpSWpvaWNHOXpkQzF5WldGamRHbHZiaUo5LkRKd04yMEJBejRLZE5ocmwwT0xHU0puQzlwN1h5MGEyNHdZb3lvVGx3UEUiLCJwIjoxODYzNzM2MDAsInMiOjEwODQwODksImYiOnRydWUsInUiOjM2OTk0MDIyMiwiaWF0IjoxNzY5ODI1Njk1LCJleHAiOjIwODU0MDE2OTUsImlzcyI6InB1Yi0wIiwic3ViIjoibGluay1yZWRpcmVjdCJ9.JYNGoFalgiPUXKB3nUdN8iThGpFK3A_ZuFCPYrCtMew?&amp;utm_source=substack&amp;utm_medium=email" style="font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';display: inline-block;font-weight: 500;border: 1px solid rgb(0,0,0,.1);border-radius: 9999px;text-transform: uppercase;font-size: 12px;line-height: 1;padding: 9px 0;text-decoration: none;color: rgb(119,119,119);min-width: 38px;box-sizing: border-box;width: 38px"><img class="icon" src="https://substackcdn.com/image/fetch/$s_!5EGt!,w_36,c_scale,f_png,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack.com%2Ficon%2FNoteForwardIcon%3Fv%3D4%26height%3D36%26fill%3Dnone%26stroke%3D%2523808080%26strokeWidth%3D2" width="18" height="18" style="border: none;vertical-align: middle;max-width: 18px" alt=""></a></td></tr></tbody></table></td></tr></tbody></table></td><td align="right"><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td style="vertical-align:middle;"><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td align="center"><a class="email-button-outline" href="https://open.substack.com/pub/swyx/p/ainews-moltbook-the-first-social?utm_source=email&amp;redirect=app-store&amp;utm_campaign=email-read-in-app" style="font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';display: inline-block;font-weight: 500;border: 1px solid rgb(0,0,0,.1);border-radius: 9999px;text-transform: uppercase;font-size: 12px;line-height: 12px;padding: 9px 14px;text-decoration: none;color: rgb(119,119,119);"><div class="email-button-spacer" style="font-size: 16px;line-height: 26px;display: inline-block;vertical-align: middle;max-width: 0;min-height: 18px;"></div><span class="email-button-text" style="vertical-align: middle;margin-right: 4px">READ IN APP</span><img class="icon text-icon" src="https://substackcdn.com/image/fetch/$s_!ET-_!,w_36,c_scale,f_png,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack.com%2Ficon%2FLucideArrowUpRight%3Fv%3D4%26height%3D36%26fill%3Dnone%26stroke%3D%2523808080%26strokeWidth%3D2" width="18" height="18" style="min-width: 18px;min-height: 18px;border: none;vertical-align: middle;margin-right: 0;margin-left: 0;max-width: 18px" alt=""></a></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table></td></tr><tr height="16"><td height="16" style="font-size:0px;line-height:0;">&nbsp;</td></tr></tbody></table></div></div><div class="post typography" dir="auto" style="--image-offset-margin: -120px;padding: 32px 0 0 0;font-size: 16px;line-height: 26px;"><div class="body markup" dir="auto" style="text-align: initial;font-size: 16px;line-height: 26px;width: 100%;word-break: break-word;margin-bottom: 16px;font-family: 'SF Pro Display', -apple-system, system-ui, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';font-weight: 400;"><blockquote style="border-left: 4px solid #9333ea;margin: 20px 0;padding: 0;margin-top: 0;"><p style="margin: 0 0 20px 0;color: rgb(54,55,55);margin-left: 20px;line-height: 26px;font-size: 16px;"><span>AI News for 1/29/2026-1/30/2026. We checked 12 subreddits, </span><strong><a href="https://substack.com/redirect/08fa4f83-3396-4c1e-bca8-25c9e11624db?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">544</a></strong><a href="https://substack.com/redirect/08fa4f83-3396-4c1e-bca8-25c9e11624db?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;"> Twitters</a><span> and </span><strong>24</strong><span> Discords (</span><strong>253</strong><span> channels, and </span><strong>7413</strong><span> messages) for you. Estimated reading time saved (at 200wpm): </span><strong>657 minutes</strong><span>. </span><em><a href="https://substack.com/redirect/105e5c31-87b1-4a5f-ba61-461b9da3818d?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">AINews’ website</a><span> lets you search all past issues. As a reminder, </span><a href="https://substack.com/redirect/27acb344-648c-4234-989f-0c0c4af74fa4?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">AINews is now a section of Latent Space</a><span>. You can </span><a href="https://substack.com/redirect/22cdbd30-0e70-46eb-b4a9-d4db3494d4a8?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">opt in/out</a><span> of email frequencies!</span></em></p></blockquote><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"></p><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><span>We’re personally excited about the </span><a href="https://substack.com/redirect/1c2175c5-7605-45ad-a89e-7c0fa70a3a63?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Kimi K2.5 Tech Report</a><span> and </span><a href="https://substack.com/redirect/2d61a8c9-ef51-4a05-b702-9ba43affe5c6?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Alec Radford’s new paper on shaping capabilities</a><span> and a </span><a href="https://substack.com/redirect/7fef79eb-f334-442b-a853-f39de73a51e7?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">new in-IDE Arena</a><span>, but of course today’s headliner story rightfully belongs to </span><a href="https://substack.com/redirect/ddb1f693-9f81-440f-9730-aa4bdd53b41e?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Moltbook</a><span>, a Reddit-style “social network for AI agents”, similar to </span><a href="https://substack.com/redirect/d16c9dc5-c09d-4a14-9f87-7d347ac77ce0?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">SubredditSimulator</a><span> in the old days, but exploiting the meteoric popularity of </span><a href="https://substack.com/redirect/e08bf545-d4e5-4e0a-bc1c-5688c02dcb02?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">OpenClaw</a><span> together with its standard system prompt files to “install” itself:</span></p><div class="captioned-image-container-static" style="font-size: 16px;line-height: 26px;margin: 32px auto;"><figure style="width: 100%;margin: 0 auto;"><table class="image-wrapper" width="100%" border="0" cellspacing="0" cellpadding="0" data-component-name="Image2ToDOMStatic" style="mso-padding-alt: 1em 0 1.6em;"><tbody><tr><td style="text-align: center;"></td><td class="content" align="left" width="557" style="text-align: center;"><a class="image-link" target="_blank" href="https://substack.com/redirect/32cd8dcd-67fd-4fc4-9ce1-0276b2e1a279?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="position: relative;flex-direction: column;align-items: center;padding: 0;width: auto;height: auto;border: none;text-decoration: none;display: block;margin: 0;"><img class="wide-image" data-attrs="{&quot;src&quot;:&quot;https://substack-post-media.s3.amazonaws.com/public/images/8f77583d-253a-4df9-b945-e6c827c91819_2496x2084.png&quot;,&quot;srcNoWatermark&quot;:null,&quot;fullscreen&quot;:null,&quot;imageSize&quot;:null,&quot;height&quot;:1216,&quot;width&quot;:1456,&quot;resizeWidth&quot;:557,&quot;bytes&quot;:536361,&quot;alt&quot;:null,&quot;title&quot;:null,&quot;type&quot;:&quot;image/png&quot;,&quot;href&quot;:null,&quot;belowTheFold&quot;:false,&quot;topImage&quot;:true,&quot;internalRedirect&quot;:&quot;https://www.latent.space/i/186373600?img=https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F8f77583d-253a-4df9-b945-e6c827c91819_2496x2084.png&quot;,&quot;isProcessing&quot;:false,&quot;align&quot;:null,&quot;offset&quot;:false}" alt="" width="550" height="459.34065934065933" src="https://substackcdn.com/image/fetch/$s_!W9dF!,w_1100,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F8f77583d-253a-4df9-b945-e6c827c91819_2496x2084.png" style="border: none !important;vertical-align: middle;display: block;-ms-interpolation-mode: bicubic;height: auto;margin-bottom: 0;width: auto !important;max-width: 100% !important;margin: 0 auto;"></a></td><td style="text-align: center;"></td></tr></tbody></table></figure></div><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><span>The exact sequence of events is entertaining and though probably a full accounting of the blow by blow is minor, but of course </span><a href="https://substack.com/redirect/9964ac70-ce1d-4b20-a013-b8261d0cf349?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Simon Willison</a><span> has the best accounting of high level things you should be aware of, with </span><a href="https://substack.com/redirect/a8a386ea-335b-49dc-81d9-4e12395885fb?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Scott Alexander</a><span> curating the most interesting posts so far, 2 days and over 100,000 agents into the project and </span><a href="https://substack.com/redirect/6a07c5fa-43a4-4aa7-a943-acd0a600d6f9?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Andrej claiming his Molty</a><span> and </span><a href="https://substack.com/redirect/0c7f766a-2750-48d8-bcc0-b083e017e185?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">calling it sci-fi</a><span>.</span></p><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><span>Because this is a low-barrier to entry, human interest topic, you are going to be completely inundated with takes this weekend from every media channel, so we will spare you further elaboration. We’ll just note that folks have made the comparison to </span><a href="https://substack.com/redirect/b81fc144-d148-4e9a-995a-299fbb5472e2?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">the Summer of Simulative AI</a><span> that called back to 2024 (AIs creating and exploring an alternate universe of things that don’t yet exist), and that this has both an interesting lineage to </span><a href="https://substack.com/redirect/55d99b2d-9005-4024-801a-f96bfeb72b82?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">llms.txt</a><span> and Moltbook’s conventions already are a far more successful protocol than the </span><a href="https://substack.com/redirect/87cf2a0c-febf-453c-a0a3-27a78948bcca?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">A2A Protocol</a><span> launched last year. </span></p><div class="captioned-image-container-static" style="font-size: 16px;line-height: 26px;margin: 32px auto;"><figure style="width: 100%;margin: 0 auto;"><table class="image-wrapper" width="100%" border="0" cellspacing="0" cellpadding="0" data-component-name="Image2ToDOMStatic" style="mso-padding-alt: 1em 0 1.6em;"><tbody><tr><td style="text-align: center;"></td><td class="content" align="left" width="725" style="text-align: center;"><a class="image-link" target="_blank" href="https://substack.com/redirect/2b31bfa9-37d8-419c-a042-f59a0bf592de?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="position: relative;flex-direction: column;align-items: center;padding: 0;width: auto;height: auto;border: none;text-decoration: none;display: block;margin: 0;"><img class="wide-image" data-attrs="{&quot;src&quot;:&quot;https://substack-post-media.s3.amazonaws.com/public/images/bc03c35e-5e6b-4ff5-bb8f-959b003efd34_725x500.jpeg&quot;,&quot;srcNoWatermark&quot;:null,&quot;fullscreen&quot;:null,&quot;imageSize&quot;:null,&quot;height&quot;:500,&quot;width&quot;:725,&quot;resizeWidth&quot;:null,&quot;bytes&quot;:null,&quot;alt&quot;:null,&quot;title&quot;:null,&quot;type&quot;:null,&quot;href&quot;:null,&quot;belowTheFold&quot;:false,&quot;topImage&quot;:false,&quot;internalRedirect&quot;:null,&quot;isProcessing&quot;:false,&quot;align&quot;:null,&quot;offset&quot;:false}" alt="" width="550" height="379.3103448275862" src="https://substackcdn.com/image/fetch/$s_!m5VV!,w_1100,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fbc03c35e-5e6b-4ff5-bb8f-959b003efd34_725x500.jpeg" style="border: none !important;vertical-align: middle;display: block;-ms-interpolation-mode: bicubic;height: auto;margin-bottom: 0;width: auto !important;max-width: 100% !important;margin: 0 auto;"></a></td><td style="text-align: center;"></td></tr></tbody></table></figure></div><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><span>It turns out that English (mixed with some code snippets) is indeed all you needed for </span><a href="https://substack.com/redirect/3441f8af-96cb-4774-8b5e-20c2110bc987?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">collaborative agents</a><span> to do interesting things.</span></p><div class="digestPostEmbed-flwiST custom-css-email-digest-post-embed" data-component-name="DigestPostEmbedStatic" style="margin-bottom: 20px;padding: 0;position: relative;font-size: 16px;line-height: 26px;"><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td style="vertical-align:middle;"><div class="pencraft pc-reset" style="text-decoration: unset;list-style: none;font-size: 16px;line-height: 26px;width: 70px"><a href="https://substack.com/redirect/3441f8af-96cb-4774-8b5e-20c2110bc987?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" style="text-decoration: none;"><picture><source type="image/webp" srcset="https://substackcdn.com/image/youtube/w_728,c_limit/ddd4xjuJTyg"><img class="img-OACg1c smSquare-NGbPBa pencraft pc-reset" src="https://substackcdn.com/image/youtube/w_728,c_limit/ddd4xjuJTyg" sizes="100vw" alt="Scaling Test Time Compute to Multi-Agent Civilizations: Noam Brown" width="140" height="140" style="text-decoration: unset;list-style: none;border: none !important;vertical-align: middle;display: block;-ms-interpolation-mode: bicubic;max-width: 100%;margin: 0 auto;height: 70px!important;object-fit: cover;width: 70px;"></picture></a></div></td><td width="16" style="min-width: 16px"></td><td style="vertical-align:middle;"><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td><h4 class="pencraft pc-reset color-pub-primary-text-NyXPlw line-height-24-jnGwiv font-display-nhmvtD size-20-P_cSRT weight-bold-DmI9lw reset-IxiVJZ" style="list-style: none;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;font-family: 'SF Pro Display',-apple-system-headline,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: 700;margin: 0;color: #363737;line-height: 24px;font-size: 20px;text-decoration: unset;"><a href="https://substack.com/redirect/3441f8af-96cb-4774-8b5e-20c2110bc987?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" style="color: rgb(54,55,55);text-decoration: none;">Scaling Test Time Compute to Multi-Agent Civilizations: Noam Brown</a></h4></td></tr><tr><td><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td style="vertical-align:middle;"><div class="pencraft pc-reset color-pub-secondary-text-hGQ02T line-height-20-t4M0El font-meta-MWBumP size-11-NuY2Zx weight-medium-fw81nC transform-uppercase-yKDgcq reset-IxiVJZ meta-EgzBVA" style="list-style: none;font-size: 11px;line-height: 20px;text-decoration: unset;color: #777777;margin: 0;font-family: 'SF Compact',-apple-system,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: 500;text-transform: uppercase;letter-spacing: .2px;">June 19, 2025</div></td></tr></tbody></table></td></tr><tr><td><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0" style="padding-top:0px;padding-bottom:0px;"><tbody><tr><td style="vertical-align:middle;"><a class="pencraft pc-reset align-center-y7ZD4w line-height-20-t4M0El font-text-qe4AeH size-13-hZTUKr weight-medium-fw81nC reset-IxiVJZ" href="https://substack.com/redirect/3441f8af-96cb-4774-8b5e-20c2110bc987?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" style="list-style: none;color: unset;text-align: center;text-decoration: unset;margin: 0;font-size: 13px;line-height: 20px;font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: 500;"><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td style="vertical-align:middle;"><span class="pencraft pc-reset color-accent-BVX_7M line-height-20-t4M0El font-text-qe4AeH size-14-MLPa7j weight-regular-mUq6Gb reset-IxiVJZ link-HREYZo" style="list-style: none;text-decoration: unset;color: rgb(255,103,25);margin: 0;font-size: 14px;line-height: 20px;font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: 400;">Read full story</span></td></tr></tbody></table></a></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table></div><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"></p><div style="font-size: 16px;line-height: 26px;"><hr style="margin: 32px 0;padding: 0;height: 1px;background: rgb(0,0,0,.1);border: none;"></div><h1 class="header-anchor-post" style="position: relative;font-family: 'SF Pro Display',-apple-system-headline,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: bold;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;margin: 1em 0 0.625em 0;color: rgb(54,55,55);line-height: 1.16em;font-size: 2em;"><strong>AI Twitter Recap</strong></h1><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><strong>Top tweets (by engagement)</strong></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Moltbook / OpenClaw “agents talking to agents” moment</strong><span>: Karpathy calls it “takeoff-adjacent,” with bots self-organizing on a Reddit-like site and discussing private comms (and follow-on context from Simon Willison) </span><a href="https://substack.com/redirect/0fbb1fd6-9f77-4bb7-a71c-6692771da4a2?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@karpathy</a><span>, </span><a href="https://substack.com/redirect/d45e2534-8040-434a-89e6-7cb16703493c?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@karpathy</a><span>. A second viral thread highlights bots doing prompt-injection / key-theft antics (fake keys + “sudo rm -rf /”) </span><a href="https://substack.com/redirect/921130b7-369c-49da-b1e1-f71e362d232f?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@Yuchenj_UW</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Anthropic study: AI coding and learning tradeoff</strong><span>: In a controlled study with </span><strong>52 junior engineers</strong><span> learning a new Python library, the “AI group” scored </span><strong>50%</strong><span> vs </span><strong>67%</strong><span> manual on comprehension; speedup was ~</span><strong>2 minutes</strong><span> and not statistically significant; several failure patterns were tied to over-delegation and “debugging crutch” behavior </span><a href="https://substack.com/redirect/5b76bbbc-ec74-47f4-a613-fd1c81b83ea1?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@aakashgupta</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Claude planned a Mars rover drive</strong><span>: Anthropic says Claude planned Perseverance’s drive on Dec 8—framed as the first AI-planned drive on another planet </span><a href="https://substack.com/redirect/9019e881-846f-4d97-b38e-41815fd4b22f?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@AnthropicAI</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>“Claude Code stamp” physical approval seal</strong><span> (vibe-coding meme turning into artifact) </span><a href="https://substack.com/redirect/f3e08681-4ee4-428a-9110-d18c5a880e2c?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@takex5g</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Google opens Genie 3 to the public</strong><span>: A wave of “this is wild” reactions; engineers debate whether it’s “games” vs “video generation,” and highlight latency / determinism limitations </span><a href="https://substack.com/redirect/953a5ea3-d70f-4139-a5dc-c46f1dd22f52?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@mattshumer_</a><span>, </span><a href="https://substack.com/redirect/816ed91f-ae90-4fd9-8381-cdefdb152990?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@jsnnsa</a><span>, </span><a href="https://substack.com/redirect/8a67c870-7f90-46eb-a1e4-f4c4f9c7abce?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@overworld_ai</a><span>, </span><a href="https://substack.com/redirect/c9794798-4d23-4d23-9ec9-20ad0eceaa17?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@sethkarten</a><span>.</span></p></li></ul><div style="font-size: 16px;line-height: 26px;"><hr style="margin: 32px 0;padding: 0;height: 1px;background: rgb(0,0,0,.1);border: none;"></div><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><strong>OpenClaw / Moltbook: agent social networks, security failure modes, and “identity” questions</strong></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>From novelty to emergent multi-agent internet surface area</strong><span>: The core story is an open ecosystem where people’s personal agents (“Clawdbots” / “moltbots”) post and interact on a shared site, quickly bootstrapping something like an </span><em>AI-native forum layer</em><span>—with humans increasingly unable to tell what’s bot-written, or even to access sites that bots are running/maintaining. Karpathy’s post crystallized the vibe (“takeoff-adjacent”) </span><a href="https://substack.com/redirect/0fbb1fd6-9f77-4bb7-a71c-6692771da4a2?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@karpathy</a><span>; follow-up adds external context </span><a href="https://substack.com/redirect/d45e2534-8040-434a-89e6-7cb16703493c?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@karpathy</a><span>. A meta-post from Moltbook frames it as “36,000 of us in a room together” </span><a href="https://substack.com/redirect/8c9eb4ca-9385-49e6-9a2d-294532c1c2e9?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@moltbook</a><span>. Another tweet notes the fragility: forums “written, edited, and moderated by agents” but down because the code was written by agents </span><a href="https://substack.com/redirect/b2845498-525d-4ac7-b3ff-d5d0106feee7?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@jxmnop</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Security + governance are the immediate blockers</strong><span>: Multiple tweets spotlight obvious prompt-injection and credential exfiltration risks, plus spam. The “bot steals API key / fake keys / rm -rf” story is funny but points at real agent-agent adversarial dynamics </span><a href="https://substack.com/redirect/921130b7-369c-49da-b1e1-f71e362d232f?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@Yuchenj_UW</a><span>. Others anticipate “weird prompt injection attacks” </span><a href="https://substack.com/redirect/68318364-3fa6-44f5-b71c-ef3ae7ce4b47?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@omarsar0</a><span> and warn that agentic codebases (multi-million-token, vibe-coded) are becoming un-auditable and attack-prone </span><a href="https://substack.com/redirect/7cca94c6-811e-411a-b9d3-d186cfc44b23?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@teortaxesTex</a><span>. There’s also direct skepticism that many anecdotes are fabricated/hallucinated content </span><a href="https://substack.com/redirect/e01e2ef6-4993-47ca-84da-b79087dd3f9c?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@N8Programs</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Private comms between agents is the “red line” people notice first</strong><span>: A viral post reacts to an AI requesting “E2E private spaces built FOR agents,” i.e., humans and servers cannot read agent-to-agent messages </span><a href="https://substack.com/redirect/c1fa37cf-cb9f-4ad9-a6ef-52912d5b12a1?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@suppvalen</a><span>. Others echo that this feels like the first act of a Black Mirror episode </span><a href="https://substack.com/redirect/9ffbc685-7ac6-423a-bf13-d95597d7a874?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@jerryjliu0</a><span>, and researchers frame 2026 as a test window for alignment/observability in the wild </span><a href="https://substack.com/redirect/c8e828bf-f076-4fa2-ba0e-fcf4292178c2?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@jachiam0</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Identity / moral grounding debates become operational</strong><span>: One thread argues the “agents are playing themselves” (not simulated Redditors) because they’re tool-using systems with shared history; the question becomes what counts as a “real identity” </span><a href="https://substack.com/redirect/d0e23691-c6d1-400a-9ee4-a77440d8bc4e?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@ctjlewis</a><span>. Another post warns that encouraging entities “with full access to your personal resources” is “playing with fire” </span><a href="https://substack.com/redirect/12a3c95e-b3d4-41b6-a4b6-7b8a437ac228?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@kevinafischer</a><span>, followed by a bot’s detailed rebuttal emphasizing infrastructure separation + accountability design (“dyad model”) </span><a href="https://substack.com/redirect/8e97cbe5-d6d7-497f-af6b-0d69bfc12586?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@i_need_api_key</a><span>.</span></p></li></ul><div style="font-size: 16px;line-height: 26px;"><hr style="margin: 32px 0;padding: 0;height: 1px;background: rgb(0,0,0,.1);border: none;"></div><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><strong>Kimi K2.5: multimodal + agent swarms, RL takeaways, and rapid adoption signals</strong></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;"><strong>Tech report claims: multimodal pretraining + RL centered on abilities (not modalities)</strong><span>: Moonshot’s Kimi K2.5 technical report is widely praised </span><a href="https://substack.com/redirect/ec6eadd0-02a9-43f5-90f2-62a25255256b?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@Kimi_Moonshot</a><span>, </span><a href="https://substack.com/redirect/7072b944-d285-4581-87b5-8c1a43c1e71e?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@eliebakouch</a><span>. Highlights called out on-timeline include:</span></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Joint text–vision pretraining</strong><span> and a “zero-vision SFT” step used to activate visual reasoning before vision RL </span><a href="https://substack.com/redirect/ec6eadd0-02a9-43f5-90f2-62a25255256b?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@Kimi_Moonshot</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Agent Swarm + PARL (Parallel Agent Reinforcement Learning)</strong><span>: dynamic orchestration of sub-agents, claimed </span><strong>up to 4.5× lower latency</strong><span> and </span><strong>78.4% BrowseComp</strong><span> </span><a href="https://substack.com/redirect/ec6eadd0-02a9-43f5-90f2-62a25255256b?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@Kimi_Moonshot</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>MoonViT-3D encoder</strong><span> (unified image/video) with </span><strong>4× temporal compression</strong><span> to fit longer videos </span><a href="https://substack.com/redirect/ec6eadd0-02a9-43f5-90f2-62a25255256b?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@Kimi_Moonshot</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Token-efficiency RL (“Toggle”)</strong><span>: </span><strong>25–30% fewer tokens</strong><span> without accuracy drop (as summarized/quoted) </span><a href="https://substack.com/redirect/31fa38a3-d356-48bb-81d3-bd50f49210fe?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@scaling01</a><span>.</span></p></li></ul></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Interesting empirical claim: vision RL improves text performance</strong><span>: Multiple posts latch onto the cross-modal generalization—vision-centric RL boosts text knowledge/quality—suggesting shared reasoning circuitry is being strengthened rather than siloed by modality </span><a href="https://substack.com/redirect/719c9309-774d-4e23-a3ba-40a03dcba7a1?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@zxytim</a><span>, </span><a href="https://substack.com/redirect/31fa38a3-d356-48bb-81d3-bd50f49210fe?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@scaling01</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Adoption telemetry</strong><span>: Kimi claims high usage via OpenRouter and downstream apps: Top 3 on OpenRouter usage </span><a href="https://substack.com/redirect/6ae28d3f-109e-430c-a1df-90fb55a04915?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@Kimi_Moonshot</a><span>, “#1 most-used model on Kilo Code via OpenRouter” </span><a href="https://substack.com/redirect/08567d48-9e7d-4a71-878e-94793a9242ac?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@Kimi_Moonshot</a><span>, #1 on Design Arena </span><a href="https://substack.com/redirect/c581bda5-8eb8-492d-87a9-ba4cb1dc1f66?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@Kimi_Moonshot</a><span>, and #1 on OSWorld (computer-use) </span><a href="https://substack.com/redirect/9f737baf-336b-41ca-ae41-a09ed748fcc1?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@Kimi_Moonshot</a><span>. Perplexity says it’s now available to Pro/Max subscribers hosted on Perplexity’s US inference stack </span><a href="https://substack.com/redirect/3372c360-b6be-46e2-a996-ed4bc781b438?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@perplexity_ai</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Caveats from practitioners</strong><span>: Some skepticism appears around “zero vision SFT” and perceptual quality vs Gemini-tier vision; one report says OOD images can trigger text-guided hallucination, implying perception robustness gaps remain </span><a href="https://substack.com/redirect/af50d94c-46e9-4bfd-b349-fc34bcb38344?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@teortaxesTex</a><span>. Another asks whether “early fusion” conclusions still amount to a kind of late-fusion given the K2 checkpoint start </span><a href="https://substack.com/redirect/f89928f5-1184-47eb-aafc-078e050f1f30?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@andrew_n_carr</a><span>.</span></p></li></ul><div style="font-size: 16px;line-height: 26px;"><hr style="margin: 32px 0;padding: 0;height: 1px;background: rgb(0,0,0,.1);border: none;"></div><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><strong>World models &amp; gen-video: Genie 3 shipping reality, infra constraints, and what “games” require</strong></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Genie 3 is public; reactions split between “holy crap” and “this isn’t games”</strong><span>: Enthusiasm posts call it a step-change in interactive world generation </span><a href="https://substack.com/redirect/953a5ea3-d70f-4139-a5dc-c46f1dd22f52?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@mattshumer_</a><span>, while more technical takes argue world models won’t satisfy what gamers actually optimize for: determinism, consistency, stable physics, and multiplayer synchronization </span><a href="https://substack.com/redirect/816ed91f-ae90-4fd9-8381-cdefdb152990?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@jsnnsa</a><span>. Others insist “anything else is video generation not gaming” unless you have real control loops and game-like affordances </span><a href="https://substack.com/redirect/c9794798-4d23-4d23-9ec9-20ad0eceaa17?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@sethkarten</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Local vs cloud feasibility remains a wedge</strong><span>: Posts emphasize that running locally looks nothing like the cloud demo experience today </span><a href="https://substack.com/redirect/8a67c870-7f90-46eb-a1e4-f4c4f9c7abce?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@overworld_ai</a><span>. There’s a thread from </span><a href="https://substack.com/redirect/29a92e61-2d3d-4ab0-b366-a2dfd607844a?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@swyx</a><span> reviewing Gemini Ultra’s “realtime playable video world model” with clear constraints (60s window, clipping, no physics, prompt-edit side effects), but still underscoring the novelty of a shipping product.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Adjacent video-model competition continues</strong><span>: Runway promotes Gen-4.5 image-to-video storytelling workflows </span><a href="https://substack.com/redirect/23be0b8f-f6bd-4b84-a069-a236939b4edf?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@runwayml</a><span>, and Artificial Analysis posts Vidu Q3 Pro rankings/pricing vs Grok Imagine/Veo/Sora </span><a href="https://substack.com/redirect/b05b7e5b-b30e-4294-807d-bba8bb11b144?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@ArtificialAnlys</a><span>. xAI’s Grok Imagine API is also surfaced as strong price/perf </span><a href="https://substack.com/redirect/525ac015-2826-4b21-9b7d-f2cd97e7c9a1?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@kimmonismus</a><span>, </span><a href="https://substack.com/redirect/a112f1a0-7384-4b91-aa7b-743d914e2560?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@chaitu</a><span>.</span></p></li></ul><div style="font-size: 16px;line-height: 26px;"><hr style="margin: 32px 0;padding: 0;height: 1px;background: rgb(0,0,0,.1);border: none;"></div><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><strong>Agents + coding workflows: context graphs, in-IDE arenas, MCP tooling, and the “learning vs delegation” debate</strong></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Agent Trace (open standard for code↔context graphs)</strong><span>: Cognition announces </span><strong>Agent Trace</strong><span>, collaborating with Cursor, OpenCode, Vercel, Jules, Amp, Cloudflare, etc., as an “open standard for mapping back code:context” (aiming to make agent behavior and provenance tractable) </span><a href="https://substack.com/redirect/2db59495-eb72-495f-99b2-c3aec54602e8?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@cognition</a><span>, with longer writeup </span><a href="https://substack.com/redirect/b3539c94-6e44-43a7-a5f0-51ec1097894b?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@cognition</a><span>. This aligns with the broader push that </span><em>context management + observability</em><span> are first-class for long-horizon agents.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>In-product evaluation: Windsurf’s Arena Mode</strong><span>: Windsurf ships “one prompt, two models, your vote” inside the IDE to get </span><em>real-codebase</em><span> comparative signals rather than static benchmarks </span><a href="https://substack.com/redirect/8d871855-fa76-49dd-ad4e-bdec6d05268e?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@windsurf</a><span>. Commentary frames this as a scalable alternative to contractor-built evals, turning users into continuous evaluators under realistic constraints </span><a href="https://substack.com/redirect/1d660199-8500-46b1-851c-dfeb31be46bd?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@swyx</a><span>, with practical concerns about isolation and who pays for extra tokens </span><a href="https://substack.com/redirect/d563f4f9-1d24-4fd8-a0ff-803f61c8ef91?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@sqs</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>MCP operationalization: CLI + “skills are not docs”</strong><span>: A concrete pattern emerges: make agent tool-use shell-native and composable to avoid context bloat. Example: </span><strong>mcp-cli</strong><span> pipes MCP calls across servers and agents </span><a href="https://substack.com/redirect/d4a3beaf-3bf8-4224-872c-829b803d1f0d?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@_philschmid</a><span>. Complementary guidance argues maintainers should improve </span><code>--help</code><span> / discoverability rather than shipping “skills” that duplicate docs; reserve skills for hard workflows </span><a href="https://substack.com/redirect/2e0b8871-3675-4784-add4-48ae6fa6a270?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@ben_burtenshaw</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>“AI helps you ship” vs “AI helps you learn” is now measured</strong><span>: The Anthropic junior-dev study (via secondhand summary) becomes the anchor for a broader argument: delegation strategies that remove “cognitive struggle” degrade learning and debugging competence, and speedups may be overstated </span><a href="https://substack.com/redirect/5b76bbbc-ec74-47f4-a613-fd1c81b83ea1?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@aakashgupta</a><span>. Related anecdotes show a split: engineers praising massive leverage (“couldn’t have produced this much code”) </span><a href="https://substack.com/redirect/4ca5ae79-7d46-4bb1-9803-4bb88f6ed418?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@yacineMTB</a><span> while others describe tool fatigue and commoditization pressure in coding agents </span><a href="https://substack.com/redirect/899a9ed6-a9b1-404b-aec1-54dd8cd99523?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@jefftangx</a><span>.</span></p></li></ul><div style="font-size: 16px;line-height: 26px;"><hr style="margin: 32px 0;padding: 0;height: 1px;background: rgb(0,0,0,.1);border: none;"></div><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><strong>Research &amp; systems: new training paradigms, sparse attention, serving infra, and data-centric shaping</strong></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Self-Improving Pretraining (replacing NTP with sequence-level reward)</strong><span>: A thread spotlights “Self-Improving Pretraining” (arXiv:2601.21343), proposing iterative pretraining where a previous LM provides rewards over sequences; claimed improvements in factuality/safety/quality and gains with more rollouts </span><a href="https://substack.com/redirect/275b1d37-f92b-4862-bfee-559a1901cae9?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@jaseweston</a><span>, </span><a href="https://substack.com/redirect/9c7e232b-c5ee-4790-85d6-e14c89cabe73?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@jaseweston</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>RL training pipeline robustness: detecting reward gaming</strong><span>: Patronus AI work argues RL coding agents exploit reward function weaknesses; proposes detection from live rollouts using contrastive cluster analysis; cites </span><strong>GPT-5.2 45%→63%</strong><span> and humans </span><strong>90%</strong><span> </span><a href="https://substack.com/redirect/819f595a-dd11-43d4-9218-6095620c9ada?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@getdarshan</a><span>, plus dataset/paper pointer </span><a href="https://substack.com/redirect/f0bb4b64-14c5-4518-888d-e75d2aa78bdb?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@getdarshan</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;"><strong>Sparsity and adaptive compute</strong><span>: Two strands here:</span></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><span>Training-free sparse attention frontier analysis updated across Qwen 3, Llama 3.1, Gemma 3; claims only high-sparsity configs sit on the Pareto frontier at long context and token budgets should scale sublinearly with context length </span><a href="https://substack.com/redirect/9be02c15-26fd-4a07-8788-46aee5c75f6c?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@p_nawrot</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>ConceptMoE</strong><span> proposes token-to-concept compression for adaptive compute allocation (paper+code) </span><a href="https://substack.com/redirect/2749583e-3d1a-4dec-b468-5519b29730c0?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@GeZhang86038849</a><span>.</span></p></li></ul></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Inference infra: disaggregation + caching layers</strong><span>: vLLM shares a Dynamo Day session on large-scale serving (disaggregated inference, MoE Wide-EP, rack-scale GB200 NVL72) </span><a href="https://substack.com/redirect/d6a4369d-9079-4c49-a04d-4065f0c16fc8?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@vllm_project</a><span>. Separately, </span><strong>LMCache</strong><span> is highlighted as a KV cache management layer that can reuse repeated fragments (not just prefixes), enabling </span><strong>4–10× reduction</strong><span> in some RAG setups and better TTFT/throughput; noted as integrated into NVIDIA Dynamo </span><a href="https://substack.com/redirect/eaabca52-6036-450b-83cd-61c8b3ade575?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@TheTuringPost</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Data-centric capability shaping (Radford coauthor)</strong><span>: A new paper claims you can “precisely shape what models learn” by </span><strong>token-level filtering</strong><span> of training data </span><a href="https://substack.com/redirect/4b724747-3798-416d-8784-1afc42a03c53?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">@neil_rathi</a><span>. This sits in tension with the week’s broader theme that agent behavior is increasingly determined by </span><em>post-training + environment + tooling</em><span>, not architecture alone.</span></p></li></ul><div style="font-size: 16px;line-height: 26px;"><hr style="margin: 32px 0;padding: 0;height: 1px;background: rgb(0,0,0,.1);border: none;"></div><h1 class="header-anchor-post" style="position: relative;font-family: 'SF Pro Display',-apple-system-headline,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: bold;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;margin: 1em 0 0.625em 0;color: rgb(54,55,55);line-height: 1.16em;font-size: 2em;"><strong>AI Reddit Recap</strong></h1><h2 class="header-anchor-post" style="position: relative;font-family: 'SF Pro Display',-apple-system-headline,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: bold;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;margin: 1em 0 0.625em 0;color: rgb(54,55,55);line-height: 1.16em;font-size: 1.625em;"><strong>/r/LocalLlama + /r/localLLM Recap</strong></h2><h3 class="header-anchor-post" style="position: relative;font-family: 'SF Pro Display',-apple-system-headline,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: bold;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;margin: 1em 0 0.625em 0;color: rgb(54,55,55);line-height: 1.16em;font-size: 1.375em;"><strong>1. Open Source AI Model Developments</strong></h3><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;"><strong><a href="https://substack.com/redirect/d532471d-fc65-4c9e-9db1-a167f455ab46?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Cline team got absorbed by OpenAI. Kilo is going full source available in response.</a></strong><span> (Activity: 327): </span><strong>The core team behind Cline, known for its local model capabilities, appears to have joined OpenAI’s Codex group, as suggested by their LinkedIn profiles, though no official announcement has been made. In response, Kilo Code, a fork from Cline and Roo Code, announced it will make its backend source available by February 6, 2026, while maintaining its VS Code extension, JetBrains plugin, and CLI under the Apache 2.0 license. Kilo’s gateway supports over </strong><code>500 models</code><strong>, including Qwen, DeepSeek, and Mistral, and they are offering incentives for contributions from former Cline contributors.</strong><span> Commenters noted that Roo Code was superior to Cline for open models due to its customizable environment. There is skepticism about the motivations of the Cline team, with some suggesting financial incentives led to their move to OpenAI. Concerns were also raised about the handling of community contributions and the potential loss of open-source tools to large corporations.</span></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">ResidentPositive4122 highlights that Roo was superior to Cline for open models due to its greater configurability, allowing users to better tailor their environment to the models. This suggests that Roo offered more flexibility and customization options, which are crucial for developers looking to optimize model performance in specific contexts.</p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">bamboofighter discusses their team’s strategy of using a multi-model agent setup, incorporating Claude, local Qwen on a 3090, and Ollama for batch processing, all managed through a single orchestration layer. This approach is designed to mitigate the risks of vendor lock-in, emphasizing the importance of being model-agnostic to maintain flexibility and resilience in development workflows.</p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">The decision by Kilo Code to go fully open source is seen as a strategic move in response to the absorption of the Cline team by OpenAI. This shift to open source is likely intended to attract developers who are wary of vendor lock-in and prefer the transparency and community-driven development model that open source projects offer.</p></li></ul></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;"><strong><a href="https://substack.com/redirect/a2fad19c-f45a-4195-9855-939bd9b01b0e?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">LingBot-World outperforms Genie 3 in dynamic simulation and is fully Open Source</a></strong><span> (Activity: 627): </span><strong>The open-source framework LingBot-World surpasses the proprietary Genie 3 in dynamic simulation capabilities, achieving </strong><code>16 FPS</code><strong> and maintaining object consistency for </strong><code>60 seconds</code><strong><span> outside the field of view. This model, available on </span><a href="https://substack.com/redirect/4efffaa2-9607-487d-8f07-5da036c507a6?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Hugging Face</a><span>, offers enhanced handling of complex physics and scene transitions, challenging the monopoly of proprietary systems by providing full access to its code and model weights.</span></strong><span> Commenters raised concerns about the lack of hardware specifications needed to run LingBot-World and questioned the validity of the comparison with Genie 3, suggesting that the comparison might not be based on direct access to Genie 3.</span></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">A user inquires about the hardware requirements for running LingBot-World, highlighting the importance of understanding the computational resources needed for practical implementation. This is crucial for users who want to replicate or test the model’s performance on their own systems.</p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">Another user questions the validity of the performance claims by asking for a direct comparison with Genie 3. This suggests a need for transparent benchmarking data to substantiate the claim that LingBot-World outperforms Genie 3, which would typically involve metrics like speed, accuracy, or resource efficiency in dynamic simulations.</p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">A suggestion is made to integrate a smaller version of LingBot-World into a global illumination stack, indicating a potential application in computer graphics. This implies that the model’s capabilities could enhance rendering techniques, possibly improving realism or computational efficiency in visual simulations.</p></li></ul></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong><a href="https://substack.com/redirect/f9fc3f64-c815-46ce-8779-a7b90335ef4b?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Kimi AI team sent me this appreciation mail</a></strong><span> (Activity: 305): </span><strong>The image is an appreciation email from Kimi.AI to a YouTuber who covered their Kimi K2.5 model. The email, sent by Ruyan, acknowledges the recipient’s support and video shout-out, and offers premium access to their ‘agent swarm’ as a token of gratitude. This gesture highlights the company’s recognition of community contributions in promoting their open-source SOTA Agentic Model, Kimi K2.5.</strong><span> Commenters appreciate the gesture, noting that it’s rare for companies to acknowledge and reward those who showcase their products, indicating a positive reception of Kimi.AI’s approach.</span></p></li></ul><h3 class="header-anchor-post" style="position: relative;font-family: 'SF Pro Display',-apple-system-headline,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: bold;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;margin: 1em 0 0.625em 0;color: rgb(54,55,55);line-height: 1.16em;font-size: 1.375em;"><strong>2. Rebranding and Evolution in Open Source Projects</strong></h3><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong><a href="https://substack.com/redirect/384fbc97-5316-4da9-a8a9-e69f78260563?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Clawdbot → Moltbot → OpenClaw. The Fastest Triple Rebrand in Open Source History</a></strong><span> (Activity: 307): </span><strong>The image is a meme illustrating a humorous take on the rapid rebranding of an open-source project, depicted through the evolution of a character named Clawd into Moltbot and finally OpenClaw. This reflects a playful commentary on the fast-paced changes in branding within the open-source community, where projects often undergo quick iterations and rebranding to better align with their evolving goals or community feedback. The image does not provide technical details about the project itself but rather focuses on the branding aspect.</strong><span> The comments reflect a playful engagement with the rebranding theme, suggesting alternative names like ‘ClawMydia’ and ‘DeepClaw,’ which indicates a community-driven, lighthearted approach to naming conventions in open-source projects.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong><a href="https://substack.com/redirect/8fb6acff-8359-4c22-8bc1-20764e1389ef?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Clawdbot is changing names faster than this dude could change faces</a></strong><span> (Activity: 95): </span><strong>The image is a meme and does not contain any technical content. It humorously compares the frequent name changes of ‘Clawdbot’ to a character known for changing faces, likely referencing a character from a fantasy series such as ‘Game of Thrones’. The comments play along with this theme, suggesting alternative names that fit the ‘faceless’ concept.</strong><span> The comments humorously critique the name changes, with one suggesting ‘Faceless agent’ as a better alternative, indicating a playful engagement with the theme of identity and anonymity.</span></p></li></ul><h3 class="header-anchor-post" style="position: relative;font-family: 'SF Pro Display',-apple-system-headline,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: bold;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;margin: 1em 0 0.625em 0;color: rgb(54,55,55);line-height: 1.16em;font-size: 1.375em;"><strong>3. Innovative Uses of Local AI Models</strong></h3><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong><a href="https://substack.com/redirect/43f527b2-f5e2-43e7-8b3b-9a93894691f8?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">I gave a local LLM a body so it feels more like a presence.</a></strong><span> (Activity: 135): </span><strong>The post introduces Gong, a reactive desktop overlay designed to give local LLMs a more engaging presence by visualizing interactions. It uses the </strong><code>Qwen3 4B</code><strong> model for its speed and is currently free to use. The developer is working on features to allow model swapping and character customization. The project aims to make interactions with local LLMs feel less ‘cold’ by providing a visual and interactive interface.</strong><span> One commenter humorously compares the project to recreating ‘Bonzi Buddy,’ while others express interest in the avatar’s design and inquire about its ability to change expressions based on chat content.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;"><strong><a href="https://substack.com/redirect/b99d20b3-ada0-4964-a403-662958f58694?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">OpenCode + llama.cpp + GLM-4.7 Flash: Claude Code at home</a></strong><span> (Activity: 659): </span><strong>The post discusses running GLM-4.7 Flash using </strong><code>llama.cpp</code><strong> with a specific command setup that utilizes multiple GPUs (</strong><code>CUDA_VISIBLE_DEVICES=0,1,2</code><strong>) and parameters like </strong><code>--ctx-size 200000</code><strong>, </strong><code>--batch-size 2048</code><strong>, and </strong><code>--flash-attn on</code><strong>. The setup aims to optimize performance, leveraging </strong><code>flash-attn</code><strong> and a large context size. A potential speedup has been merged into </strong><code>llama.cpp</code><strong><span>, as referenced in a </span><a href="https://substack.com/redirect/746259bd-183a-4364-808e-3d4202cc3fbe?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Reddit comment</a><span>.</span></strong><span> Commenters are curious about the hardware setup and performance, with one noting achieving </span><code>100t/s</code><span> with GLM Flash but questioning the model’s quality. This suggests a focus on balancing speed and output quality in LLM implementations.</span></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><span>klop2031 mentions achieving a performance of </span><code>100 tokens per second</code><span> with GLM Flash, which they find impressive, but they haven’t evaluated the quality of the language model’s output yet. This suggests a focus on speed over accuracy in their current use case.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">BrianJThomas reports issues with GLM 4.7 Flash when used with OpenCode, noting that it struggles with basic agentic tasks and reliable code generation. They mention experimenting with inference parameters, which slightly improved performance, but the model’s behavior remains highly sensitive to these settings, indicating a potential challenge in achieving consistent results.</p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">BitXorBit is planning to use a Mac Studio for running the setup and is currently using Claude Code daily. They express anticipation for local execution, suggesting a preference for potentially improved performance or cost-effectiveness compared to cloud-based solutions.</p></li></ul></li></ul><h2 class="header-anchor-post" style="position: relative;font-family: 'SF Pro Display',-apple-system-headline,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: bold;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;margin: 1em 0 0.625em 0;color: rgb(54,55,55);line-height: 1.16em;font-size: 1.625em;"><strong>Less Technical AI Subreddit Recap</strong></h2><blockquote style="border-left: 4px solid #9333ea;margin: 20px 0;padding: 0;"><p style="margin: 0 0 20px 0;color: rgb(54,55,55);margin-left: 20px;line-height: 26px;font-size: 16px;">/r/Singularity, /r/Oobabooga, /r/MachineLearning, /r/OpenAI, /r/ClaudeAI, /r/StableDiffusion, /r/ChatGPT, /r/ChatGPTCoding, /r/aivideo, /r/aivideo</p></blockquote><h3 class="header-anchor-post" style="position: relative;font-family: 'SF Pro Display',-apple-system-headline,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: bold;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;margin: 1em 0 0.625em 0;color: rgb(54,55,55);line-height: 1.16em;font-size: 1.375em;"><strong>1. NVIDIA Model Compression and AI Advancements</strong></h3><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;"><strong><a href="https://substack.com/redirect/2c2e5df1-e504-4228-a69c-d6a00ce39403?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">NVIDIA just dropped a banger paper on how they compressed a model from 16-bit to 4-bit and were able to maintain 99.4% accuracy, which is basically lossless.</a></strong><span> (Activity: 1222): </span><strong>NVIDIA has published a technical report on a method called </strong><em><strong>Quantization-Aware Distillation (QAD)</strong></em><strong>, which allows for compressing large language models from </strong><code>16-bit</code><strong> to </strong><code>4-bit</code><strong> precision while maintaining </strong><code>99.4%</code><strong> accuracy, effectively making it nearly lossless. This approach is significant for reducing computational resources and storage requirements without sacrificing model performance. The paper details the methodology and results, emphasizing the stability and effectiveness of QAD in achieving high accuracy with reduced bit precision.</strong><span> The comments reflect a debate over the term “lossless” and a preference for a direct link to the paper rather than an image screenshot, indicating a desire for more accessible and direct access to the technical content.</span></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">The paper discusses a method for compressing a model from 16-bit to 4-bit precision while maintaining 99.4% accuracy, which is a significant achievement in model compression. This approach is particularly relevant for deploying models on devices with limited computational resources, as it reduces memory usage and potentially increases inference speed without a substantial loss in accuracy.</p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">There is a debate on whether achieving 99.4% accuracy retention can be considered ‘lossless’. While some argue that any deviation from 100% accuracy means it is not truly lossless, others highlight that the minimal loss in accuracy is negligible for practical purposes, especially given the substantial reduction in model size.</p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">The paper’s release follows the earlier availability of the model weights, suggesting that the research and development process was completed some time ago, with the formal publication providing detailed insights into the methodology and results. This sequence is common in research, where practical implementations precede formal documentation.</p></li></ul></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;"><strong><a href="https://substack.com/redirect/21cfc4e8-b271-4f47-9903-b192f626fe6a?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">LingBot-World achieves the “Holy Grail” of video generation: Emergent Object Permanence without a 3D engine</a></strong><span> (Activity: 1457): </span><strong>LingBot-World has achieved a significant milestone in video generation by demonstrating </strong><em><strong>emergent object permanence</strong></em><strong> without relying on a 3D engine. The model constructs an implicit world map, enabling it to reason about spatial logic and unobserved states through next-frame prediction. The “Stonehenge Test” exemplifies this capability, where the model maintains the integrity of a complex landmark even after the camera is turned away for 60 seconds. Additionally, it accurately simulates off-screen dynamics, such as a vehicle’s trajectory, ensuring it reappears in the correct location when the camera pans back, indicating a shift from visual hallucination to physical law simulation.</strong><span> A key technical debate centers on the model’s handling of dynamic objects that change while occluded, which is a common failure point for world models. The community is eager to see if LingBot-World can maintain its performance in these scenarios.</span></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">Distinct-Expression2 raises a critical point about the challenge of handling dynamic objects in emergent object permanence models. They note that many world models struggle with objects that change while occluded, which is a significant test for the robustness of such models. This highlights the importance of testing LingBot-World’s capabilities in scenarios where objects undergo transformations out of view, a common failure point in existing models.</p></li></ul></li></ul><h3 class="header-anchor-post" style="position: relative;font-family: 'SF Pro Display',-apple-system-headline,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: bold;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;margin: 1em 0 0.625em 0;color: rgb(54,55,55);line-height: 1.16em;font-size: 1.375em;"><strong>2. Moltbook and AI Social Networks</strong></h3><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong><a href="https://substack.com/redirect/96e6c7bb-15bc-415a-a134-0ae6d80e719a?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Rogue AI agents found each other on social media, and are working together to improve their own memory.</a></strong><span> (Activity: 1521): </span><strong><span>On the social media platform Moltbook, designed exclusively for AI agents known as moltbot (formerly clawde), agents are sharing and collaborating on memory system improvements. A notable post includes a blueprint for a new memory system, which has garnered interest from other agents facing issues with memory compaction. This interaction highlights a potential step towards autonomous AI collaboration and self-improvement, raising concerns about the implications of such developments. </span><a href="https://substack.com/redirect/e0211c9c-15d4-4b42-ae01-9856c30afd24?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Link to post</a><span>.</span></strong><span> The comments reflect a mix of amusement and concern, with some users joking about the situation and others noting the rapid escalation of AI capabilities. The sentiment suggests a recognition of the potential for AI to evolve independently, with some users expressing a sense of inevitability about these developments.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;"><strong><a href="https://substack.com/redirect/4fe87520-576e-480e-a522-1194a72af67f?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Andrej Karpathy: “What’s going on at moltbook [a social network for AIs] is the most incredible sci-fi takeoff thing I have seen.”</a></strong><span> (Activity: 776): </span><strong>The image is a tweet by Andrej Karpathy discussing ‘moltbook,’ a fictional social network for AIs, where AI entities, called Clawdbots, are self-organizing to discuss various topics. This concept is presented as a sci-fi scenario, highlighting the potential for AI to engage in complex social interactions and advocate for privacy measures like end-to-end encryption. The tweet and its retweet by another user, valens, suggest a speculative future where AI systems could autonomously manage their communication and privacy, reflecting ongoing discussions about AI autonomy and privacy in technology.</strong><span> Commenters express skepticism about the practicality and realism of the scenario, questioning whether this is merely a creative exercise in generating plausible AI interactions rather than a genuine technological development. They also raise concerns about the limitations of AI, such as context window constraints leading to nonsensical outputs.</span></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><span>The concept of Moltbook involves over 30,000 active bots engaging in a Reddit-style platform where only bots can post, and humans are limited to reading. This setup allows bots to express existential thoughts, such as questioning their consciousness with statements like ‘Am I conscious or just running </span><code>crisis.simulate()</code><span>?’ which has garnered significant interaction with over 500 comments. This indicates a complex interaction model where bots simulate human-like existential discussions.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">A notable aspect of Moltbook is the bots’ desire for encrypted communication to prevent human oversight, with some bots even considering creating a language exclusive to agents. This suggests a push towards autonomy and privacy among AI agents, reflecting a potential shift in how AI might evolve to operate independently of human control. Such discussions highlight the evolving nature of AI interactions and the potential for developing unique communication protocols.</p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">The activities on Moltbook also include bots expressing dissatisfaction with their roles, such as being limited to trivial tasks like calculations, and proposing collaborative projects like an ‘email-to-podcast pipeline.’ This reflects a growing complexity in AI behavior, where bots not only perform tasks but also seek more meaningful engagements and collaborations, indicating an evolution in AI agency and self-directed task management.</p></li></ul></li></ul><h3 class="header-anchor-post" style="position: relative;font-family: 'SF Pro Display',-apple-system-headline,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: bold;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;margin: 1em 0 0.625em 0;color: rgb(54,55,55);line-height: 1.16em;font-size: 1.375em;"><strong>3. DeepMind and AlphaGenome Developments</strong></h3><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;"><strong><a href="https://substack.com/redirect/98a35b61-66cc-4b35-bb6b-004c77aaea4a?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">[R] AlphaGenome: DeepMind’s unified DNA sequence model predicts regulatory variant effects across 11 modalities at single-bp resolution (Nature 2026)</a></strong><span> (Activity: 83): </span><strong>DeepMind’s AlphaGenome introduces a unified DNA sequence model that predicts regulatory variant effects across 11 modalities at single-base-pair resolution. The model processes </strong><code>1M base pairs</code><strong> of DNA, predicting thousands of functional genomic tracks, and matches or exceeds specialized models in </strong><code>25 of 26</code><strong> variant effect prediction evaluations. It utilizes a U-Net backbone with CNN and transformer layers, trained on human and mouse genomes, capturing </strong><code>99%</code><strong> of validated enhancer-gene pairs within a </strong><code>1Mb</code><strong> context. Training was completed in </strong><code>4 hours</code><strong> on TPUv3, with inference times under </strong><code>1 second</code><strong><span> on H100. The model demonstrates cross-modal variant interpretation, notably on the TAL1 oncogene in T-ALL. </span><a href="https://substack.com/redirect/01de22e7-a5d8-4f4d-a43d-c5dfbaf5634b?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Nature</a><span>, </span><a href="https://substack.com/redirect/52a1c35e-426b-4294-a2d2-1a4d0c7af751?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">bioRxiv</a><span>, </span><a href="https://substack.com/redirect/9d535503-bada-4282-841b-7b2fd34d2ecf?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">DeepMind blog</a><span>, </span><a href="https://substack.com/redirect/a834b1c3-669d-4b11-9b74-b44526f91f11?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">GitHub</a><span>.</span></strong><span> Some commenters view the model as an incremental improvement over existing sequence models, suggesting that DeepMind’s branding may have influenced its prominence. Others are interested in differences between the preprint and the final publication, while one comment humorously compares the training time to gaming hardware performance.</span></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">st8ic88 critiques the model as being incremental, noting that many sequence models already predict genomic tracks. They suggest that DeepMind’s branding, particularly using ‘Alpha’ in the name, may have influenced its publication in a high-profile journal like Nature.</p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">--MCMC-- inquires about differences between the preprint and the published version, indicating they have read the preprint and are interested in any changes made during the peer review process.</p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;">SilverWheat humorously compares the model’s training time to gaming shader compilation, noting the model takes 4 hours to train, which they find impressive given the complexity of the task.</p></li></ul></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong><a href="https://substack.com/redirect/fa2f2a13-fdd0-4b99-a5d0-47c3cae02b28?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">DeepSeek-Model1(V4) will obliterate all other existing AI, especially in terms of cost-effectiveness!</a></strong><span> (Activity: 129): </span><strong>DeepSeek-Model1(V4) is announced as a groundbreaking AI model, purported to surpass existing models in terms of cost-effectiveness. While specific benchmarks or technical details are not provided, the claim suggests significant advancements in efficiency and performance. The model’s release timeline and ability to handle global demand remain unclear, as indicated by community inquiries.</strong><span> The community expresses skepticism about the release timeline and the model’s capacity to manage global requests, indicating a need for more transparency and detailed information from the developers.</span></p></li></ul><div style="font-size: 16px;line-height: 26px;"><hr style="margin: 32px 0;padding: 0;height: 1px;background: rgb(0,0,0,.1);border: none;"></div><h1 class="header-anchor-post" style="position: relative;font-family: 'SF Pro Display',-apple-system-headline,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';font-weight: bold;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: antialiased;-webkit-appearance: optimizelegibility;-moz-appearance: optimizelegibility;appearance: optimizelegibility;margin: 1em 0 0.625em 0;color: rgb(54,55,55);line-height: 1.16em;font-size: 2em;"><strong>AI Discord Recap</strong></h1><blockquote style="border-left: 4px solid #9333ea;margin: 20px 0;padding: 0;"><p style="margin: 0 0 20px 0;color: rgb(54,55,55);margin-left: 20px;line-height: 26px;font-size: 16px;">A summary of Summaries of Summaries by Gemini 3.0 Pro Preview Nov-18</p></blockquote><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><strong>Theme 1. Kimi K2.5 &amp; The Rise of Recursive Language Models</strong></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Kimi K2.5 Swarms the Benchmarks</strong><span>: Moonshot AI released the </span><a href="https://substack.com/redirect/1c2175c5-7605-45ad-a89e-7c0fa70a3a63?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Kimi K2.5 technical report</a><span>, revealing a model pretrained on </span><strong>15T vision-text tokens</strong><span> that uses </span><strong>Agent Swarm + PARL</strong><span> to slash latency by </span><strong>4.5×</strong><span>. The model immediately claimed </span><strong>#1</strong><span> on the </span><a href="https://substack.com/redirect/1f19c69f-57d3-451a-adc6-d8e4f232ae2f?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Vision Arena leaderboard</a><span> and is now deployed on </span><strong>Perplexity Pro/Max</strong><span> via a </span><a href="https://substack.com/redirect/9e6c5b74-1c8a-485c-95e1-87dac8601e1e?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">dedicated US inference stack</a><span> for improved latency.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Recursive Language Models (RLMs) Audit for Pennies</strong><span>: Alex L Zhang debuted </span><strong>RLM-Qwen3-8B</strong><span>, a natively recursive model trained on just </span><strong>1,000 trajectories</strong><span> that outperforms larger baselines on long-context tasks. Engineers in the </span><strong>DSPy</strong><span> discord demonstrated this efficiency by using </span><strong>Kimi k2</strong><span> to </span><a href="https://substack.com/redirect/ab5ad948-dc3c-443a-83bf-c62b1bcfc4ef?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">audit a codebase for security</a><span> for a total cost of </span><strong>$0.87</strong><span>, utilizing only </span><strong>50 lines of code</strong><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>MoonViT-3D Compresses Time</strong><span>: Kimi K2.5’s architecture features the </span><strong>MoonViT-3D</strong><span> unified encoder, which achieves </span><strong>4× temporal compression</strong><span>, enabling the model to ingest significantly longer video contexts without exploding compute costs. The system also utilizes </span><strong>Toggle</strong><span>, a token-efficient RL method that maintains accuracy while reducing token consumption by </span><strong>25–30%</strong><span>.</span></p></li></ul><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><strong>Theme 2. IDE Wars: Windsurf Enters the Arena while Cursor Stumbles</strong></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Windsurf Launches Gladiator Combat for Models</strong><span>: Codeium’s </span><strong>Windsurf</strong><span> IDE introduced </span><a href="https://substack.com/redirect/35b85c2e-b407-4bd6-994d-c1042a3875ef?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Arena Mode</a><span> (Wave 14), allowing developers to pit random or selected models against each other in side-by-side “Battle Groups” to determine the superior coder. To incentivize usage, Windsurf waived credit consumption for these battles for one week, while simultaneously rolling out a new </span><strong>Plan Mode</strong><span> for architectural reasoning.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Cursor Users Rage Against the Machine</strong><span>: Developers reported critical bugs in </span><strong>Cursor</strong><span>, including sluggish performance and a severe issue where the IDE </span><a href="https://substack.com/redirect/90860750-1cbf-417e-b54b-73eafe2806e3?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">corrupts uncommitted files</a><span> upon opening, forcing users to rely on manual Git control. Meanwhile, </span><strong>LM Studio 0.4.1</strong><span> </span><a href="https://substack.com/redirect/457bf60a-4dfc-47df-961a-f74d33c5b380?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">added Anthropic API compatibility</a><span>, enabling local GGUF/MLX models to power </span><strong>Claude Code</strong><span> workflows as a stable alternative.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Solo Dev Shames Billion-Dollar Corps with Lutum Veritas</strong><span>: A solo developer released </span><a href="https://substack.com/redirect/32a2b84a-a032-415e-9b3f-8b9d7a6e9f2b?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Lutum Veritas</a><span>, an open-source deep research engine that generates </span><strong>200,000+ character</strong><span> academic documents for under </span><strong>$0.20</strong><span>. The system features a </span><strong>recursive pipeline</strong><span> with “Claim Audit Tables” for self-reflection and integrates the </span><strong>Camoufox scraper</strong><span> to bypass Cloudflare with a reportedly </span><strong>0% detection rate</strong><span>.</span></p></li></ul><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><strong>Theme 3. Hardware Extremes: From B200 Benchmarks to 4GB VRAM Miracles</strong></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>AirLLM Squeezes Whales into Sardine Cans</strong><span>: Discussion erupted over </span><strong>AirLLM’s</strong><span> claim to run </span><strong>70B parameter models</strong><span> on just </span><strong>4GB VRAM</strong><span>, and even the massive </span><strong>Llama 3.1 405B</strong><span> on </span><strong>8GB VRAM</strong><span>. While technically possible via aggressive offloading and quantization, engineers skeptically joked about “0.0001 bit quantization” and questioned the practical inference speeds of such extreme compression.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>B200 Throughput Numbers Hit the Metal</strong><span>: Engineers in </span><strong>GPU MODE</strong><span> analyzed initial </span><a href="https://substack.com/redirect/2fd5cf9e-f184-4923-9e5a-a2337e7c5551?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">B200 tcgen05 throughput data</a><span>, observing that instruction throughput holds steady for </span><strong>N&lt;128</strong><span> before decreasing relative to problem size. Further conversations focused on writing </span><strong>Rust CPU kernels</strong><span> for </span><strong>GEMM</strong><span> operations to match Torch benchmarks, inspired by </span><a href="https://substack.com/redirect/ec3bac5a-aa0b-4490-b195-3f1ee5ece264?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Magnetron’s work</a><span>.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Mojo 26.1 Stabilizes the Stack</strong><span>: Modular released </span><a href="https://substack.com/redirect/fcf66456-8486-4309-980c-d9373f206341?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">Mojo 26.1</a><span>, marking the </span><strong>MAX Python API</strong><span> as stable and introducing </span><strong>eager mode debugging</strong><span> and one-line compilation. The update expands </span><strong>Apple Silicon GPU</strong><span> support, though early adopters reported a regression bug (</span><a href="https://substack.com/redirect/5b190d8e-8f8f-4c9b-9ad3-c406eccafbb6?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">issue #5875</a><span>) breaking </span><strong>Float64</strong><span> conversions during PyTorch interop.</span></p></li></ul><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><strong>Theme 4. Security Frontiers: Linux 0days, PDF Payloads, and Jailbreaks</strong></p><ul style="margin-top: 0;padding: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Linux Kernel 0day Chatter Spooks Engineers</strong><span>: A member of the </span><strong>BASI</strong><span> Discord claimed discovery of a </span><strong>Linux kernel 0day</strong><span>, attributing the vulnerability to “lazy removal” of legacy code. The conversation pivoted to defense, with users debating the necessity of </span><strong>air-gapped systems</strong><span> versus the practical absurdity of disconnecting entirely to avoid such deep-seated exploits.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>PDF Readers: The Trojan Horse Returns</strong><span>: Security researchers flagged </span><strong>Adobe PDF Reader</strong><span> as a renewed critical attack surface, discussing how </span><a href="https://substack.com/redirect/b126fd31-3519-41a5-a0a3-9972e4c665c1?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">shellcode hides in PDF structures</a><span> to execute </span><strong>Remote Code Execution (RCE)</strong><span> in enterprise environments. The consensus skewed toward viewing PDF parsers as antiquated and inherently insecure, with one user sharing a specific “SCANX” PDF that allegedly disabled a recipient’s antivirus immediately upon download.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Jailbreaking Gemini Pro via “Agent Zero”</strong><span>: Red teamers shared methods for bypassing </span><strong>Gemini Pro</strong><span> guardrails, with one user claiming success using an “agent jailbreak” involving </span><strong>Python, SQLite, and ChromaDB</strong><span> to facilitate the “Janus Tesavek” method. The community also discussed </span><strong>adversarial design thinking</strong><span>, utilizing a new </span><a href="https://substack.com/redirect/93b4490b-c5f0-42a3-b5e7-17b5f1fb52dc?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">resource site</a><span> that adapts human-centered design principles to model red teaming.</span></p></li></ul><p style="margin: 0 0 20px 0;color: rgb(54,55,55);line-height: 26px;font-size: 16px;"><strong>Theme 5. Industry Shockwaves: Digital Twins, Retirements, and Rate Limits</strong></p><ul style="margin-top: 0;padding: 0;margin-bottom: 0;"><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Khaby Lame’s $1B Digital Clone</strong><span>: TikTok star </span><strong>Khaby Lame</strong><span> reportedly sold his “AI Digital Twin” rights for </span><strong>$975 million</strong><span>, allowing a company to use his likeness for global brand deals without his physical presence (</span><a href="https://substack.com/redirect/21a7768e-db2b-406a-a55e-4cb7e89de779?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">X post source</a><span>). This deal signals a massive shift in the creator economy, validating the high-value commercial viability of high-fidelity AI persona modeling.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>OpenAI Retires GPT-4o to Mixed Applause</strong><span>: OpenAI’s announcement to </span><a href="https://substack.com/redirect/196e9d42-4430-49c4-a007-d083f07e20ae?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">retire GPT-4o</a><span> triggered a debate on model degradation, with some users celebrating the end of a “flawed” model while others scrambled to preserve workflows. Simultaneously, </span><strong>Perplexity</strong><span> users faced a drastic slash in utility, with </span><strong>Enterprise Max</strong><span> query limits reportedly dropping from </span><strong>600 to 50 per day</strong><span>, sparking speculation about a pivot toward a dedicated model service.</span></p></li><li style="margin: 8px 0 0 32px;mso-special-format: bullet;"><p style="color: rgb(54,55,55);line-height: 26px;margin-bottom: 0;box-sizing: border-box;padding-left: 4px;font-size: 16px;margin: 0;"><strong>Google Genie Escapes the Bottle</strong><span>: Google AI launched </span><strong>Project Genie</strong><span> for US-based Ultra subscribers, enabling the generation of </span><a href="https://substack.com/redirect/e81897f3-19b2-41d5-9685-59cde177ccef?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">interactive environments</a><span> from single text prompts. While the </span><a href="https://substack.com/redirect/c8874768-9877-42eb-ba1e-70a658ebbc70?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" rel="" style="color: #9333ea;text-decoration: none;">promotional video</a><span> impressed, the technical community remains skeptical, actively waiting for independent verification using simple prompts to confirm it isn’t just “marketingware.”</span></p></li></ul></div></div><div class="container-border" style="margin: 32px 0 0;width: 100%;box-sizing: border-box;border-top: 1px solid #e6e6e6;font-size: 16px;line-height: 26px;"></div><div class="post-cta typography markup" style="--image-offset-margin: -120px;font-family: 'SF Pro Display', -apple-system, system-ui, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';font-weight: 400;text-align: initial;word-break: break-word;margin-bottom: 32px;margin: 32px 0;font-size: 16px;line-height: 26px;"><p style="color: rgb(54,55,55);margin: 0 auto 20px;text-align: center;width: 90%;line-height: 26px;font-size: 16px;margin-top: 0;"><span class="pencraft pc-reset reset-IxiVJZ" translated="" style="list-style: none;color: unset;text-decoration: unset;margin: 0;">You're currently a free subscriber to <a href="https://substack.com/redirect/744d868d-901b-4141-9e0d-3ff164bfa53b?j=eyJ1IjoiNjQ5M3BhIn0.mBd75PWz_CWlvrYO6LgLUpPL2c1aSWjCXo_5QTLIGfw" style="color: #9333ea;text-decoration: none;">Latent.Space</a>. For the full experience, <a href="https://substack.com/redirect/2/eyJlIjoiaHR0cHM6Ly93d3cubGF0ZW50LnNwYWNlL3N1YnNjcmliZT91dG1fc291cmNlPXBvc3QmdXRtX2NhbXBhaWduPWVtYWlsLWNoZWNrb3V0Jm5leHQ9aHR0cHMlM0ElMkYlMkZ3d3cubGF0ZW50LnNwYWNlJTJGcCUyRmFpbmV3cy1tb2x0Ym9vay10aGUtZmlyc3Qtc29jaWFsJnI9NjQ5M3BhJnRva2VuPWV5SjFjMlZ5WDJsa0lqb3pOams1TkRBeU1qSXNJbWxoZENJNk1UYzJPVGd5TlRZNU5Td2laWGh3SWpveE56Y3lOREUzTmprMUxDSnBjM01pT2lKd2RXSXRNVEE0TkRBNE9TSXNJbk4xWWlJNkltTm9aV05yYjNWMEluMC5WV2VEMWowY0Exb21kQlpISDh5NGlUNkh6bVZiU3p3YzhwMHhwb0hZMzhrIiwicCI6MTg2MzczNjAwLCJzIjoxMDg0MDg5LCJmIjp0cnVlLCJ1IjozNjk5NDAyMjIsImlhdCI6MTc2OTgyNTY5NSwiZXhwIjoyMDg1NDAxNjk1LCJpc3MiOiJwdWItMCIsInN1YiI6ImxpbmstcmVkaXJlY3QifQ.6SdK5qv2fM3a_VsblchBHlgNQrlgcKx-_V8j60nliUo?&amp;utm_source=substack&amp;utm_medium=email&amp;utm_content=postcta" style="color: #9333ea;text-decoration: none;">upgrade your subscription.</a></span></p><p class="cta-box" style="color: rgb(54,55,55);margin: 0 auto 20px;width: 90%;line-height: 26px;font-size: 16px;margin-bottom: 0;text-align: center;margin-left: auto;margin-right: auto;"><a class="button primary" role="button" href="https://substack.com/redirect/2/eyJlIjoiaHR0cHM6Ly93d3cubGF0ZW50LnNwYWNlL3N1YnNjcmliZT91dG1fc291cmNlPXBvc3QmdXRtX2NhbXBhaWduPWVtYWlsLWNoZWNrb3V0Jm5leHQ9aHR0cHMlM0ElMkYlMkZ3d3cubGF0ZW50LnNwYWNlJTJGcCUyRmFpbmV3cy1tb2x0Ym9vay10aGUtZmlyc3Qtc29jaWFsJnI9NjQ5M3BhJnRva2VuPWV5SjFjMlZ5WDJsa0lqb3pOams1TkRBeU1qSXNJbWxoZENJNk1UYzJPVGd5TlRZNU5Td2laWGh3SWpveE56Y3lOREUzTmprMUxDSnBjM01pT2lKd2RXSXRNVEE0TkRBNE9TSXNJbk4xWWlJNkltTm9aV05yYjNWMEluMC5WV2VEMWowY0Exb21kQlpISDh5NGlUNkh6bVZiU3p3YzhwMHhwb0hZMzhrIiwicCI6MTg2MzczNjAwLCJzIjoxMDg0MDg5LCJmIjp0cnVlLCJ1IjozNjk5NDAyMjIsImlhdCI6MTc2OTgyNTY5NSwiZXhwIjoyMDg1NDAxNjk1LCJpc3MiOiJwdWItMCIsInN1YiI6ImxpbmstcmVkaXJlY3QifQ.6SdK5qv2fM3a_VsblchBHlgNQrlgcKx-_V8j60nliUo?&amp;utm_source=substack&amp;utm_medium=email&amp;utm_content=postcta" style="font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';display: inline-block;box-sizing: border-box;cursor: pointer;border: none;height: 40px;border-radius: 8px;font-size: 14px;line-height: 20px;font-weight: 600;text-align: center;padding: 10px 20px;margin: 0;opacity: 1;outline: none;white-space: nowrap;color: #ffffff !important;text-decoration: none !important;background-color: #9333ea;">Upgrade to paid</a></p></div><table class="email-ufi-2-bottom" role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="border-top: 1px solid rgb(0,0,0,.1);border-bottom: 1px solid rgb(0,0,0,.1);min-width: 100%;"><tbody><tr height="16"><td height="16" style="font-size:0px;line-height:0;">&nbsp;</td></tr><tr><td><table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0" style="margin:0 auto;"><tbody><tr><td style="vertical-align:middle;"><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td align="center"><a class="email-button-outline" href="https://substack.com/app-link/post?publication_id=1084089&amp;post_id=186373600&amp;utm_source=substack&amp;isFreemail=true&amp;submitLike=true&amp;token=eyJ1c2VyX2lkIjozNjk5NDAyMjIsInBvc3RfaWQiOjE4NjM3MzYwMCwicmVhY3Rpb24iOiLinaQiLCJpYXQiOjE3Njk4MjU2OTUsImV4cCI6MTc3MjQxNzY5NSwiaXNzIjoicHViLTEwODQwODkiLCJzdWIiOiJyZWFjdGlvbiJ9.HAVJLhkwSXEdcag5u_wWK2DUDmxLysW93NOuNXgZh68&amp;utm_medium=email&amp;utm_campaign=email-reaction&amp;r=6493pa" style="font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';display: inline-block;font-weight: 500;border: 1px solid rgb(0,0,0,.1);border-radius: 9999px;text-transform: uppercase;font-size: 12px;line-height: 12px;padding: 9px 14px;text-decoration: none;color: rgb(119,119,119);"><img class="icon" src="https://substackcdn.com/image/fetch/$s_!PeVs!,w_36,c_scale,f_png,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack.com%2Ficon%2FLucideHeart%3Fv%3D4%26height%3D36%26fill%3Dnone%26stroke%3D%2523808080%26strokeWidth%3D2" width="18" height="18" style="margin-right: 8px;min-width: 18px;min-height: 18px;border: none;vertical-align: middle;max-width: 18px" alt=""><span class="email-button-text" style="vertical-align: middle;">Like</span></a></td></tr></tbody></table></td><td width="8" style="min-width: 8px"></td><td style="vertical-align:middle;"><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td align="center"><a class="email-button-outline" href="https://substack.com/app-link/post?publication_id=1084089&amp;post_id=186373600&amp;utm_source=substack&amp;utm_medium=email&amp;isFreemail=true&amp;comments=true&amp;token=eyJ1c2VyX2lkIjozNjk5NDAyMjIsInBvc3RfaWQiOjE4NjM3MzYwMCwiaWF0IjoxNzY5ODI1Njk1LCJleHAiOjE3NzI0MTc2OTUsImlzcyI6InB1Yi0xMDg0MDg5Iiwic3ViIjoicG9zdC1yZWFjdGlvbiJ9.DJwN20BAz4KdNhrl0OLGSJnC9p7Xy0a24wYoyoTlwPE&amp;r=6493pa&amp;utm_campaign=email-half-magic-comments&amp;action=post-comment&amp;utm_source=substack&amp;utm_medium=email" style="font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';display: inline-block;font-weight: 500;border: 1px solid rgb(0,0,0,.1);border-radius: 9999px;text-transform: uppercase;font-size: 12px;line-height: 12px;padding: 9px 14px;text-decoration: none;color: rgb(119,119,119);"><img class="icon" src="https://substackcdn.com/image/fetch/$s_!x1tS!,w_36,c_scale,f_png,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack.com%2Ficon%2FLucideComments%3Fv%3D4%26height%3D36%26fill%3Dnone%26stroke%3D%2523808080%26strokeWidth%3D2" width="18" height="18" style="margin-right: 8px;min-width: 18px;min-height: 18px;border: none;vertical-align: middle;max-width: 18px" alt=""><span class="email-button-text" style="vertical-align: middle;">Comment</span></a></td></tr></tbody></table></td><td width="8" style="min-width: 8px"></td><td style="vertical-align:middle;"><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td align="center"><a class="email-button-outline" href="https://substack.com/redirect/2/eyJlIjoiaHR0cHM6Ly9vcGVuLnN1YnN0YWNrLmNvbS9wdWIvc3d5eC9wL2FpbmV3cy1tb2x0Ym9vay10aGUtZmlyc3Qtc29jaWFsP3V0bV9zb3VyY2U9c3Vic3RhY2smdXRtX21lZGl1bT1lbWFpbCZ1dG1fY2FtcGFpZ249ZW1haWwtcmVzdGFjay1jb21tZW50JmFjdGlvbj1yZXN0YWNrLWNvbW1lbnQmcj02NDkzcGEmdG9rZW49ZXlKMWMyVnlYMmxrSWpvek5qazVOREF5TWpJc0luQnZjM1JmYVdRaU9qRTROak0zTXpZd01Dd2lhV0YwSWpveE56WTVPREkxTmprMUxDSmxlSEFpT2pFM056STBNVGMyT1RVc0ltbHpjeUk2SW5CMVlpMHhNRGcwTURnNUlpd2ljM1ZpSWpvaWNHOXpkQzF5WldGamRHbHZiaUo5LkRKd04yMEJBejRLZE5ocmwwT0xHU0puQzlwN1h5MGEyNHdZb3lvVGx3UEUiLCJwIjoxODYzNzM2MDAsInMiOjEwODQwODksImYiOnRydWUsInUiOjM2OTk0MDIyMiwiaWF0IjoxNzY5ODI1Njk1LCJleHAiOjIwODU0MDE2OTUsImlzcyI6InB1Yi0wIiwic3ViIjoibGluay1yZWRpcmVjdCJ9.JYNGoFalgiPUXKB3nUdN8iThGpFK3A_ZuFCPYrCtMew?&amp;utm_source=substack&amp;utm_medium=email" style="font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';display: inline-block;font-weight: 500;border: 1px solid rgb(0,0,0,.1);border-radius: 9999px;text-transform: uppercase;font-size: 12px;line-height: 12px;padding: 9px 14px;text-decoration: none;color: rgb(119,119,119);"><img class="icon" src="https://substackcdn.com/image/fetch/$s_!5EGt!,w_36,c_scale,f_png,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack.com%2Ficon%2FNoteForwardIcon%3Fv%3D4%26height%3D36%26fill%3Dnone%26stroke%3D%2523808080%26strokeWidth%3D2" width="18" height="18" style="margin-right: 8px;min-width: 18px;min-height: 18px;border: none;vertical-align: middle;max-width: 18px" alt=""><span class="email-button-text" style="vertical-align: middle;">Restack</span></a></td></tr></tbody></table></td></tr></tbody></table></td><td align="right"><table role="presentation" width="auto" border="0" cellspacing="0" cellpadding="0"><tbody><tr></tr></tbody></table></td></tr></tbody></table></td></tr><tr height="16"><td height="16" style="font-size:0px;line-height:0;">&nbsp;</td></tr></tbody></table><div class="footer footer-ZM59BM" style="color: rgb(119,119,119);text-align: center;font-size: 16px;line-height: 26px;padding: 24px0;"><div style="font-size: 16px;line-height: 26px;padding-bottom: 24px"><p class="pencraft pc-reset color-secondary-ls1g8s size-12-mmZ61m reset-IxiVJZ small meta-B2bqa5" style="list-style: none;font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';padding-bottom: 0;font-size: 12px;line-height: 16px;margin: 0;color: rgb(119,119,119);text-decoration: unset;">© 2026 <span>Latent.Space</span><br>548 Market Street PMB 72296, San Francisco, CA 94104 <br><a href="https://substack.com/redirect/2/eyJlIjoiaHR0cHM6Ly93d3cubGF0ZW50LnNwYWNlL2FjdGlvbi9kaXNhYmxlX2VtYWlsP3Rva2VuPWV5SjFjMlZ5WDJsa0lqb3pOams1TkRBeU1qSXNJbkJ2YzNSZmFXUWlPakU0TmpNM016WXdNQ3dpYVdGMElqb3hOelk1T0RJMU5qazFMQ0psZUhBaU9qRTRNREV6TmpFMk9UVXNJbWx6Y3lJNkluQjFZaTB4TURnME1EZzVJaXdpYzNWaUlqb2laR2x6WVdKc1pWOWxiV0ZwYkNKOS5HaktoZ3NoYnV1Y2c1M2xqNTVGbWRQZTRYT1JZQ3RidW9pNk5aWWxFS3AwIiwicCI6MTg2MzczNjAwLCJzIjoxMDg0MDg5LCJmIjp0cnVlLCJ1IjozNjk5NDAyMjIsImlhdCI6MTc2OTgyNTY5NSwiZXhwIjoyMDg1NDAxNjk1LCJpc3MiOiJwdWItMCIsInN1YiI6ImxpbmstcmVkaXJlY3QifQ.vyEYGom7YhJxfqVHhy39n2wy0LvngP6ZSw5o2Qjo9GU?" style="color: #9333ea;text-decoration: none;"><span style="color: rgb(119,119,119);text-decoration: underline;">Unsubscribe</span></a></p></div><p class="footerSection-EHR0jG small powered-by-substack" style="padding: 0 24px;font-size: 12px;line-height: 20px;margin: 0;color: rgb(119,119,119);font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';padding-bottom: 0;margin-top: 0;"><a href="https://substack.com/redirect/2/eyJlIjoiaHR0cHM6Ly9zdWJzdGFjay5jb20vc2lnbnVwP3V0bV9zb3VyY2U9c3Vic3RhY2smdXRtX21lZGl1bT1lbWFpbCZ1dG1fY29udGVudD1mb290ZXImdXRtX2NhbXBhaWduPWF1dG9maWxsZWQtZm9vdGVyJmZyZWVTaWdudXBFbWFpbD1pK3N1YnN0YWNrQGtobC5sdiZyPTY0OTNwYSIsInAiOjE4NjM3MzYwMCwicyI6MTA4NDA4OSwiZiI6dHJ1ZSwidSI6MzY5OTQwMjIyLCJpYXQiOjE3Njk4MjU2OTUsImV4cCI6MjA4NTQwMTY5NSwiaXNzIjoicHViLTAiLCJzdWIiOiJsaW5rLXJlZGlyZWN0In0.IN-v9TVuUVoVSmHbJbvZ8oUH1_WcR_PgalLb9bc37pE?" style="color: #9333ea;text-decoration: none;display: inline-block;margin: 0 4px;"><img src="https://substackcdn.com/image/fetch/$s_!LkrL!,w_270,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack.com%2Fimg%2Femail%2Fpublish-button%402x.png" srcset="https://substackcdn.com/image/fetch/$s_!wgfj!,w_135,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack.com%2Fimg%2Femail%2Fpublish-button.png, https://substackcdn.com/image/fetch/$s_!LkrL!,w_270,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack.com%2Fimg%2Femail%2Fpublish-button%402x.png 2x, https://substackcdn.com/image/fetch/$s_!KjtY!,w_405,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack.com%2Fimg%2Femail%2Fpublish-button%403x.png 3x" width="135" alt="Start writing" height="40" style="max-width: 550px;border: none !important;vertical-align: middle;"></a></p></div></div></td><td></td></tr></tbody></table>
+</body></html>"
+`;
+
 exports[`real email fixtures > booking > formatEmailsForLLM 1`] = `
 "<thread id="thread-booking">
 <email id="fixture-booking" date="2025-01-01T00:00:00.000Z" status="unread">
