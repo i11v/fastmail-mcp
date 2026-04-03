@@ -31,15 +31,6 @@ function getFormData() {
   };
 }
 
-function parseAddresses(str: string) {
-  if (!str) return [];
-  return str.split(/[,;]\s*/).filter(Boolean).map((addr) => {
-    const match = addr.match(/^(.+?)\s*<(.+?)>$/);
-    if (match) return { name: match[1].trim(), email: match[2].trim() };
-    return { email: addr.trim() };
-  });
-}
-
 function prefillForm(data: PrefillData) {
   if (data.to) (document.getElementById("to") as HTMLInputElement).value = data.to;
   if (data.cc) {
@@ -104,27 +95,10 @@ document.getElementById("toggle-cc-bcc-btn")!.addEventListener("click", () => {
 // Save Draft
 document.getElementById("save-draft-btn")!.addEventListener("click", async () => {
   const data = getFormData();
-  if (!data.to) { showStatus("Please enter a recipient.", "error"); return; }
   try {
     await app.callServerTool({
-      name: "execute",
-      arguments: {
-        methodCalls: [
-          ["Email/set", {
-            create: {
-              draft: {
-                to: parseAddresses(data.to),
-                cc: parseAddresses(data.cc),
-                bcc: parseAddresses(data.bcc),
-                subject: data.subject,
-                keywords: { "$draft": true },
-                bodyValues: { body: { value: data.body, isEncodingProblem: false } },
-                textBody: [{ partId: "body", type: "text/plain" }],
-              },
-            },
-          }, "save"],
-        ],
-      },
+      name: "save_draft",
+      arguments: { to: data.to, cc: data.cc, subject: data.subject, body: data.body },
     });
     showStatus("Draft saved.", "success");
   } catch (err) {
@@ -139,35 +113,8 @@ document.getElementById("send-btn")!.addEventListener("click", async () => {
   if (!data.subject && !data.body) { showStatus("Please enter a subject or body.", "error"); return; }
   try {
     await app.callServerTool({
-      name: "execute",
-      arguments: {
-        methodCalls: [
-          ["Identity/get", {}, "id"],
-          ["Email/set", {
-            create: {
-              msg: {
-                to: parseAddresses(data.to),
-                cc: parseAddresses(data.cc),
-                bcc: parseAddresses(data.bcc),
-                subject: data.subject,
-                from: [{ "#resultOf": "id", "name": "Identity/get", "path": "/list/0/email" }],
-                bodyValues: { body: { value: data.body, isEncodingProblem: false } },
-                textBody: [{ partId: "body", type: "text/plain" }],
-                mailboxIds: {},
-              },
-            },
-          }, "create"],
-          ["EmailSubmission/set", {
-            create: {
-              sub: {
-                emailId: "#msg",
-                identityId: { resultOf: "id", name: "Identity/get", path: "/list/0/id" },
-              },
-            },
-          }, "send"],
-        ],
-        confirmed: true,
-      },
+      name: "send_email",
+      arguments: { to: data.to, cc: data.cc, subject: data.subject, body: data.body },
     });
     showStatus("Email sent.", "success");
     app.sendMessage({

@@ -52,6 +52,79 @@ function escapeHtml(str: string): string {
   return div.innerHTML;
 }
 
+function isDarkMode(): boolean {
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+}
+
+function buildSrcdoc(emailHtml: string, dark: boolean): string {
+  const darkCss = dark
+    ? `
+      html, body {
+        background: #1a1a1a !important;
+        color: #e0e0e0 !important;
+      }
+      img { opacity: 0.9; }
+    `
+    : "";
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base target="_blank">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+    img { max-width: 100%; height: auto; }
+    table { max-width: 100% !important; }
+    ${darkCss}
+  </style>
+</head>
+<body>${emailHtml}</body>
+</html>`;
+}
+
+function renderBodyInIframe(container: HTMLElement, html: string) {
+  const iframe = document.createElement("iframe");
+  iframe.sandbox.add("allow-same-origin");
+  iframe.style.width = "100%";
+  iframe.style.border = "none";
+  iframe.style.display = "block";
+  iframe.style.overflow = "hidden";
+
+  const srcdoc = buildSrcdoc(html, isDarkMode());
+  iframe.setAttribute("srcdoc", srcdoc);
+
+  container.innerHTML = "";
+  container.appendChild(iframe);
+
+  iframe.addEventListener("load", () => {
+    const doc = iframe.contentDocument;
+    if (!doc) return;
+
+    function resize() {
+      // Reset height to 0 first so scrollHeight reflects actual content, not old frame size
+      iframe.style.height = "0";
+      const height = doc!.documentElement.scrollHeight;
+      iframe.style.height = height + "px";
+    }
+
+    resize();
+
+    // Watch for dynamic content changes (image loads, lazy rendering)
+    const observer = new ResizeObserver(() => resize());
+    observer.observe(doc.body);
+  });
+}
+
 function addBadge(container: HTMLElement, cls: string, text: string) {
   const el = document.createElement("span");
   el.className = `badge ${cls}`;
@@ -86,12 +159,12 @@ function renderEmail(data: EmailData) {
 
   const bodyEl = document.getElementById("body")!;
   if (data.htmlBody) {
-    bodyEl.innerHTML = data.htmlBody;
+    renderBodyInIframe(bodyEl, data.htmlBody);
   } else if (data.textBody) {
     bodyEl.innerHTML = `<pre>${escapeHtml(data.textBody)}</pre>`;
   } else if (data.body) {
     if (/<[a-z][\s\S]*>/i.test(data.body)) {
-      bodyEl.innerHTML = data.body;
+      renderBodyInIframe(bodyEl, data.body);
     } else {
       bodyEl.innerHTML = `<pre>${escapeHtml(data.body)}</pre>`;
     }
@@ -152,34 +225,64 @@ app.onerror = (err) => {
   console.error("App error:", err);
 };
 
-app.onhostcontextchanged = applyHostContext;
+app.onhostcontextchanged = (ctx) => {
+  applyHostContext(ctx);
+  // Re-render iframe body with updated theme
+  if (emailData) {
+    const bodyEl = document.getElementById("body");
+    const htmlContent = emailData.htmlBody || (emailData.body && /<[a-z][\s\S]*>/i.test(emailData.body) ? emailData.body : null);
+    if (bodyEl && htmlContent) {
+      renderBodyInIframe(bodyEl, htmlContent);
+    }
+  }
+};
 
 app.onteardown = async () => ({ });
+
+function getEmailBodyText(): string {
+  if (!emailData) return "";
+  return emailData.textBody || emailData.body || "";
+}
+
+function buildEmailContext(): string {
+  if (!emailData) return "";
+  const lines: string[] = [];
+  lines.push(`From: ${formatAddress(emailData.from)}`);
+  if (emailData.to) lines.push(`To: ${formatAddress(emailData.to)}`);
+  if (emailData.cc) lines.push(`CC: ${formatAddress(emailData.cc)}`);
+  lines.push(`Date: ${formatDate(emailData.receivedAt || emailData.sentAt)}`);
+  lines.push(`Subject: ${emailData.subject || "(no subject)"}`);
+  lines.push("");
+  lines.push(getEmailBodyText());
+  return lines.join("\n");
+}
 
 // Action buttons
 document.getElementById("reply-btn")!.addEventListener("click", () => {
   if (!emailData) return;
-  const replyTo = emailData.replyTo || emailData.from;
+  const replyTo = formatAddress(emailData.replyTo || emailData.from);
   app.sendMessage({
     role: "user",
     content: [{
       type: "text",
-      text: `Reply to this email from ${formatAddress(replyTo)} with subject: Re: ${emailData.subject || ""}`,
+      text: `Draft a reply to this email and open it in compose_email with to="${replyTo}" and subject="Re: ${emailData.subject || ""}". Write the reply body for me based on the original message below.\n\n--- Original message ---\n${buildEmailContext()}`,
     }],
   });
 });
 
 document.getElementById("reply-all-btn")!.addEventListener("click", () => {
   if (!emailData) return;
-  const replyTo = emailData.replyTo || emailData.from;
-  const recipients = [formatAddress(replyTo)];
-  if (emailData.to) recipients.push(formatAddress(emailData.to));
-  if (emailData.cc) recipients.push(formatAddress(emailData.cc));
+  const replyTo = formatAddress(emailData.replyTo || emailData.from);
+  const to = replyTo;
+  const cc = [
+    ...(emailData.to || []),
+    ...(emailData.cc || []),
+  ].map(a => formatAddress(a)).filter(Boolean).join(", ");
   app.sendMessage({
     role: "user",
     content: [{
       type: "text",
-      text: `Reply all to this email. Recipients: ${recipients.join(", ")} with subject: Re: ${emailData.subject || ""}`,
+      text: `Draft a reply-all to this email and open it in compose_email with to="${to}", cc="${cc}", and subject="Re: ${emailData.subject || ""}". Write the reply body for me based on the original message below.\n\n--- Original message ---\n${buildEmailContext()}`,
     }],
   });
 });
@@ -190,7 +293,7 @@ document.getElementById("forward-btn")!.addEventListener("click", () => {
     role: "user",
     content: [{
       type: "text",
-      text: `Forward this email with subject: Fwd: ${emailData.subject || ""}`,
+      text: `Forward this email using compose_email with subject="Fwd: ${emailData.subject || ""}" and the original message quoted in the body. Leave the "to" field empty for me to fill in.\n\n--- Original message ---\n${buildEmailContext()}`,
     }],
   });
 });

@@ -126,6 +126,51 @@ export function sanitizeEmailHtml(html: string): string {
 }
 
 /**
+ * Lightweight cleanup of email HTML for display in a sandboxed iframe.
+ * NOT a security sanitizer — the iframe sandbox attribute handles security.
+ * Only removes tracking pixels, MSO comments, and non-style head content
+ * to reduce payload noise and improve privacy.
+ */
+export function cleanEmailHtmlForDisplay(html: string): string {
+  // Unescape JSON string escapes (JMAP body values are JSON strings)
+  html = unescapeJsonString(html);
+
+  // Strip MSO conditional comments: <!--[if ...]>...<![endif]-->
+  html = html.replace(/<!--\[if[^\]]*\]>[\s\S]*?<!\[endif\]-->/gi, "");
+  html = html.replace(/<!\[if[^\]]*\]>/gi, "");
+  html = html.replace(/<!--<!\[endif\]-->/gi, "");
+
+  const $ = load(html);
+
+  // Remove tracking pixels (1x1 or 0x0 images) — privacy
+  $("img").each(function () {
+    const width = $(this).attr("width");
+    const height = $(this).attr("height");
+    if ((width === "1" && height === "1") || (width === "0" && height === "0")) {
+      $(this).remove();
+    }
+  });
+
+  // Remove <head> content except <style> blocks
+  const head = $("head");
+  if (head.length > 0) {
+    // Extract style elements before removing head
+    const styles: string[] = [];
+    head.find("style").each(function () {
+      const styleHtml = $.html(this);
+      if (styleHtml) styles.push(styleHtml);
+    });
+    head.remove();
+    // Prepend extracted styles back
+    if (styles.length > 0) {
+      $("html").prepend(styles.join("\n"));
+    }
+  }
+
+  return $.html().trim();
+}
+
+/**
  * Get the body content from an email.
  * Prefers htmlBody (sanitized) for consistent output.
  * Falls back to textBody for plain-text emails.
@@ -281,7 +326,7 @@ export function formatEmailBody(email: any): {
       }
     }
     if (htmlParts.length > 0) {
-      html = sanitizeEmailHtml(htmlParts.join("\n"));
+      html = cleanEmailHtmlForDisplay(htmlParts.join("\n"));
     }
   }
 

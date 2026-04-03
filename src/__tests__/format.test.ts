@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join, basename } from "node:path";
-import { sanitizeEmailHtml, formatEmailsForLLM } from "../format.js";
+import { sanitizeEmailHtml, cleanEmailHtmlForDisplay, formatEmailsForLLM } from "../format.js";
 
 const FIXTURES_DIR = join(import.meta.dirname, "fixtures");
 
@@ -117,6 +117,126 @@ describe("sanitizeEmailHtml", () => {
     const result = sanitizeEmailHtml(html);
     expect(result).toContain("<table");
     expect(result).toContain("Name");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// cleanEmailHtmlForDisplay
+// ---------------------------------------------------------------------------
+describe("cleanEmailHtmlForDisplay", () => {
+  it("removes tracking pixels (1x1)", () => {
+    const html = `<img width="1" height="1" src="https://track.example.com/px.gif"><p>Content</p>`;
+    const result = cleanEmailHtmlForDisplay(html);
+    expect(result).not.toContain("track.example.com");
+    expect(result).toContain("Content");
+  });
+
+  it("removes tracking pixels (0x0)", () => {
+    const html = `<img width="0" height="0" src="https://spy.example.com"><p>OK</p>`;
+    const result = cleanEmailHtmlForDisplay(html);
+    expect(result).not.toContain("spy.example.com");
+  });
+
+  it("strips MSO conditional comments", () => {
+    const html = `<!--[if mso]><style>.x{color:red}</style><![endif]--><p>Content</p>`;
+    const result = cleanEmailHtmlForDisplay(html);
+    expect(result).not.toContain("mso");
+    expect(result).toContain("Content");
+  });
+
+  it("preserves <style> tags", () => {
+    const html = `<html><head><style>.foo{color:red}</style><title>X</title></head><body><p>Text</p></body></html>`;
+    const result = cleanEmailHtmlForDisplay(html);
+    expect(result).toContain("<style>");
+    expect(result).toContain(".foo{color:red}");
+  });
+
+  it("preserves inline styles", () => {
+    const html = `<div style="color: red; font-size: 16px;">Styled</div>`;
+    const result = cleanEmailHtmlForDisplay(html);
+    expect(result).toContain('style="color: red; font-size: 16px;"');
+    expect(result).toContain("Styled");
+  });
+
+  it("preserves classes", () => {
+    const html = `<div class="container main"><p class="text">Hello</p></div>`;
+    const result = cleanEmailHtmlForDisplay(html);
+    expect(result).toContain('class="container main"');
+    expect(result).toContain('class="text"');
+  });
+
+  it("preserves tables and layout structure", () => {
+    const html = `<table><tr><td style="padding:10px">Cell</td></tr></table>`;
+    const result = cleanEmailHtmlForDisplay(html);
+    expect(result).toContain("<table>");
+    expect(result).toContain("<td");
+    expect(result).toContain("padding:10px");
+  });
+
+  it("removes <meta> and <title> from head but keeps <style>", () => {
+    const html = `<html><head><meta charset="UTF-8"><title>Email</title><style>body{margin:0}</style></head><body><p>Body</p></body></html>`;
+    const result = cleanEmailHtmlForDisplay(html);
+    expect(result).not.toContain("<title>");
+    expect(result).not.toContain("<meta");
+    expect(result).toContain("<style>");
+    expect(result).toContain("body{margin:0}");
+    expect(result).toContain("Body");
+  });
+
+  it("keeps normal images", () => {
+    const html = `<img width="200" height="100" src="https://example.com/photo.jpg">`;
+    const result = cleanEmailHtmlForDisplay(html);
+    expect(result).toContain("photo.jpg");
+  });
+
+  it("unescapes JSON string escapes", () => {
+    const html = `<p>Line one\\nLine two</p>`;
+    const result = cleanEmailHtmlForDisplay(html);
+    expect(result).toContain("Line one\nLine two");
+  });
+
+  it("preserves scripts (iframe sandbox handles security)", () => {
+    const html = `<div>Hello</div><script>alert('x')</script>`;
+    const result = cleanEmailHtmlForDisplay(html);
+    expect(result).toContain("<script>");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// cleanEmailHtmlForDisplay — fixture-based snapshot tests
+// ---------------------------------------------------------------------------
+describe("cleanEmailHtmlForDisplay fixtures", () => {
+  const names = getFixtureNames();
+
+  describe.runIf(names.length > 0).each(names)("%s", (name) => {
+    let html: string;
+    let cleaned: string;
+
+    beforeAll(() => {
+      html = loadFixture(name);
+      cleaned = cleanEmailHtmlForDisplay(html);
+    });
+
+    it("cleaned HTML for display", () => {
+      expect(cleaned).toMatchSnapshot();
+    });
+
+    it("removes tracking pixels", () => {
+      expect(cleaned).not.toMatch(/width="1"[^>]*height="1"/i);
+      expect(cleaned).not.toMatch(/width="0"[^>]*height="0"/i);
+    });
+
+    it("preserves inline styles when present in source", () => {
+      // If the original had inline styles, they should still be present
+      const sourceHasStyles = /style="/.test(html);
+      const cleanedHasStyles = /style="/.test(cleaned);
+      // Cleaned output should never strip inline styles
+      expect(!sourceHasStyles || cleanedHasStyles).toBe(true);
+    });
+
+    it("cleaned output is non-empty", () => {
+      expect(cleaned.trim().length).toBeGreaterThan(0);
+    });
   });
 });
 

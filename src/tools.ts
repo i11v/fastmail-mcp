@@ -385,7 +385,83 @@ export function describeDestructiveAction(methodCalls: MethodCall[]): string {
   return ops.join(", ");
 }
 
-// --- Zod schema ---
+// --- Address parsing ---
+
+export function parseAddresses(str: string): { name?: string; email: string }[] {
+  if (!str) return [];
+  return str
+    .split(/[,;]\s*/)
+    .filter(Boolean)
+    .map((addr) => {
+      const match = addr.match(/^(.+?)\s*<(.+?)>$/);
+      if (match) return { name: match[1].trim(), email: match[2].trim() };
+      return { email: addr.trim() };
+    });
+}
+
+// --- Email helpers ---
+
+async function lookupMailboxAndIdentity(
+  session: JMAPSession,
+  bearerToken: string,
+): Promise<{ draftsMailboxId: string; identity: { id: string; name: string; email: string } }> {
+  const result = await runJMAPDirect(
+    [
+      ["Mailbox/query", { filter: { role: "drafts" }, limit: 1 }, "mbox"],
+      ["Identity/get", {}, "ident"],
+    ],
+    session,
+    bearerToken,
+  );
+
+  const mboxResult = result[0] as [string, { ids?: string[] }, string] | undefined;
+  const draftsMailboxId = mboxResult?.[1]?.ids?.[0];
+  if (!draftsMailboxId) {
+    throw new Error("Could not find Drafts mailbox");
+  }
+
+  const identResult = result[1] as [string, { list?: any[] }, string] | undefined;
+  const ident = identResult?.[1]?.list?.[0];
+  if (!ident) {
+    throw new Error("Could not find sender identity");
+  }
+
+  return {
+    draftsMailboxId,
+    identity: { id: ident.id, name: ident.name ?? "", email: ident.email },
+  };
+}
+
+interface EmailFields {
+  to?: string;
+  cc?: string;
+  bcc?: string;
+  subject?: string;
+  body?: string;
+}
+
+function buildEmailCreate(
+  args: EmailFields,
+  draftsMailboxId: string,
+  identity: { name: string; email: string },
+  creationId: string,
+): Record<string, Record<string, unknown>> {
+  return {
+    [creationId]: {
+      mailboxIds: { [draftsMailboxId]: true },
+      keywords: { $draft: true, $seen: true },
+      from: [{ name: identity.name, email: identity.email }],
+      to: parseAddresses(args.to || ""),
+      cc: parseAddresses(args.cc || ""),
+      bcc: parseAddresses(args.bcc || ""),
+      subject: args.subject || "",
+      bodyStructure: { type: "text/plain", partId: "body" },
+      bodyValues: { body: { value: args.body || "" } },
+    },
+  };
+}
+
+// --- Zod schemas ---
 
 const ExecuteSchema = z.object({
   methodCalls: z.array(z.tuple([z.string(), z.record(z.unknown()), z.string()])),
@@ -393,6 +469,22 @@ const ExecuteSchema = z.object({
     .boolean()
     .optional()
     .describe("Set to true to confirm a destructive operation after the server requests it."),
+});
+
+const SaveDraftSchema = z.object({
+  to: z.string().optional().describe("Recipient email address(es), comma-separated"),
+  cc: z.string().optional().describe("CC email address(es), comma-separated"),
+  bcc: z.string().optional().describe("BCC email address(es), comma-separated"),
+  subject: z.string().optional().describe("Email subject line"),
+  body: z.string().optional().describe("Email body text"),
+});
+
+const SendEmailSchema = z.object({
+  to: z.string().describe("Recipient email address(es), comma-separated (required)"),
+  cc: z.string().optional().describe("CC email address(es), comma-separated"),
+  bcc: z.string().optional().describe("BCC email address(es), comma-separated"),
+  subject: z.string().optional().describe("Email subject line"),
+  body: z.string().optional().describe("Email body text"),
 });
 
 // --- Tool registration ---
@@ -457,6 +549,148 @@ export function registerTools(server: McpServer) {
 
         const result = await runJMAP(validated, extra);
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
+
+  server.registerTool(
+    "save_draft",
+    {
+      description:
+        "Save an email as a draft. Handles identity and drafts mailbox lookup server-side. " +
+        "All fields are optional for drafts.",
+      inputSchema: SaveDraftSchema,
+    },
+    async (args, extra) => {
+      try {
+        const { session, bearerToken } = await getSession(extra);
+        const { draftsMailboxId, identity } = await lookupMailboxAndIdentity(session, bearerToken);
+
+        const create = buildEmailCreate(args, draftsMailboxId, identity, "draft");
+        const result = await runJMAPDirect(
+          [["Email/set", { create }, "create"]],
+          session,
+          bearerToken,
+        );
+
+        const setResult = result[0] as
+          | [string, { created?: Record<string, { id: string }>; notCreated?: unknown }, string]
+          | undefined;
+        if (setResult?.[1]?.notCreated) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Failed to save draft: ${JSON.stringify(setResult[1].notCreated)}`,
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        const draftId = setResult?.[1]?.created?.draft?.id ?? "unknown";
+        return { content: [{ type: "text", text: `Draft saved (${draftId})` }] };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
+
+  server.registerTool(
+    "send_email",
+    {
+      description:
+        "Send an email immediately. Handles identity lookup, drafts mailbox, and email submission server-side. " +
+        "The 'to' field is required.",
+      inputSchema: SendEmailSchema,
+    },
+    async (args, extra) => {
+      try {
+        if (!args.to.trim()) {
+          return {
+            content: [{ type: "text", text: "Error: 'to' field must not be empty." }],
+            isError: true,
+          };
+        }
+
+        const { session, bearerToken } = await getSession(extra);
+        const { draftsMailboxId, identity } = await lookupMailboxAndIdentity(session, bearerToken);
+
+        const create = buildEmailCreate(args, draftsMailboxId, identity, "msg");
+        const result = await runJMAPDirect(
+          [
+            ["Email/set", { create }, "create"],
+            [
+              "EmailSubmission/set",
+              {
+                create: {
+                  sub: {
+                    "#emailId": { resultOf: "create", name: "Email/set", path: "/created/msg/id" },
+                    identityId: identity.id,
+                  },
+                },
+              },
+              "submit",
+            ],
+          ],
+          session,
+          bearerToken,
+        );
+
+        // Check for Email/set errors
+        const setResult = result[0] as
+          | [string, { created?: Record<string, { id: string }>; notCreated?: unknown }, string]
+          | undefined;
+        if (setResult?.[1]?.notCreated) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Failed to create email: ${JSON.stringify(setResult[1].notCreated)}`,
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        // Check for submission errors
+        const subResult = result[1] as
+          | [string, { created?: unknown; notCreated?: unknown }, string]
+          | undefined;
+        if (subResult?.[1]?.notCreated) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Failed to submit email: ${JSON.stringify(subResult[1].notCreated)}`,
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        const recipients = parseAddresses(args.to)
+          .map((a) => a.email)
+          .join(", ");
+        return { content: [{ type: "text", text: `Email sent to ${recipients}` }] };
       } catch (error) {
         return {
           content: [
