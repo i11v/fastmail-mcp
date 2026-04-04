@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { trace } from "@opentelemetry/api";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
@@ -112,6 +113,11 @@ async function getSession(
 ): Promise<{ session: JMAPSession; bearerToken: string }> {
   const bearerToken = extractBearerToken(extra);
   const tokenHash = hashToken(bearerToken);
+
+  const activeSpan = trace.getActiveSpan();
+  if (activeSpan) {
+    activeSpan.setAttribute("user.id", tokenHash);
+  }
 
   // Try cached session
   const cached = await getCachedSession(tokenHash).catch(() => null);
