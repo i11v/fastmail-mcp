@@ -89,12 +89,23 @@ function buildSrcdoc(emailHtml: string, dark: boolean): string {
   </style>
 </head>
 <body>${emailHtml}</body>
+<script>
+  function postHeight() {
+    var h = document.documentElement.scrollHeight;
+    parent.postMessage({ type: "resize", height: h }, "*");
+  }
+  postHeight();
+  new ResizeObserver(postHeight).observe(document.body);
+</script>
 </html>`;
 }
 
 function renderBodyInIframe(container: HTMLElement, html: string) {
   const iframe = document.createElement("iframe");
-  iframe.sandbox.add("allow-same-origin");
+  // allow-scripts lets the resize script run inside the iframe.
+  // Do NOT add allow-same-origin: the iframe gets an opaque origin,
+  // preventing email content from accessing the parent page.
+  iframe.sandbox.add("allow-scripts");
   iframe.style.width = "100%";
   iframe.style.border = "none";
   iframe.style.display = "block";
@@ -106,23 +117,14 @@ function renderBodyInIframe(container: HTMLElement, html: string) {
   container.innerHTML = "";
   container.appendChild(iframe);
 
-  iframe.addEventListener("load", () => {
-    const doc = iframe.contentDocument;
-    if (!doc) return;
-
-    function resize() {
-      // Reset height to 0 first so scrollHeight reflects actual content, not old frame size
-      iframe.style.height = "0";
-      const height = doc!.documentElement.scrollHeight;
-      iframe.style.height = height + "px";
+  // Listen for resize messages from the sandboxed iframe
+  const onMessage = (e: MessageEvent) => {
+    if (e.source !== iframe.contentWindow) return;
+    if (e.data?.type === "resize" && typeof e.data.height === "number") {
+      iframe.style.height = e.data.height + "px";
     }
-
-    resize();
-
-    // Watch for dynamic content changes (image loads, lazy rendering)
-    const observer = new ResizeObserver(() => resize());
-    observer.observe(doc.body);
-  });
+  };
+  window.addEventListener("message", onMessage);
 }
 
 function addBadge(container: HTMLElement, cls: string, text: string) {
