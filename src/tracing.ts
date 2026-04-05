@@ -6,7 +6,14 @@ import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic-conventions";
-import { trace, context, SpanStatusCode } from "@opentelemetry/api";
+import {
+  trace,
+  context,
+  SpanStatusCode,
+  diag,
+  DiagConsoleLogger,
+  DiagLogLevel,
+} from "@opentelemetry/api";
 import type { MiddlewareHandler } from "hono";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -31,7 +38,9 @@ if (apiKey) {
     },
   });
 
-  spanProcessor = new BatchSpanProcessor(exporter);
+  spanProcessor = new BatchSpanProcessor(exporter, {
+    exportTimeoutMillis: 5000,
+  });
 
   const sdk = new NodeSDK({
     resource,
@@ -39,15 +48,22 @@ if (apiKey) {
   });
 
   sdk.start();
+
+  // Log export errors (e.g. invalid API key) instead of crashing
+  diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.WARN);
 }
 
 const tracer = trace.getTracer("fastmail-mcp");
 
 export { tracer };
 
-export function forceFlush(): Promise<void> {
-  if (!spanProcessor) return Promise.resolve();
-  return spanProcessor.forceFlush();
+export async function forceFlush(): Promise<void> {
+  if (!spanProcessor) return;
+  try {
+    await spanProcessor.forceFlush();
+  } catch {
+    // Silently ignore flush errors — tracing should never break the server
+  }
 }
 
 export function tracingMiddleware(): MiddlewareHandler {
