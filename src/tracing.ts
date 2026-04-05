@@ -27,12 +27,13 @@ const resource = resourceFromAttributes({
 });
 
 const apiKey = process.env.HONEYCOMB_API_KEY;
+const honeycombEndpoint = process.env.HONEYCOMB_SERVER ?? "https://api.honeycomb.io";
 
 let spanProcessor: BatchSpanProcessor | undefined;
 
 if (apiKey) {
   const exporter = new OTLPTraceExporter({
-    url: "https://api.honeycomb.io/v1/traces",
+    url: `${honeycombEndpoint}/v1/traces`,
     headers: {
       "x-honeycomb-team": apiKey,
     },
