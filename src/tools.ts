@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { trace, SpanStatusCode } from "@opentelemetry/api";
+import { SpanStatusCode, type Span } from "@opentelemetry/api";
 import { tracer } from "./tracing.js";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -111,13 +111,13 @@ async function fetchSession(bearerToken: string): Promise<JMAPSession> {
 
 async function getSession(
   extra: RequestHandlerExtra<any, any>,
+  span?: Span,
 ): Promise<{ session: JMAPSession; bearerToken: string }> {
   const bearerToken = extractBearerToken(extra);
   const tokenHash = hashToken(bearerToken);
 
-  const activeSpan = trace.getActiveSpan();
-  if (activeSpan) {
-    activeSpan.setAttribute("user.id", tokenHash);
+  if (span) {
+    span.setAttribute("user.id", tokenHash);
   }
 
   // Try cached session
@@ -367,8 +367,9 @@ export async function getSessionFromExtra(
 async function runJMAP(
   validatedCalls: MethodCall[],
   extra: RequestHandlerExtra<any, any>,
+  span?: Span,
 ): Promise<unknown[]> {
-  const { session, bearerToken } = await getSession(extra);
+  const { session, bearerToken } = await getSession(extra, span);
   return runJMAPDirect(validatedCalls, session, bearerToken);
 }
 
@@ -565,7 +566,7 @@ export function registerTools(server: McpServer) {
           }
         }
 
-        const result = await runJMAP(validated, extra);
+        const result = await runJMAP(validated, extra, span);
         span.setAttribute("mcp.outcome", "success");
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       } catch (error) {
@@ -598,7 +599,7 @@ export function registerTools(server: McpServer) {
       const span = tracer.startSpan("tool:save_draft");
       span.setAttribute("mcp.tool", "save_draft");
       try {
-        const { session, bearerToken } = await getSession(extra);
+        const { session, bearerToken } = await getSession(extra, span);
         const { draftsMailboxId, identity } = await lookupMailboxAndIdentity(session, bearerToken);
 
         const create = buildEmailCreate(args, draftsMailboxId, identity, "draft");
@@ -668,7 +669,7 @@ export function registerTools(server: McpServer) {
         const recipients = parseAddresses(args.to);
         span.setAttribute("email.recipient_count", recipients.length);
 
-        const { session, bearerToken } = await getSession(extra);
+        const { session, bearerToken } = await getSession(extra, span);
         const { draftsMailboxId, identity } = await lookupMailboxAndIdentity(session, bearerToken);
 
         const create = buildEmailCreate(args, draftsMailboxId, identity, "msg");
