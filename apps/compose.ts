@@ -98,7 +98,7 @@ document.getElementById("save-draft-btn")!.addEventListener("click", async () =>
   try {
     await app.callServerTool({
       name: "save_draft",
-      arguments: { to: data.to, cc: data.cc, subject: data.subject, body: data.body },
+      arguments: { to: data.to, cc: data.cc, bcc: data.bcc, subject: data.subject, body: data.body },
     });
     showStatus("Draft saved.", "success");
   } catch (err) {
@@ -114,7 +114,7 @@ document.getElementById("send-btn")!.addEventListener("click", async () => {
   try {
     await app.callServerTool({
       name: "send_email",
-      arguments: { to: data.to, cc: data.cc, subject: data.subject, body: data.body },
+      arguments: { to: data.to, cc: data.cc, bcc: data.bcc, subject: data.subject, body: data.body },
     });
     showStatus("Email sent.", "success");
     app.sendMessage({

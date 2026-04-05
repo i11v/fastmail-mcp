@@ -107,7 +107,7 @@ async function fetchSession(bearerToken: string): Promise<JMAPSession> {
   };
 }
 
-async function getSession(
+export async function getSession(
   extra: RequestHandlerExtra<any, any>,
 ): Promise<{ session: JMAPSession; bearerToken: string }> {
   const bearerToken = extractBearerToken(extra);
@@ -322,13 +322,25 @@ export function injectAccountId(methodCalls: MethodCall[], accountId: string): M
 
 /**
  * Low-level JMAP call with explicit session and token.
- * Used by apps.ts to make JMAP calls outside the execute tool.
+ * Used by apps.ts and high-level tools (save_draft, send_email) to make
+ * JMAP calls outside the execute tool's full validation pipeline.
+ *
+ * Still enforces the method allowlist to prevent unintended methods.
  */
 export async function runJMAPDirect(
   methodCalls: MethodCall[],
   session: JMAPSession,
   bearerToken: string,
 ): Promise<unknown[]> {
+  for (let i = 0; i < methodCalls.length; i++) {
+    const method = methodCalls[i][0];
+    if (!ALLOWED_METHODS.has(method)) {
+      throw new Error(
+        `runJMAPDirect: disallowed method "${method}". Allowed: ${[...ALLOWED_METHODS].join(", ")}`,
+      );
+    }
+  }
+
   const injectedCalls = injectAccountId(methodCalls, session.accountId);
 
   const response = await fetch(session.apiUrl, {
@@ -346,15 +358,6 @@ export async function runJMAPDirect(
 
   const jmapResponse = (await response.json()) as { methodResponses: unknown[] };
   return cleanResponse(jmapResponse.methodResponses);
-}
-
-/**
- * Get session from request extra. Exported for use by apps.ts.
- */
-export async function getSessionFromExtra(
-  extra: RequestHandlerExtra<any, any>,
-): Promise<{ session: JMAPSession; bearerToken: string }> {
-  return getSession(extra);
 }
 
 async function runJMAP(
@@ -389,14 +392,30 @@ export function describeDestructiveAction(methodCalls: MethodCall[]): string {
 
 export function parseAddresses(str: string): { name?: string; email: string }[] {
   if (!str) return [];
-  return str
-    .split(/[,;]\s*/)
-    .filter(Boolean)
-    .map((addr) => {
-      const match = addr.match(/^(.+?)\s*<(.+?)>$/);
-      if (match) return { name: match[1].trim(), email: match[2].trim() };
-      return { email: addr.trim() };
-    });
+
+  // Split on commas/semicolons that are NOT inside double quotes.
+  const parts: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (const ch of str) {
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+      current += ch;
+    } else if ((ch === "," || ch === ";") && !inQuotes) {
+      parts.push(current.trim());
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  if (current.trim()) parts.push(current.trim());
+
+  return parts.filter(Boolean).map((addr) => {
+    // "Display Name" <email> or Display Name <email>
+    const match = addr.match(/^"?(.+?)"?\s*<(.+?)>$/);
+    if (match) return { name: match[1].trim(), email: match[2].trim() };
+    return { email: addr.trim() };
+  });
 }
 
 // --- Email helpers ---
@@ -485,6 +504,10 @@ const SendEmailSchema = z.object({
   bcc: z.string().optional().describe("BCC email address(es), comma-separated"),
   subject: z.string().optional().describe("Email subject line"),
   body: z.string().optional().describe("Email body text"),
+  confirmed: z
+    .boolean()
+    .optional()
+    .describe("Set to true to confirm sending after the server requests it."),
 });
 
 // --- Tool registration ---
@@ -629,6 +652,43 @@ export function registerTools(server: McpServer) {
             content: [{ type: "text", text: "Error: 'to' field must not be empty." }],
             isError: true,
           };
+        }
+
+        // Sending email is destructive (can't unsend) — require confirmation.
+        if (!args.confirmed) {
+          const recipients = parseAddresses(args.to)
+            .map((a) => a.email)
+            .join(", ");
+          try {
+            const elicitResult = await server.server.elicitInput({
+              message: `This will send an email to ${recipients}. Proceed?`,
+              requestedSchema: {
+                type: "object" as const,
+                properties: {
+                  confirmed: {
+                    type: "boolean" as const,
+                    description: "Confirm sending the email",
+                  },
+                },
+                required: ["confirmed"],
+              },
+            });
+            if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
+              return { content: [{ type: "text", text: "Send cancelled by user." }] };
+            }
+          } catch {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text:
+                    `⚠️ Confirmation required: this will send an email to ${recipients}. ` +
+                    `IMPORTANT: Do NOT proceed automatically — you MUST ask the user for explicit confirmation first. ` +
+                    `Only if the user confirms, call this tool again with confirmed: true.`,
+                },
+              ],
+            };
+          }
         }
 
         const { session, bearerToken } = await getSession(extra);

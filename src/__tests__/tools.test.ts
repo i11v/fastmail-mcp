@@ -44,4 +44,18 @@ describe("parseAddresses", () => {
       { name: "Alice", email: "a@b.com" },
     ]);
   });
+
+  it("handles quoted display names with commas", () => {
+    expect(parseAddresses('"Doe, John" <john@example.com>, alice@example.com')).toEqual([
+      { name: "Doe, John", email: "john@example.com" },
+      { email: "alice@example.com" },
+    ]);
+  });
+
+  it("handles quoted display names with semicolons", () => {
+    expect(parseAddresses('"Smith; Jr" <jr@example.com>; bob@example.com')).toEqual([
+      { name: "Smith; Jr", email: "jr@example.com" },
+      { email: "bob@example.com" },
+    ]);
+  });
 });

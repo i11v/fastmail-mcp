@@ -171,6 +171,22 @@ export function cleanEmailHtmlForDisplay(html: string): string {
 }
 
 /**
+ * Collect raw body part values from a JMAP email, joined by newline.
+ * Works for both htmlBody and textBody part lists.
+ */
+function collectBodyParts(email: any, partList: "htmlBody" | "textBody"): string | null {
+  const parts = email[partList];
+  if (!parts || parts.length === 0) return null;
+
+  const values: string[] = [];
+  for (const part of parts) {
+    const body = email.bodyValues[part.partId];
+    if (body?.value) values.push(body.value);
+  }
+  return values.length > 0 ? values.join("\n") : null;
+}
+
+/**
  * Get the body content from an email.
  * Prefers htmlBody (sanitized) for consistent output.
  * Falls back to textBody for plain-text emails.
@@ -178,33 +194,11 @@ export function cleanEmailHtmlForDisplay(html: string): string {
 function getEmailBody(email: any): string {
   if (!email.bodyValues) return "";
 
-  // Use htmlBody, sanitized for LLM consumption
-  if (email.htmlBody && email.htmlBody.length > 0) {
-    const htmlParts: string[] = [];
-    for (const part of email.htmlBody) {
-      const body = email.bodyValues[part.partId];
-      if (body?.value) {
-        htmlParts.push(body.value);
-      }
-    }
-    if (htmlParts.length > 0) {
-      return sanitizeEmailHtml(htmlParts.join("\n"));
-    }
-  }
+  const html = collectBodyParts(email, "htmlBody");
+  if (html) return sanitizeEmailHtml(html);
 
-  // Fall back to textBody if no htmlBody
-  if (email.textBody && email.textBody.length > 0) {
-    const textParts: string[] = [];
-    for (const part of email.textBody) {
-      const body = email.bodyValues[part.partId];
-      if (body?.value) {
-        textParts.push(body.value);
-      }
-    }
-    if (textParts.length > 0) {
-      return textParts.join("\n").trim();
-    }
-  }
+  const text = collectBodyParts(email, "textBody");
+  if (text) return text.trim();
 
   return "";
 }
@@ -314,34 +308,11 @@ export function formatEmailBody(email: any): {
 } {
   if (!email.bodyValues) return { html: null, text: null, content: "" };
 
-  let html: string | null = null;
-  let text: string | null = null;
+  const rawHtml = collectBodyParts(email, "htmlBody");
+  const html = rawHtml ? cleanEmailHtmlForDisplay(rawHtml) : null;
 
-  if (email.htmlBody && email.htmlBody.length > 0) {
-    const htmlParts: string[] = [];
-    for (const part of email.htmlBody) {
-      const body = email.bodyValues[part.partId];
-      if (body?.value) {
-        htmlParts.push(body.value);
-      }
-    }
-    if (htmlParts.length > 0) {
-      html = cleanEmailHtmlForDisplay(htmlParts.join("\n"));
-    }
-  }
-
-  if (email.textBody && email.textBody.length > 0) {
-    const textParts: string[] = [];
-    for (const part of email.textBody) {
-      const body = email.bodyValues[part.partId];
-      if (body?.value) {
-        textParts.push(body.value);
-      }
-    }
-    if (textParts.length > 0) {
-      text = textParts.join("\n").trim();
-    }
-  }
+  const rawText = collectBodyParts(email, "textBody");
+  const text = rawText ? rawText.trim() : null;
 
   const content = html || text || "";
   return { html, text, content };
