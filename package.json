@@ -1,17 +1,12 @@
 {
-  "name": "fastmail-mcp-unofficial",
+  "name": "fastmail-mcp",
   "version": "0.5.0",
-  "description": "MCP server for Fastmail — JMAP execute proxy",
+  "description": "MCP server for Fastmail — Cloudflare Workers edition",
   "type": "module",
-  "engines": {
-    "node": "24.x"
-  },
-  "main": "dist/index.js",
   "scripts": {
-    "build": "pnpm build:apps && tsc",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --minify",
     "build:apps": "INPUT=apps/read-email.html vite build -c vite.apps.config.ts && INPUT=apps/compose.html vite build -c vite.apps.config.ts",
-    "start": "node dist/index.js",
-    "deploy": "vercel --prod",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint src",
     "lint:fix": "oxlint --fix src",
@@ -20,6 +15,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "pnpm typecheck && pnpm lint && pnpm fmt:check && pnpm test",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "prepare": "lefthook install"
   },
   "keywords": [
@@ -32,29 +28,25 @@
   "license": "MIT",
   "dependencies": {
     "@hono/mcp": "^0.2.4",
-    "@hono/node-server": "^1.19.7",
     "@modelcontextprotocol/ext-apps": "^1.2.2",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/exporter-trace-otlp-http": "^0.214.0",
     "@opentelemetry/resources": "^2.6.1",
-    "@opentelemetry/sdk-node": "^0.214.0",
     "@opentelemetry/sdk-trace-base": "^2.6.1",
     "@opentelemetry/semantic-conventions": "^1.40.0",
     "cheerio": "^1.2.0",
-    "hono": "^4.9.8",
-    "redis": "^5.10.0",
+    "hono": "^4.12.10",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^24.5.2",
     "lefthook": "^2.1.0",
     "oxfmt": "^0.28.0",
     "oxlint": "^1.43.0",
-    "typescript": "^5.9.2",
-    "vercel": "^39.2.4",
+    "typescript": "^6.0.0",
     "vite": "^8.0.0",
     "vite-plugin-singlefile": "^2.3.0",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "wrangler": "^4.80.0"
   }
 }
