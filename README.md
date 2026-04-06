@@ -134,6 +134,21 @@ Display the full content of an email in a rich reader view. Fetches the email by
 - `POST /mcp` - MCP protocol endpoint
 - `GET /health` - Health check endpoint
 
+## Environment Variables
+
+Copy `.env.example` to `.env.development.local` and fill in the values:
+
+```bash
+cp .env.example .env.development.local
+```
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `REDIS_URL` | Yes | Redis connection URL (provisioned via Vercel Marketplace) |
+| `HONEYCOMB_API_KEY` | No | Honeycomb ingest key for OpenTelemetry tracing |
+| `HONEYCOMB_SERVER` | No | Honeycomb API server (default: `https://api.honeycomb.io`, EU: `https://api.eu1.honeycomb.io`) |
+| `PORT` | No | Local server port (default: `3000`) |
+
 ## Development
 
 ```bash
