@@ -153,7 +153,7 @@ cp .env.example .env.development.local
 pnpm install   # Install dependencies
 pnpm dev       # Run local dev server (wrangler)
 pnpm check     # Run all checks (typecheck + lint + fmt + test)
-pnpm deploy    # Deploy to Cloudflare
+pnpm run deploy:prod  # Deploy to Cloudflare
 ```
 
 ---
