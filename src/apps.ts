@@ -1,6 +1,3 @@
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
@@ -8,12 +5,8 @@ import {
   registerAppResource,
   RESOURCE_MIME_TYPE,
 } from "@modelcontextprotocol/ext-apps/server";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const appsDir = join(__dirname, "..", "dist", "apps");
-
-const composeHtml = readFileSync(join(appsDir, "compose.html"), "utf-8");
-const readEmailHtml = readFileSync(join(appsDir, "read-email.html"), "utf-8");
+import composeHtml from "../public/compose.html";
+import readEmailHtml from "../public/read-email.html";
 
 // --- Zod schemas ---
 
