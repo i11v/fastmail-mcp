@@ -3,7 +3,6 @@ import { tracer, forceFlush } from "./tracing.js";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
-import { getCachedSession, setCachedSession } from "./redis.js";
 import { hashToken } from "./utils.js";
 
 // Constants
@@ -110,28 +109,12 @@ async function getSession(
   span?: Span,
 ): Promise<{ session: JMAPSession; bearerToken: string }> {
   const bearerToken = extractBearerToken(extra);
-  const tokenHash = hashToken(bearerToken);
 
   if (span) {
-    span.setAttribute("user.id", tokenHash);
+    span.setAttribute("user.id", hashToken(bearerToken));
   }
 
-  // Try cached session
-  const cached = await getCachedSession(tokenHash).catch(() => null);
-  if (cached) {
-    const session: JMAPSession = JSON.parse(cached.json);
-    return { session, bearerToken };
-  }
-
-  // Fetch fresh session
   const session = await fetchSession(bearerToken);
-
-  // Cache it
-  await setCachedSession(tokenHash, {
-    accountId: session.accountId,
-    json: JSON.stringify(session),
-  }).catch(() => {}); // Don't fail if Redis is down
-
   return { session, bearerToken };
 }
 
@@ -579,7 +562,7 @@ export function registerTools(server: McpServer) {
         };
       } finally {
         span.end();
-        if (process.env.VERCEL) await forceFlush();
+        await forceFlush();
       }
     },
   );
@@ -639,7 +622,7 @@ export function registerTools(server: McpServer) {
         };
       } finally {
         span.end();
-        if (process.env.VERCEL) await forceFlush();
+        await forceFlush();
       }
     },
   );
@@ -748,7 +731,7 @@ export function registerTools(server: McpServer) {
         };
       } finally {
         span.end();
-        if (process.env.VERCEL) await forceFlush();
+        await forceFlush();
       }
     },
   );
