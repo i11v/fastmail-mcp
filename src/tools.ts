@@ -1,4 +1,4 @@
-import { SpanStatusCode, type Span } from "@opentelemetry/api";
+import { SpanStatusCode, trace, context, type Span } from "@opentelemetry/api";
 import { tracer, forceFlush } from "./tracing.js";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -114,7 +114,8 @@ async function getSession(
     parentSpan.setAttribute("user.id", hashToken(bearerToken));
   }
 
-  const session = await tracer.startActiveSpan("fetchSession", async (span) => {
+  const parentCtx = parentSpan ? trace.setSpan(context.active(), parentSpan) : context.active();
+  const session = await tracer.startActiveSpan("fetchSession", {}, parentCtx, async (span) => {
     try {
       const result = await fetchSession(bearerToken);
       span.setAttribute("jmap.account_id", result.accountId);
