@@ -106,15 +106,28 @@ async function fetchSession(bearerToken: string): Promise<JMAPSession> {
 
 async function getSession(
   extra: RequestHandlerExtra<any, any>,
-  span?: Span,
+  parentSpan?: Span,
 ): Promise<{ session: JMAPSession; bearerToken: string }> {
   const bearerToken = extractBearerToken(extra);
 
-  if (span) {
-    span.setAttribute("user.id", hashToken(bearerToken));
+  if (parentSpan) {
+    parentSpan.setAttribute("user.id", hashToken(bearerToken));
   }
 
-  const session = await fetchSession(bearerToken);
+  const session = await tracer.startActiveSpan("fetchSession", async (span) => {
+    try {
+      const result = await fetchSession(bearerToken);
+      span.setAttribute("jmap.account_id", result.accountId);
+      return result;
+    } catch (error) {
+      span.recordException(error as Error);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: (error as Error).message });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
+
   return { session, bearerToken };
 }
 
