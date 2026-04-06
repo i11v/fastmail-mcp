@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [viteSingleFile()],
   build: {
     rollupOptions: { input: INPUT },
-    outDir: "dist",
+    outDir: "public",
     emptyOutDir: false,
   },
 });

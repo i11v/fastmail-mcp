@@ -4,8 +4,8 @@
 
 Unofficial MCP server for Fastmail integration. Enables AI assistants to interact with Fastmail accounts through the Model Context Protocol for email management, querying, and sending.
 
-- **Node.js:** v24.x (see `.nvmrc`)
-- **Deployment:** Vercel (https://fastmail-mcp.vercel.app)
+- **Runtime:** Cloudflare Workers
+- **Deployment:** Cloudflare (`wrangler deploy`)
 
 ## Package Manager
 
@@ -13,9 +13,8 @@ Always use `pnpm` instead of `npm` for this project.
 
 ```bash
 pnpm install      # Install dependencies
-pnpm build        # Build TypeScript to dist/
-pnpm start        # Run local server on port 3000
-pnpm deploy       # Deploy to Vercel (production)
+pnpm dev          # Run local dev server (wrangler)
+pnpm run deploy:prod  # Deploy to Cloudflare (production)
 ```
 
 ## Quality Commands
@@ -39,7 +38,6 @@ pnpm test:watch   # Run tests in watch mode
 - `src/tools.ts` - Tool implementations, Zod schemas, JMAP integration
 - `src/format.ts` - Email formatting for LLM consumption (XML output, HTML→Markdown)
 - `src/apps.ts` - MCP Apps UI resources and tools (compose_email, read_email)
-- `src/redis.ts` - Redis client setup, session caching
 
 ## Tooling
 
@@ -58,8 +56,6 @@ pnpm test:watch   # Run tests in watch mode
 | `hono` | Web framework |
 | `@hono/mcp` | MCP integration |
 | `@modelcontextprotocol/sdk` | MCP protocol SDK |
-| `effect` | Functional programming |
-| `effect-jmap` | JMAP client library |
 | `zod` | Schema validation |
 
 ## Documentation

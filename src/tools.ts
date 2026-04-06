@@ -1,9 +1,8 @@
-import { SpanStatusCode, type Span } from "@opentelemetry/api";
+import { SpanStatusCode, trace, context, type Span } from "@opentelemetry/api";
 import { tracer, forceFlush } from "./tracing.js";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
-import { getCachedSession, setCachedSession } from "./redis.js";
 import { hashToken } from "./utils.js";
 
 // Constants
@@ -107,30 +106,28 @@ async function fetchSession(bearerToken: string): Promise<JMAPSession> {
 
 async function getSession(
   extra: RequestHandlerExtra<any, any>,
-  span?: Span,
+  parentSpan?: Span,
 ): Promise<{ session: JMAPSession; bearerToken: string }> {
   const bearerToken = extractBearerToken(extra);
-  const tokenHash = hashToken(bearerToken);
 
-  if (span) {
-    span.setAttribute("user.id", tokenHash);
+  if (parentSpan) {
+    parentSpan.setAttribute("user.id", hashToken(bearerToken));
   }
 
-  // Try cached session
-  const cached = await getCachedSession(tokenHash).catch(() => null);
-  if (cached) {
-    const session: JMAPSession = JSON.parse(cached.json);
-    return { session, bearerToken };
-  }
-
-  // Fetch fresh session
-  const session = await fetchSession(bearerToken);
-
-  // Cache it
-  await setCachedSession(tokenHash, {
-    accountId: session.accountId,
-    json: JSON.stringify(session),
-  }).catch(() => {}); // Don't fail if Redis is down
+  const parentCtx = parentSpan ? trace.setSpan(context.active(), parentSpan) : context.active();
+  const session = await tracer.startActiveSpan("fetchSession", {}, parentCtx, async (span) => {
+    try {
+      const result = await fetchSession(bearerToken);
+      span.setAttribute("jmap.account_id", result.accountId);
+      return result;
+    } catch (error) {
+      span.recordException(error as Error);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: (error as Error).message });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
 
   return { session, bearerToken };
 }
@@ -579,7 +576,7 @@ export function registerTools(server: McpServer) {
         };
       } finally {
         span.end();
-        if (process.env.VERCEL) await forceFlush();
+        await forceFlush();
       }
     },
   );
@@ -639,7 +636,7 @@ export function registerTools(server: McpServer) {
         };
       } finally {
         span.end();
-        if (process.env.VERCEL) await forceFlush();
+        await forceFlush();
       }
     },
   );
@@ -748,7 +745,7 @@ export function registerTools(server: McpServer) {
         };
       } finally {
         span.end();
-        if (process.env.VERCEL) await forceFlush();
+        await forceFlush();
       }
     },
   );
