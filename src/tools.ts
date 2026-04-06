@@ -1,5 +1,5 @@
 import { SpanStatusCode, type Span } from "@opentelemetry/api";
-import { startToolSpan } from "./tracing.js";
+import { tracer, forceFlush } from "./tracing.js";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
@@ -505,7 +505,7 @@ export function registerTools(server: McpServer) {
       inputSchema: ExecuteSchema,
     },
     async (args, extra) => {
-      const span = startToolSpan("tool:execute", extra.requestInfo?.headers);
+      const span = tracer.startSpan("tool:execute");
       try {
         // Validate
         const validated = validateStructure(args.methodCalls);
@@ -579,6 +579,7 @@ export function registerTools(server: McpServer) {
         };
       } finally {
         span.end();
+        if (process.env.VERCEL) await forceFlush();
       }
     },
   );
@@ -592,7 +593,7 @@ export function registerTools(server: McpServer) {
       inputSchema: SaveDraftSchema,
     },
     async (args, extra) => {
-      const span = startToolSpan("tool:save_draft", extra.requestInfo?.headers);
+      const span = tracer.startSpan("tool:save_draft");
       span.setAttribute("mcp.tool", "save_draft");
       try {
         const { session, bearerToken } = await getSession(extra, span);
@@ -638,6 +639,7 @@ export function registerTools(server: McpServer) {
         };
       } finally {
         span.end();
+        if (process.env.VERCEL) await forceFlush();
       }
     },
   );
@@ -651,7 +653,7 @@ export function registerTools(server: McpServer) {
       inputSchema: SendEmailSchema,
     },
     async (args, extra) => {
-      const span = startToolSpan("tool:send_email", extra.requestInfo?.headers);
+      const span = tracer.startSpan("tool:send_email");
       span.setAttribute("mcp.tool", "send_email");
       try {
         if (!args.to.trim()) {
@@ -746,6 +748,7 @@ export function registerTools(server: McpServer) {
         };
       } finally {
         span.end();
+        if (process.env.VERCEL) await forceFlush();
       }
     },
   );

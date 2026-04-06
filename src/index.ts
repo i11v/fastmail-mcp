@@ -9,7 +9,6 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPTransport } from "@hono/mcp";
 import { registerTools } from "./tools.js";
 import { registerApps } from "./apps.js";
-import { tracingMiddleware } from "./tracing.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const publicDir = join(__dirname, "..", "public");
@@ -26,9 +25,6 @@ app.use(
     allowHeaders: ["Content-Type", "Mcp-Session-Id", "Authorization"],
   }),
 );
-
-// Tracing middleware for MCP requests
-app.use("/mcp", tracingMiddleware());
 
 // Create MCP server
 const mcpServer = new McpServer({
