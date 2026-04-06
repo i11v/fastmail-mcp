@@ -41,4 +41,4 @@ jobs:
         run: pnpm test
 
       - name: Dry-run deploy (build check)
-        run: npx wrangler deploy --minify --dry-run
+        run: pnpm wrangler deploy --minify --dry-run
