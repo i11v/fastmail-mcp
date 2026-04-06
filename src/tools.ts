@@ -1,8 +1,10 @@
-import { createHash } from "node:crypto";
+import { SpanStatusCode, type Span } from "@opentelemetry/api";
+import { tracer, forceFlush } from "./tracing.js";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import { getCachedSession, setCachedSession } from "./redis.js";
+import { hashToken } from "./utils.js";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
@@ -74,10 +76,6 @@ function extractBearerToken(extra: RequestHandlerExtra<any, any>): string {
   return authHeader.substring(7);
 }
 
-function hashToken(token: string): string {
-  return createHash("sha256").update(token).digest("hex").slice(0, 16);
-}
-
 // --- Session management ---
 
 async function fetchSession(bearerToken: string): Promise<JMAPSession> {
@@ -109,9 +107,14 @@ async function fetchSession(bearerToken: string): Promise<JMAPSession> {
 
 async function getSession(
   extra: RequestHandlerExtra<any, any>,
+  span?: Span,
 ): Promise<{ session: JMAPSession; bearerToken: string }> {
   const bearerToken = extractBearerToken(extra);
   const tokenHash = hashToken(bearerToken);
+
+  if (span) {
+    span.setAttribute("user.id", tokenHash);
+  }
 
   // Try cached session
   const cached = await getCachedSession(tokenHash).catch(() => null);
@@ -360,8 +363,9 @@ export async function getSessionFromExtra(
 async function runJMAP(
   validatedCalls: MethodCall[],
   extra: RequestHandlerExtra<any, any>,
+  span?: Span,
 ): Promise<unknown[]> {
-  const { session, bearerToken } = await getSession(extra);
+  const { session, bearerToken } = await getSession(extra, span);
   return runJMAPDirect(validatedCalls, session, bearerToken);
 }
 
@@ -501,14 +505,23 @@ export function registerTools(server: McpServer) {
       inputSchema: ExecuteSchema,
     },
     async (args, extra) => {
+      const span = tracer.startSpan("tool:execute");
       try {
         // Validate
         const validated = validateStructure(args.methodCalls);
         validateResultReferences(validated);
         validateHygiene(validated);
 
+        const safety = classifySafety(validated);
+        span.setAttributes({
+          "mcp.tool": "execute",
+          "jmap.method_count": validated.length,
+          "jmap.methods": validated.map(([m]) => m).join(", "),
+          "jmap.safety": safety,
+        });
+
         // Safety gate — confirm destructive ops before executing.
-        if (classifySafety(validated) === "destructive") {
+        if (safety === "destructive") {
           // If the caller already confirmed via the `confirmed` flag, skip.
           if (!args.confirmed) {
             // Try elicitation first (rich UI for clients that support it).
@@ -527,11 +540,13 @@ export function registerTools(server: McpServer) {
                 },
               });
               if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
+                span.setAttribute("mcp.outcome", "cancelled");
                 return { content: [{ type: "text", text: "Operation cancelled by user." }] };
               }
             } catch {
               // Elicitation not supported — fall back to two-step confirmation.
               const description = describeDestructiveAction(validated);
+              span.setAttribute("mcp.outcome", "awaiting_confirmation");
               return {
                 content: [
                   {
@@ -547,9 +562,12 @@ export function registerTools(server: McpServer) {
           }
         }
 
-        const result = await runJMAP(validated, extra);
+        const result = await runJMAP(validated, extra, span);
+        span.setAttribute("mcp.outcome", "success");
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       } catch (error) {
+        span.recordException(error as Error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: (error as Error).message });
         return {
           content: [
             {
@@ -559,6 +577,9 @@ export function registerTools(server: McpServer) {
           ],
           isError: true,
         };
+      } finally {
+        span.end();
+        if (process.env.VERCEL) await forceFlush();
       }
     },
   );
@@ -572,8 +593,10 @@ export function registerTools(server: McpServer) {
       inputSchema: SaveDraftSchema,
     },
     async (args, extra) => {
+      const span = tracer.startSpan("tool:save_draft");
+      span.setAttribute("mcp.tool", "save_draft");
       try {
-        const { session, bearerToken } = await getSession(extra);
+        const { session, bearerToken } = await getSession(extra, span);
         const { draftsMailboxId, identity } = await lookupMailboxAndIdentity(session, bearerToken);
 
         const create = buildEmailCreate(args, draftsMailboxId, identity, "draft");
@@ -587,6 +610,7 @@ export function registerTools(server: McpServer) {
           | [string, { created?: Record<string, { id: string }>; notCreated?: unknown }, string]
           | undefined;
         if (setResult?.[1]?.notCreated) {
+          span.setAttribute("mcp.outcome", "jmap_error");
           return {
             content: [
               {
@@ -599,8 +623,11 @@ export function registerTools(server: McpServer) {
         }
 
         const draftId = setResult?.[1]?.created?.draft?.id ?? "unknown";
+        span.setAttribute("mcp.outcome", "success");
         return { content: [{ type: "text", text: `Draft saved (${draftId})` }] };
       } catch (error) {
+        span.recordException(error as Error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: (error as Error).message });
         return {
           content: [
             {
@@ -610,6 +637,9 @@ export function registerTools(server: McpServer) {
           ],
           isError: true,
         };
+      } finally {
+        span.end();
+        if (process.env.VERCEL) await forceFlush();
       }
     },
   );
@@ -623,15 +653,21 @@ export function registerTools(server: McpServer) {
       inputSchema: SendEmailSchema,
     },
     async (args, extra) => {
+      const span = tracer.startSpan("tool:send_email");
+      span.setAttribute("mcp.tool", "send_email");
       try {
         if (!args.to.trim()) {
+          span.setAttribute("mcp.outcome", "validation_error");
           return {
             content: [{ type: "text", text: "Error: 'to' field must not be empty." }],
             isError: true,
           };
         }
 
-        const { session, bearerToken } = await getSession(extra);
+        const recipients = parseAddresses(args.to);
+        span.setAttribute("email.recipient_count", recipients.length);
+
+        const { session, bearerToken } = await getSession(extra, span);
         const { draftsMailboxId, identity } = await lookupMailboxAndIdentity(session, bearerToken);
 
         const create = buildEmailCreate(args, draftsMailboxId, identity, "msg");
@@ -660,6 +696,7 @@ export function registerTools(server: McpServer) {
           | [string, { created?: Record<string, { id: string }>; notCreated?: unknown }, string]
           | undefined;
         if (setResult?.[1]?.notCreated) {
+          span.setAttribute("mcp.outcome", "jmap_error");
           return {
             content: [
               {
@@ -676,6 +713,7 @@ export function registerTools(server: McpServer) {
           | [string, { created?: unknown; notCreated?: unknown }, string]
           | undefined;
         if (subResult?.[1]?.notCreated) {
+          span.setAttribute("mcp.outcome", "jmap_error");
           return {
             content: [
               {
@@ -687,11 +725,18 @@ export function registerTools(server: McpServer) {
           };
         }
 
-        const recipients = parseAddresses(args.to)
-          .map((a) => a.email)
-          .join(", ");
-        return { content: [{ type: "text", text: `Email sent to ${recipients}` }] };
+        span.setAttribute("mcp.outcome", "success");
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Email sent to ${recipients.map((a) => a.email).join(", ")}`,
+            },
+          ],
+        };
       } catch (error) {
+        span.recordException(error as Error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: (error as Error).message });
         return {
           content: [
             {
@@ -701,6 +746,9 @@ export function registerTools(server: McpServer) {
           ],
           isError: true,
         };
+      } finally {
+        span.end();
+        if (process.env.VERCEL) await forceFlush();
       }
     },
   );

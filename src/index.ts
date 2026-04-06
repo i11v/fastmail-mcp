@@ -1,3 +1,5 @@
+// Side-effect import: must be first to initialize OTEL before other modules
+import "./tracing.js"; // eslint-disable-line import/no-unassigned-import
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
