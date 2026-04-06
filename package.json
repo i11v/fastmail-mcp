@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify",
+    "deploy:prod": "wrangler deploy --minify",
     "build:apps": "INPUT=apps/read-email.html vite build -c vite.apps.config.ts && INPUT=apps/compose.html vite build -c vite.apps.config.ts",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint src",

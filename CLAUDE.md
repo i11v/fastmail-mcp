@@ -14,7 +14,7 @@ Always use `pnpm` instead of `npm` for this project.
 ```bash
 pnpm install      # Install dependencies
 pnpm dev          # Run local dev server (wrangler)
-pnpm deploy       # Deploy to Cloudflare (production)
+pnpm deploy:prod  # Deploy to Cloudflare (production)
 ```
 
 ## Quality Commands
