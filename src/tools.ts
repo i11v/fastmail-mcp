@@ -1,10 +1,10 @@
-import { createHash } from "node:crypto";
 import { SpanStatusCode, type Span } from "@opentelemetry/api";
-import { tracer } from "./tracing.js";
+import { startToolSpan } from "./tracing.js";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import { getCachedSession, setCachedSession } from "./redis.js";
+import { hashToken } from "./utils.js";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
@@ -74,10 +74,6 @@ function extractBearerToken(extra: RequestHandlerExtra<any, any>): string {
   }
 
   return authHeader.substring(7);
-}
-
-function hashToken(token: string): string {
-  return createHash("sha256").update(token).digest("hex").slice(0, 16);
 }
 
 // --- Session management ---
@@ -509,7 +505,7 @@ export function registerTools(server: McpServer) {
       inputSchema: ExecuteSchema,
     },
     async (args, extra) => {
-      const span = tracer.startSpan("tool:execute");
+      const span = startToolSpan("tool:execute", extra.requestInfo?.headers);
       try {
         // Validate
         const validated = validateStructure(args.methodCalls);
@@ -596,7 +592,7 @@ export function registerTools(server: McpServer) {
       inputSchema: SaveDraftSchema,
     },
     async (args, extra) => {
-      const span = tracer.startSpan("tool:save_draft");
+      const span = startToolSpan("tool:save_draft", extra.requestInfo?.headers);
       span.setAttribute("mcp.tool", "save_draft");
       try {
         const { session, bearerToken } = await getSession(extra, span);
@@ -655,7 +651,7 @@ export function registerTools(server: McpServer) {
       inputSchema: SendEmailSchema,
     },
     async (args, extra) => {
-      const span = tracer.startSpan("tool:send_email");
+      const span = startToolSpan("tool:send_email", extra.requestInfo?.headers);
       span.setAttribute("mcp.tool", "send_email");
       try {
         if (!args.to.trim()) {
