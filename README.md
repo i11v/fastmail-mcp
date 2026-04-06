@@ -22,7 +22,7 @@ Add the following to your Claude Code MCP settings (`~/.claude/claude_desktop_co
   "mcpServers": {
     "fastmail": {
       "type": "url",
-      "url": "https://fastmail-mcp.vercel.app/mcp",
+      "url": "https://fastmail-mcp.YOUR-SUBDOMAIN.workers.dev/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_FASTMAIL_API_TOKEN"
       }
@@ -144,19 +144,16 @@ cp .env.example .env.development.local
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `REDIS_URL` | Yes | Redis connection URL (provisioned via Vercel Marketplace) |
 | `HONEYCOMB_API_KEY` | No | Honeycomb ingest key for OpenTelemetry tracing |
 | `HONEYCOMB_SERVER` | No | Honeycomb API server (default: `https://api.honeycomb.io`, EU: `https://api.eu1.honeycomb.io`) |
-| `PORT` | No | Local server port (default: `3000`) |
 
 ## Development
 
 ```bash
 pnpm install   # Install dependencies
-pnpm build     # Build for production
-pnpm start     # Run local server
+pnpm dev       # Run local dev server (wrangler)
 pnpm check     # Run all checks (typecheck + lint + fmt + test)
-pnpm deploy    # Deploy to Vercel
+pnpm deploy    # Deploy to Cloudflare
 ```
 
 ---
