@@ -7,8 +7,8 @@ import {
 } from "@modelcontextprotocol/ext-apps/server";
 import { getSession, runJMAPDirect } from "./tools.js";
 import { formatEmailBody } from "./format.js";
-import composeHtml from "../public/compose.html";
-import readEmailHtml from "../public/read-email.html";
+import composeHtml from "../public/apps/compose.html";
+import readEmailHtml from "../public/apps/read-email.html";
 
 // --- Zod schemas ---
 
