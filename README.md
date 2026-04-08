@@ -22,7 +22,7 @@ Add the following to your Claude Code MCP settings (`~/.claude/claude_desktop_co
   "mcpServers": {
     "fastmail": {
       "type": "url",
-      "url": "https://fastmail-mcp.ilnur-khalilov.workers.dev/mcp",
+      "url": "https://fastmail-mcp.i11v.com/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_FASTMAIL_API_TOKEN"
       }
