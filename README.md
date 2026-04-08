@@ -78,33 +78,6 @@ Execute JMAP method calls against Fastmail. Accepts an array of JMAP method call
 - `ids: null` on `/get` calls is rejected (use `/query` first)
 - Destructive operations (`destroy`, `EmailSubmission/set`) return an error asking for user confirmation
 
-### `send_email`
-
-Send an email immediately. Handles identity lookup, drafts mailbox, and submission server-side.
-
-**Input:**
-```json
-{
-  "to": "recipient@example.com",
-  "cc": "other@example.com",
-  "subject": "Hello",
-  "body": "Message text..."
-}
-```
-
-### `save_draft`
-
-Save an email as a draft. Handles identity and drafts mailbox lookup server-side.
-
-**Input:**
-```json
-{
-  "to": "recipient@example.com",
-  "subject": "Hello",
-  "body": "Message text..."
-}
-```
-
 ### `compose_email` (MCP App)
 
 Open an interactive email compose form. Optionally pre-fill fields (to, cc, bcc, subject, body). On hosts that support MCP Apps, renders an inline compose UI with send and save-draft buttons. Falls back to structured text on other hosts.

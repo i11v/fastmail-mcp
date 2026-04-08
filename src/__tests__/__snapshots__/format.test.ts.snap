@@ -928,19 +928,7 @@ Privacy policy
 </tr>
 </tbody>
 </table>
-<script type="application/ld+json">
-{
-"@context": "http://schema.org",
-"@type": "EmailMessage",
-"potentialAction": {
-"@type": "ViewAction",
-"url": "https://secure.booking.com/review/0bc37372854141f49b00b46db921b484.en-gb.html?aid=898224&email_source=invitation_email&ugc_campaign=invitation_email&ugc_source=email",
-"target": "https://secure.booking.com/review/0bc37372854141f49b00b46db921b484.en-gb.html?aid=898224&email_source=invitation_email&ugc_campaign=invitation_email&ugc_source=email",
-"name": "Review your stay"
-},
-"description": "Review your stay"
-}
-</script>
+
 
 
 

@@ -77,7 +77,7 @@ function buildSrcdoc(emailHtml: string, dark: boolean): string {
     html, body {
       margin: 0;
       padding: 0;
-      overflow: hidden;
+      overflow: auto;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       line-height: 1.6;
       word-break: break-word;
@@ -94,35 +94,19 @@ function buildSrcdoc(emailHtml: string, dark: boolean): string {
 
 function renderBodyInIframe(container: HTMLElement, html: string) {
   const iframe = document.createElement("iframe");
-  iframe.sandbox.add("allow-same-origin");
+  // Bare sandbox: no allow-scripts, no allow-same-origin.
+  // Scripts are stripped server-side; the iframe is fully inert.
+  iframe.setAttribute("sandbox", "");
   iframe.style.width = "100%";
+  iframe.style.height = "600px";
   iframe.style.border = "none";
   iframe.style.display = "block";
-  iframe.style.overflow = "hidden";
 
   const srcdoc = buildSrcdoc(html, isDarkMode());
   iframe.setAttribute("srcdoc", srcdoc);
 
   container.innerHTML = "";
   container.appendChild(iframe);
-
-  iframe.addEventListener("load", () => {
-    const doc = iframe.contentDocument;
-    if (!doc) return;
-
-    function resize() {
-      // Reset height to 0 first so scrollHeight reflects actual content, not old frame size
-      iframe.style.height = "0";
-      const height = doc!.documentElement.scrollHeight;
-      iframe.style.height = height + "px";
-    }
-
-    resize();
-
-    // Watch for dynamic content changes (image loads, lazy rendering)
-    const observer = new ResizeObserver(() => resize());
-    observer.observe(doc.body);
-  });
 }
 
 function addBadge(container: HTMLElement, cls: string, text: string) {

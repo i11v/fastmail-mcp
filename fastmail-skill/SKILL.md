@@ -1,6 +1,6 @@
 ---
 name: fastmail
-description: Use when interacting with the user's Fastmail email via the `execute`, `send_email`, `save_draft`, `compose_email`, and `read_email` MCP tools. Covers JMAP method calls for querying, reading, sending, and managing emails and mailboxes, plus interactive UI widgets for composing and reading emails.
+description: Use when interacting with the user's Fastmail email via the `execute`, `compose_email`, and `read_email` MCP tools. Covers JMAP method calls for querying, reading, sending, and managing emails and mailboxes, plus interactive UI widgets for composing and reading emails.
 ---
 
 # JMAP Mail Skill
@@ -50,38 +50,9 @@ The server injects `accountId` automatically — never include it yourself.
 
 Less common: `Mailbox/queryChanges`, `Email/queryChanges`, `EmailSubmission/get`, `EmailSubmission/query`, `Core/echo`.
 
-## Email Tools
-
-Purpose-built tools for sending emails and saving drafts. These handle all JMAP complexity (identity lookup, drafts mailbox, submission) server-side — just pass plain form fields.
-
-### `send_email`
-
-Send an email immediately. The `to` field is required; all other fields are optional.
-
-```json
-{
-  "to": "recipient@example.com",
-  "cc": "other@example.com",
-  "subject": "Hello",
-  "body": "Message text..."
-}
-```
-
-### `save_draft`
-
-Save an email as a draft. All fields are optional.
-
-```json
-{
-  "to": "recipient@example.com",
-  "subject": "Hello",
-  "body": "Message text..."
-}
-```
-
 ## UI Tools (MCP Apps)
 
-These tools render interactive widgets on hosts that support MCP Apps. They do **not** use the `execute` tool — they are standalone tools with their own inputs.
+These tools render interactive widgets on hosts that support MCP Apps. The compose UI uses `execute` under the hood for drafts and sending.
 
 ### `compose_email`
 
