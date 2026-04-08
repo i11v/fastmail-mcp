@@ -15,6 +15,11 @@ interface PrefillData {
   body?: string;
 }
 
+interface SenderContext {
+  draftsMailboxId: string;
+  identity: { id: string; name: string; email: string };
+}
+
 function showStatus(message: string, type: "error" | "success") {
   const el = document.getElementById("status")!;
   el.textContent = message;
@@ -65,18 +70,91 @@ function applyHostContext(ctx: McpUiHostContext) {
   if (ctx.styles?.css?.fonts) applyHostFonts(ctx.styles.css.fonts);
 }
 
+/** Parse comma/semicolon-separated addresses into JMAP EmailAddress objects. */
+function parseAddresses(str: string): { name?: string; email: string }[] {
+  if (!str) return [];
+  const parts: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (const ch of str) {
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+      current += ch;
+    } else if ((ch === "," || ch === ";") && !inQuotes) {
+      parts.push(current.trim());
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  if (current.trim()) parts.push(current.trim());
+  return parts.filter(Boolean).map((addr) => {
+    const match = addr.match(/^"?(.+?)"?\s*<(.+?)>$/);
+    if (match) return { name: match[1].trim(), email: match[2].trim() };
+    return { email: addr.trim() };
+  });
+}
+
+/** Call execute to look up drafts mailbox and sender identity. */
+async function fetchSenderContext(app: App): Promise<SenderContext> {
+  const result = await app.callServerTool({
+    name: "execute",
+    arguments: {
+      methodCalls: [
+        ["Mailbox/query", { filter: { role: "drafts" }, limit: 1 }, "mbox"],
+        ["Identity/get", {}, "ident"],
+      ],
+    },
+  });
+
+  const text = result.content?.find((b: any) => b.type === "text")?.text;
+  if (!text) throw new Error("Empty response from execute");
+  const responses = JSON.parse(text);
+
+  const mboxIds = responses[0]?.[1]?.ids;
+  if (!mboxIds?.[0]) throw new Error("Could not find Drafts mailbox");
+
+  const identList = responses[1]?.[1]?.list;
+  if (!identList?.[0]) throw new Error("Could not find sender identity");
+
+  const ident = identList[0];
+  return {
+    draftsMailboxId: mboxIds[0],
+    identity: { id: ident.id, name: ident.name ?? "", email: ident.email },
+  };
+}
+
+function buildEmailCreate(
+  data: ReturnType<typeof getFormData>,
+  ctx: SenderContext,
+  creationId: string,
+): Record<string, Record<string, unknown>> {
+  return {
+    [creationId]: {
+      mailboxIds: { [ctx.draftsMailboxId]: true },
+      keywords: { $draft: true, $seen: true },
+      from: [{ name: ctx.identity.name, email: ctx.identity.email }],
+      to: parseAddresses(data.to),
+      cc: parseAddresses(data.cc),
+      bcc: parseAddresses(data.bcc),
+      subject: data.subject || "",
+      bodyStructure: { type: "text/plain", partId: "body" },
+      bodyValues: { body: { value: data.body || "" } },
+    },
+  };
+}
+
 // Create App instance
 const app = new App({ name: "Fastmail Compose", version: "1.0.0" });
+let senderCtx: SenderContext | null = null;
 
 // Register handlers before connecting
 app.ontoolinput = (params) => {
-  console.info("Received tool input:", params);
   const args = params.arguments as PrefillData | undefined;
   if (args) prefillForm(args);
 };
 
 app.ontoolresult = (result) => {
-  console.info("Received tool result:", result);
   prefillForm(extractPrefill(result));
 };
 
@@ -92,13 +170,20 @@ document.getElementById("toggle-cc-bcc-btn")!.addEventListener("click", () => {
   btn.textContent = fields.classList.contains("hidden") ? "Show CC/BCC" : "Hide CC/BCC";
 });
 
+async function ensureSenderContext(): Promise<SenderContext> {
+  if (!senderCtx) senderCtx = await fetchSenderContext(app);
+  return senderCtx;
+}
+
 // Save Draft
 document.getElementById("save-draft-btn")!.addEventListener("click", async () => {
   const data = getFormData();
   try {
+    const ctx = await ensureSenderContext();
+    const create = buildEmailCreate(data, ctx, "draft");
     await app.callServerTool({
-      name: "save_draft",
-      arguments: { to: data.to, cc: data.cc, subject: data.subject, body: data.body },
+      name: "execute",
+      arguments: { methodCalls: [["Email/set", { create }, "create"]] },
     });
     showStatus("Draft saved.", "success");
   } catch (err) {
@@ -112,9 +197,27 @@ document.getElementById("send-btn")!.addEventListener("click", async () => {
   if (!data.to) { showStatus("Please enter a recipient.", "error"); return; }
   if (!data.subject && !data.body) { showStatus("Please enter a subject or body.", "error"); return; }
   try {
+    const ctx = await ensureSenderContext();
+    const create = buildEmailCreate(data, ctx, "msg");
     await app.callServerTool({
-      name: "send_email",
-      arguments: { to: data.to, cc: data.cc, subject: data.subject, body: data.body },
+      name: "execute",
+      arguments: {
+        methodCalls: [
+          ["Email/set", { create }, "create"],
+          [
+            "EmailSubmission/set",
+            {
+              create: {
+                sub: {
+                  "#emailId": { resultOf: "create", name: "Email/set", path: "/created/msg/id" },
+                  identityId: ctx.identity.id,
+                },
+              },
+            },
+            "submit",
+          ],
+        ],
+      },
     });
     showStatus("Email sent.", "success");
     app.sendMessage({

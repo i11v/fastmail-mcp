@@ -1,47 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { parseAddresses } from "../tools.js";
+import { ALLOWED_METHODS } from "../tools.js";
 
-describe("parseAddresses", () => {
-  it("returns empty array for empty string", () => {
-    expect(parseAddresses("")).toEqual([]);
+describe("ALLOWED_METHODS", () => {
+  it("includes core JMAP methods", () => {
+    expect(ALLOWED_METHODS.has("Email/query")).toBe(true);
+    expect(ALLOWED_METHODS.has("Email/get")).toBe(true);
+    expect(ALLOWED_METHODS.has("Email/set")).toBe(true);
+    expect(ALLOWED_METHODS.has("Mailbox/get")).toBe(true);
+    expect(ALLOWED_METHODS.has("EmailSubmission/set")).toBe(true);
   });
 
-  it("parses a simple email address", () => {
-    expect(parseAddresses("a@b.com")).toEqual([{ email: "a@b.com" }]);
-  });
-
-  it("parses name + email in angle brackets", () => {
-    expect(parseAddresses("Alice <a@b.com>")).toEqual([{ name: "Alice", email: "a@b.com" }]);
-  });
-
-  it("parses comma-separated addresses", () => {
-    expect(parseAddresses("a@b.com, c@d.com")).toEqual([
-      { email: "a@b.com" },
-      { email: "c@d.com" },
-    ]);
-  });
-
-  it("parses semicolon-separated addresses", () => {
-    expect(parseAddresses("a@b.com; c@d.com")).toEqual([
-      { email: "a@b.com" },
-      { email: "c@d.com" },
-    ]);
-  });
-
-  it("parses mixed names and bare emails", () => {
-    expect(parseAddresses("Alice <a@b.com>, c@d.com")).toEqual([
-      { name: "Alice", email: "a@b.com" },
-      { email: "c@d.com" },
-    ]);
-  });
-
-  it("trims whitespace from addresses", () => {
-    expect(parseAddresses("  a@b.com  ")).toEqual([{ email: "a@b.com" }]);
-  });
-
-  it("trims whitespace from name and email in brackets", () => {
-    expect(parseAddresses("  Alice   <  a@b.com  >")).toEqual([
-      { name: "Alice", email: "a@b.com" },
-    ]);
+  it("rejects unknown methods", () => {
+    expect(ALLOWED_METHODS.has("Evil/method")).toBe(false);
   });
 });

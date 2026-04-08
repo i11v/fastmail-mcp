@@ -195,10 +195,11 @@ describe("cleanEmailHtmlForDisplay", () => {
     expect(result).toContain("Line one\nLine two");
   });
 
-  it("preserves scripts (iframe sandbox handles security)", () => {
+  it("strips scripts", () => {
     const html = `<div>Hello</div><script>alert('x')</script>`;
     const result = cleanEmailHtmlForDisplay(html);
-    expect(result).toContain("<script>");
+    expect(result).not.toContain("<script");
+    expect(result).toContain("Hello");
   });
 });
 

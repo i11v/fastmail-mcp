@@ -5,8 +5,10 @@ import {
   registerAppResource,
   RESOURCE_MIME_TYPE,
 } from "@modelcontextprotocol/ext-apps/server";
-import composeHtml from "../public/compose.html";
-import readEmailHtml from "../public/read-email.html";
+import { getSession, runJMAPDirect } from "./tools.js";
+import { formatEmailBody } from "./format.js";
+import composeHtml from "../public/apps/compose.html";
+import readEmailHtml from "../public/apps/read-email.html";
 
 // --- Zod schemas ---
 
@@ -103,11 +105,8 @@ export function registerApps(server: McpServer) {
       },
     },
     async (args, extra) => {
-      // Fetch the email via JMAP using the execute tool's internals
-      // We import the helpers from tools.ts to reuse session management
-      const { getSessionFromExtra, runJMAPDirect } = await import("./tools.js");
       try {
-        const { session, bearerToken } = await getSessionFromExtra(extra);
+        const { session, bearerToken } = await getSession(extra);
         const result = await runJMAPDirect(
           [
             [
@@ -152,8 +151,6 @@ export function registerApps(server: McpServer) {
           };
         }
 
-        // Process body content for the UI
-        const { formatEmailBody } = await import("./format.js");
         const body = formatEmailBody(email);
 
         const emailData = {
