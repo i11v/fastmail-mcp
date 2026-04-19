@@ -13,5 +13,8 @@
 	"upload_source_maps": true,
 	"routes": [
 		{ "pattern": "fastmail-mcp.i11v.com", "custom_domain": true }
+	],
+	"rules": [
+		{ "type": "Text", "globs": ["**/*.md"], "fallthrough": true }
 	]
 }

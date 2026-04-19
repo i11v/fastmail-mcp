@@ -102,6 +102,32 @@ Display the full content of an email in a rich reader view. Fetches the email by
 }
 ```
 
+## Available Resources
+
+Resource-aware MCP clients automatically receive the Fastmail skill — a set of
+markdown files teaching the LLM how to drive the `execute` JMAP tool. Clients
+that support resource priority will load `SKILL.md` first and follow its links
+lazily.
+
+All resources use the `file:///fastmail-skill/<path>` URI scheme and
+`text/markdown` mime type. Tagged `audience: ["assistant"]`.
+
+| URI | Priority | Purpose |
+|---|---|---|
+| `file:///fastmail-skill/SKILL.md` | 1.0 | Entry point — JMAP methods, rules, UI tools |
+| `file:///fastmail-skill/core/request-format.md` | 0.5 | Method-call triples, back-references, callId |
+| `file:///fastmail-skill/core/error-handling.md` | 0.5 | JMAP error handling |
+| `file:///fastmail-skill/email/querying.md` | 0.5 | Email/query filters and sort |
+| `file:///fastmail-skill/email/reading.md` | 0.5 | Email/get body fetching |
+| `file:///fastmail-skill/email/writing.md` | 0.5 | Drafts, flags, move, delete |
+| `file:///fastmail-skill/email/search.md` | 0.5 | SearchSnippet/get highlights |
+| `file:///fastmail-skill/mailbox/overview.md` | 0.5 | Mailbox CRUD |
+| `file:///fastmail-skill/patterns/unread-inbox.md` | 0.5 | Show unread inbox |
+| `file:///fastmail-skill/patterns/move-archive.md` | 0.5 | Move / archive |
+| `file:///fastmail-skill/patterns/reply.md` | 0.5 | Reply pattern |
+| `file:///fastmail-skill/sending/workflow.md` | 0.5 | EmailSubmission/set workflow |
+| `file:///fastmail-skill/thread/overview.md` | 0.5 | Thread/get |
+
 ## API Endpoints
 
 - `POST /mcp` - MCP protocol endpoint
