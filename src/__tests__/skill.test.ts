@@ -18,8 +18,8 @@ const EXPECTED_URIS = [
 ] as const;
 
 describe("SKILL_FILES", () => {
-  it("contains exactly 13 entries", () => {
-    expect(SKILL_FILES).toHaveLength(13);
+  it("contains the expected number of entries", () => {
+    expect(SKILL_FILES).toHaveLength(EXPECTED_URIS.length);
   });
 
   it("registers every expected URI", () => {
@@ -34,5 +34,27 @@ describe("SKILL_FILES", () => {
     const names = new Set(SKILL_FILES.map((f) => f.name));
     expect(uris.size).toBe(SKILL_FILES.length);
     expect(names.size).toBe(SKILL_FILES.length);
+  });
+});
+
+describe("SKILL_FILES metadata", () => {
+  it("marks SKILL.md with priority 1.0", () => {
+    const skillMd = SKILL_FILES.find((f) => f.name === "SKILL.md");
+    expect(skillMd).toBeDefined();
+    expect(skillMd?.priority).toBe(1.0);
+  });
+
+  it("marks every other file with priority 0.5", () => {
+    for (const f of SKILL_FILES) {
+      if (f.name === "SKILL.md") continue;
+      expect(f.priority).toBe(0.5);
+    }
+  });
+
+  it("has non-empty title and description on every file", () => {
+    for (const f of SKILL_FILES) {
+      expect(f.title.length).toBeGreaterThan(0);
+      expect(f.description.length).toBeGreaterThan(0);
+    }
   });
 });
