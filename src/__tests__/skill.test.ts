@@ -58,3 +58,35 @@ describe("SKILL_FILES metadata", () => {
     }
   });
 });
+
+describe("SKILL_FILES content", () => {
+  it("loads SKILL.md content via bundled import", () => {
+    const f = SKILL_FILES.find((f) => f.name === "SKILL.md");
+    expect(f?.content).toContain("JMAP Mail Skill");
+    expect(f?.content.length).toBeGreaterThan(100);
+  });
+
+  it("loads a subdirectory file (email/querying.md)", () => {
+    const f = SKILL_FILES.find((f) => f.name === "email/querying.md");
+    expect(f?.content.length).toBeGreaterThan(50);
+  });
+
+  it("every (X.md) link in SKILL.md is registered as a resource", () => {
+    const skill = SKILL_FILES.find((f) => f.name === "SKILL.md");
+    expect(skill).toBeDefined();
+    // Match markdown links ending in .md — e.g. (email/querying.md)
+    const linkRe = /\(([^)\s]+\.md)\)/g;
+    const linkedPaths = new Set<string>();
+    for (const match of skill!.content.matchAll(linkRe)) {
+      linkedPaths.add(match[1]);
+    }
+    expect(linkedPaths.size).toBeGreaterThan(0);
+
+    const registeredPaths = new Set(
+      SKILL_FILES.map((f) => f.uri.replace("file:///fastmail-skill/", "")),
+    );
+    for (const path of linkedPaths) {
+      expect(registeredPaths.has(path)).toBe(true);
+    }
+  });
+});
