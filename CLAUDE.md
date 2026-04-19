@@ -70,7 +70,8 @@ When adding, removing, or renaming **skill files** under `fastmail-skill/`:
 
 1. `src/skill.ts` — `SKILL_FILES` array (add/remove the corresponding entry and import)
 2. `README.md` — "Available Resources" table
-3. The `src/__tests__/skill.test.ts` link-coverage test will catch references that exist in `SKILL.md` but are not registered.
+3. `public/landing.html` — update the resource count in the "Available Resources" paragraph
+4. The `src/__tests__/skill.test.ts` link-coverage test will catch references that exist in `SKILL.md` but are not registered.
 
 ## Gotchas
 
