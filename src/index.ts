@@ -6,6 +6,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPTransport } from "@hono/mcp";
 import { registerTools } from "./tools.js";
 import { registerApps } from "./apps.js";
+import { registerSkillResources } from "./skill.js";
 import landingHtml from "../public/landing.html";
 
 const app = new Hono();
@@ -29,6 +30,7 @@ const mcpServer = new McpServer({
 // Register tools and MCP Apps
 registerTools(mcpServer);
 registerApps(mcpServer);
+registerSkillResources(mcpServer);
 
 // Transport
 const transport = new StreamableHTTPTransport();

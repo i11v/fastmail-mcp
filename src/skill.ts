@@ -135,6 +135,29 @@ export const SKILL_FILES: readonly SkillFile[] = [
   },
 ];
 
-export function registerSkillResources(_server: McpServer): void {
-  // Filled in by Task 5.
+export function registerSkillResources(server: McpServer): void {
+  for (const file of SKILL_FILES) {
+    server.registerResource(
+      file.name,
+      file.uri,
+      {
+        title: file.title,
+        description: file.description,
+        mimeType: "text/markdown",
+        annotations: {
+          audience: ["assistant"],
+          priority: file.priority,
+        },
+      },
+      async (uri) => ({
+        contents: [
+          {
+            uri: uri.href,
+            mimeType: "text/markdown",
+            text: file.content,
+          },
+        ],
+      }),
+    );
+  }
 }
