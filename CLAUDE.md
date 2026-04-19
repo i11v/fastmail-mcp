@@ -60,11 +60,17 @@ pnpm test:watch   # Run tests in watch mode
 
 ## Documentation
 
-When adding, removing, or renaming tools, update **all three locations**:
+When adding, removing, or renaming **tools**, update **all three locations**:
 
 1. `src/tools.ts` — `toolDefinitions` object and `registerTools()` function
 2. `README.md` — "Available Tools" section
 3. `public/landing.html` — tools list in the landing page
+
+When adding, removing, or renaming **skill files** under `fastmail-skill/`:
+
+1. `src/skill.ts` — `SKILL_FILES` array (add/remove the corresponding entry and import)
+2. `README.md` — "Available Resources" table
+3. The `src/__tests__/skill.test.ts` link-coverage test will catch references that exist in `SKILL.md` but are not registered.
 
 ## Gotchas
 
