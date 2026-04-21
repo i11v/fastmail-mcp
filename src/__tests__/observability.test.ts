@@ -4,16 +4,12 @@ import { setupInMemoryTracing } from "./helpers/otel.js";
 import { recordEvent } from "../observability.js";
 
 describe("recordEvent", () => {
-  let cleanup: (() => void) | undefined;
   afterEach(() => {
-    cleanup?.();
-    cleanup = undefined;
     vi.restoreAllMocks();
   });
 
   it("adds a span event with attributes", () => {
-    const { exporter, cleanup: c } = setupInMemoryTracing();
-    cleanup = c;
+    const exporter = setupInMemoryTracing();
 
     const span = trace.getTracer("test").startSpan("parent");
     recordEvent(span, "test.event", { key: "value", count: 3 });
@@ -27,8 +23,7 @@ describe("recordEvent", () => {
   });
 
   it("does not log to console by default", () => {
-    const { cleanup: c } = setupInMemoryTracing();
-    cleanup = c;
+    setupInMemoryTracing();
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const span = trace.getTracer("test").startSpan("parent");
@@ -39,8 +34,7 @@ describe("recordEvent", () => {
   });
 
   it("also console.errors a structured line when alsoLog is true", () => {
-    const { cleanup: c } = setupInMemoryTracing();
-    cleanup = c;
+    setupInMemoryTracing();
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const span = trace.getTracer("test").startSpan("parent");

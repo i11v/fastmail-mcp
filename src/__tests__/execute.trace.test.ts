@@ -10,16 +10,12 @@ const fakeExtra = {
 const noopElicit = vi.fn().mockResolvedValue({ action: "accept", content: { confirmed: true } });
 
 describe("tool:execute — pre-validation labels", () => {
-  let cleanup: (() => void) | undefined;
   afterEach(() => {
-    cleanup?.();
-    cleanup = undefined;
     vi.restoreAllMocks();
   });
 
   it("sets jmap.method_count and jmap.methods[] even when validation fails", async () => {
-    const { exporter, cleanup: c } = setupInMemoryTracing();
-    cleanup = c;
+    const exporter = setupInMemoryTracing();
 
     await executeHandler(
       {
@@ -40,8 +36,7 @@ describe("tool:execute — pre-validation labels", () => {
   });
 
   it("records jmap.methods[] as array of strings even for non-string entries", async () => {
-    const { exporter, cleanup: c } = setupInMemoryTracing();
-    cleanup = c;
+    const exporter = setupInMemoryTracing();
 
     await executeHandler(
       {
@@ -52,7 +47,8 @@ describe("tool:execute — pre-validation labels", () => {
       { elicitInput: noopElicit },
     );
 
-    const root = exporter.getFinishedSpans().find((s) => s.name === "tool:execute")!;
-    expect(root.attributes["jmap.methods"]).toEqual(["<invalid>"]);
+    const root = exporter.getFinishedSpans().find((s) => s.name === "tool:execute");
+    expect(root).toBeDefined();
+    expect(root!.attributes["jmap.methods"]).toEqual(["<invalid>"]);
   });
 });
