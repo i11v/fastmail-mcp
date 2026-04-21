@@ -1,5 +1,5 @@
 import { SpanStatusCode, trace, context, type Span } from "@opentelemetry/api";
-import { tracer, forceFlush } from "./tracing.js";
+import { getTracer, forceFlush } from "./tracing.js";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
@@ -116,7 +116,7 @@ export async function getSession(
   }
 
   const parentCtx = parentSpan ? trace.setSpan(context.active(), parentSpan) : context.active();
-  const session = await tracer.startActiveSpan("fetchSession", {}, parentCtx, async (span) => {
+  const session = await getTracer().startActiveSpan("fetchSession", {}, parentCtx, async (span) => {
     try {
       const result = await fetchSession(bearerToken);
       span.setAttribute("jmap.account_id", result.accountId);
@@ -406,7 +406,7 @@ export async function executeHandler(
   extra: RequestHandlerExtra<any, any>,
   deps: { elicitInput: ElicitInputFn },
 ): Promise<CallToolResult> {
-  const span = tracer.startSpan("tool:execute");
+  const span = getTracer().startSpan("tool:execute");
   try {
     span.setAttribute("mcp.tool", "execute");
     const rawCalls = Array.isArray(args.methodCalls) ? args.methodCalls : [];
