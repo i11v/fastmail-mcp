@@ -3,6 +3,7 @@ import { tracer, forceFlush } from "./tracing.js";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { hashToken } from "./utils.js";
 
 // Constants
@@ -387,6 +388,102 @@ const ExecuteSchema = z.object({
     .describe("Set to true to confirm a destructive operation after the server requests it."),
 });
 
+// --- Handler ---
+
+// Elicitation dependency is passed in so the handler can be unit-tested
+// without constructing a full McpServer.
+export type ElicitInputFn = (params: {
+  message: string;
+  requestedSchema: {
+    type: "object";
+    properties: Record<string, unknown>;
+    required?: string[];
+  };
+}) => Promise<{ action: string; content?: Record<string, unknown> }>;
+
+export async function executeHandler(
+  args: z.infer<typeof ExecuteSchema>,
+  extra: RequestHandlerExtra<any, any>,
+  deps: { elicitInput: ElicitInputFn },
+): Promise<CallToolResult> {
+  const span = tracer.startSpan("tool:execute");
+  try {
+    // Validate
+    const validated = validateStructure(args.methodCalls);
+    validateResultReferences(validated);
+    validateHygiene(validated);
+
+    const safety = classifySafety(validated);
+    span.setAttributes({
+      "mcp.tool": "execute",
+      "jmap.method_count": validated.length,
+      "jmap.methods": validated.map(([m]) => m).join(", "),
+      "jmap.safety": safety,
+    });
+
+    // Safety gate — confirm destructive ops before executing.
+    if (safety === "destructive") {
+      // If the caller already confirmed via the `confirmed` flag, skip.
+      if (!args.confirmed) {
+        // Try elicitation first (rich UI for clients that support it).
+        try {
+          const elicitResult = await deps.elicitInput({
+            message: `This will ${describeDestructiveAction(validated)}. Proceed?`,
+            requestedSchema: {
+              type: "object" as const,
+              properties: {
+                confirmed: {
+                  type: "boolean" as const,
+                  description: "Confirm the destructive operation",
+                },
+              },
+              required: ["confirmed"],
+            },
+          });
+          if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
+            span.setAttribute("mcp.outcome", "cancelled");
+            return { content: [{ type: "text", text: "Operation cancelled by user." }] };
+          }
+        } catch {
+          // Elicitation not supported — fall back to two-step confirmation.
+          const description = describeDestructiveAction(validated);
+          span.setAttribute("mcp.outcome", "awaiting_confirmation");
+          return {
+            content: [
+              {
+                type: "text",
+                text:
+                  `⚠️ Confirmation required: this will ${description}. ` +
+                  `IMPORTANT: Do NOT proceed automatically — you MUST ask the user for explicit confirmation first. ` +
+                  `Only if the user confirms, call this tool again with the same methodCalls and confirmed: true.`,
+              },
+            ],
+          };
+        }
+      }
+    }
+
+    const result = await runJMAP(validated, extra, span);
+    span.setAttribute("mcp.outcome", "success");
+    return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+  } catch (error) {
+    span.recordException(error as Error);
+    span.setStatus({ code: SpanStatusCode.ERROR, message: (error as Error).message });
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
+      isError: true,
+    };
+  } finally {
+    span.end();
+    await forceFlush();
+  }
+}
+
 // --- Tool registration ---
 
 export function registerTools(server: McpServer) {
@@ -400,83 +497,9 @@ export function registerTools(server: McpServer) {
         "Every /get call must include a 'properties' array. Every /query call must include a 'limit'.",
       inputSchema: ExecuteSchema,
     },
-    async (args, extra) => {
-      const span = tracer.startSpan("tool:execute");
-      try {
-        // Validate
-        const validated = validateStructure(args.methodCalls);
-        validateResultReferences(validated);
-        validateHygiene(validated);
-
-        const safety = classifySafety(validated);
-        span.setAttributes({
-          "mcp.tool": "execute",
-          "jmap.method_count": validated.length,
-          "jmap.methods": validated.map(([m]) => m).join(", "),
-          "jmap.safety": safety,
-        });
-
-        // Safety gate — confirm destructive ops before executing.
-        if (safety === "destructive") {
-          // If the caller already confirmed via the `confirmed` flag, skip.
-          if (!args.confirmed) {
-            // Try elicitation first (rich UI for clients that support it).
-            try {
-              const elicitResult = await server.server.elicitInput({
-                message: `This will ${describeDestructiveAction(validated)}. Proceed?`,
-                requestedSchema: {
-                  type: "object" as const,
-                  properties: {
-                    confirmed: {
-                      type: "boolean" as const,
-                      description: "Confirm the destructive operation",
-                    },
-                  },
-                  required: ["confirmed"],
-                },
-              });
-              if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
-                span.setAttribute("mcp.outcome", "cancelled");
-                return { content: [{ type: "text", text: "Operation cancelled by user." }] };
-              }
-            } catch {
-              // Elicitation not supported — fall back to two-step confirmation.
-              const description = describeDestructiveAction(validated);
-              span.setAttribute("mcp.outcome", "awaiting_confirmation");
-              return {
-                content: [
-                  {
-                    type: "text",
-                    text:
-                      `⚠️ Confirmation required: this will ${description}. ` +
-                      `IMPORTANT: Do NOT proceed automatically — you MUST ask the user for explicit confirmation first. ` +
-                      `Only if the user confirms, call this tool again with the same methodCalls and confirmed: true.`,
-                  },
-                ],
-              };
-            }
-          }
-        }
-
-        const result = await runJMAP(validated, extra, span);
-        span.setAttribute("mcp.outcome", "success");
-        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
-      } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: SpanStatusCode.ERROR, message: (error as Error).message });
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-          isError: true,
-        };
-      } finally {
-        span.end();
-        await forceFlush();
-      }
-    },
+    async (args, extra) =>
+      executeHandler(args, extra, {
+        elicitInput: server.server.elicitInput.bind(server.server) as ElicitInputFn,
+      }),
   );
 }

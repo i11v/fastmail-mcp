@@ -1,5 +1,7 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import {
   registerAppTool,
   registerAppResource,
@@ -23,6 +25,140 @@ const ComposeEmailSchema = {
 const ReadEmailSchema = {
   emailId: z.string().describe("The JMAP email ID to read"),
 };
+
+// --- Handlers ---
+
+export async function readEmailHandler(
+  args: { emailId: string },
+  extra: RequestHandlerExtra<any, any>,
+): Promise<CallToolResult> {
+  try {
+    const { session, bearerToken } = await getSession(extra);
+    const result = await runJMAPDirect(
+      [
+        [
+          "Email/get",
+          {
+            ids: [args.emailId],
+            properties: [
+              "id",
+              "threadId",
+              "from",
+              "to",
+              "cc",
+              "bcc",
+              "replyTo",
+              "subject",
+              "receivedAt",
+              "sentAt",
+              "keywords",
+              "hasAttachment",
+              "htmlBody",
+              "textBody",
+              "bodyValues",
+            ],
+            fetchHTMLBodyValues: true,
+            fetchTextBodyValues: true,
+          },
+          "get",
+        ],
+      ],
+      session,
+      bearerToken,
+    );
+
+    // Extract email from JMAP response
+    const getResult = result[0] as [string, { list?: any[] }, string] | undefined;
+    const email = getResult?.[1]?.list?.[0];
+
+    if (!email) {
+      return {
+        content: [{ type: "text", text: `Error: Email with ID "${args.emailId}" not found.` }],
+        isError: true,
+      };
+    }
+
+    const body = formatEmailBody(email);
+
+    const emailData = {
+      id: email.id,
+      threadId: email.threadId,
+      from: email.from,
+      to: email.to,
+      cc: email.cc,
+      bcc: email.bcc,
+      replyTo: email.replyTo,
+      subject: email.subject,
+      receivedAt: email.receivedAt,
+      sentAt: email.sentAt,
+      keywords: email.keywords,
+      hasAttachment: email.hasAttachment,
+      htmlBody: body.html,
+      textBody: body.text,
+      body: body.content,
+    };
+
+    // structuredContent powers the widget; content text is a brief summary for the AI
+    const from = email.from?.[0];
+    const fromStr = from ? (from.name ? `${from.name} <${from.email}>` : from.email) : "unknown";
+    const summary = [
+      `Email displayed in widget.`,
+      `From: ${fromStr}`,
+      `Subject: ${email.subject ?? "(no subject)"}`,
+      `Date: ${email.sentAt ?? email.receivedAt ?? "unknown"}`,
+      email.hasAttachment ? "Has attachments." : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    return {
+      content: [{ type: "text", text: summary }],
+      structuredContent: emailData,
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
+export async function composeEmailHandler(
+  args: {
+    to?: string;
+    cc?: string;
+    bcc?: string;
+    subject?: string;
+    body?: string;
+  },
+  _extra: RequestHandlerExtra<any, any>,
+): Promise<CallToolResult> {
+  // Return the pre-fill data as structured content for the UI to consume
+  const prefill: Record<string, string> = {};
+  if (args.to) prefill.to = args.to;
+  if (args.cc) prefill.cc = args.cc;
+  if (args.bcc) prefill.bcc = args.bcc;
+  if (args.subject) prefill.subject = args.subject;
+  if (args.body) prefill.body = args.body;
+
+  const text =
+    Object.keys(prefill).length > 0
+      ? `Opening compose form with pre-filled fields: ${Object.keys(prefill).join(", ")}`
+      : "Opening compose form.";
+
+  return {
+    content: [
+      { type: "text", text: JSON.stringify(prefill) },
+      { type: "text", text },
+    ],
+    structuredContent: prefill,
+  };
+}
 
 // --- Resource & tool registration ---
 
@@ -64,28 +200,7 @@ export function registerApps(server: McpServer) {
         ui: { resourceUri: "ui://fastmail-mcp/compose" },
       },
     },
-    async (args) => {
-      // Return the pre-fill data as structured content for the UI to consume
-      const prefill: Record<string, string> = {};
-      if (args.to) prefill.to = args.to;
-      if (args.cc) prefill.cc = args.cc;
-      if (args.bcc) prefill.bcc = args.bcc;
-      if (args.subject) prefill.subject = args.subject;
-      if (args.body) prefill.body = args.body;
-
-      const text =
-        Object.keys(prefill).length > 0
-          ? `Opening compose form with pre-filled fields: ${Object.keys(prefill).join(", ")}`
-          : "Opening compose form.";
-
-      return {
-        content: [
-          { type: "text", text: JSON.stringify(prefill) },
-          { type: "text", text },
-        ],
-        structuredContent: prefill,
-      };
-    },
+    composeEmailHandler,
   );
 
   registerAppTool(
@@ -104,105 +219,6 @@ export function registerApps(server: McpServer) {
         ui: { resourceUri: "ui://fastmail-mcp/read-email" },
       },
     },
-    async (args, extra) => {
-      try {
-        const { session, bearerToken } = await getSession(extra);
-        const result = await runJMAPDirect(
-          [
-            [
-              "Email/get",
-              {
-                ids: [args.emailId],
-                properties: [
-                  "id",
-                  "threadId",
-                  "from",
-                  "to",
-                  "cc",
-                  "bcc",
-                  "replyTo",
-                  "subject",
-                  "receivedAt",
-                  "sentAt",
-                  "keywords",
-                  "hasAttachment",
-                  "htmlBody",
-                  "textBody",
-                  "bodyValues",
-                ],
-                fetchHTMLBodyValues: true,
-                fetchTextBodyValues: true,
-              },
-              "get",
-            ],
-          ],
-          session,
-          bearerToken,
-        );
-
-        // Extract email from JMAP response
-        const getResult = result[0] as [string, { list?: any[] }, string] | undefined;
-        const email = getResult?.[1]?.list?.[0];
-
-        if (!email) {
-          return {
-            content: [{ type: "text", text: `Error: Email with ID "${args.emailId}" not found.` }],
-            isError: true,
-          };
-        }
-
-        const body = formatEmailBody(email);
-
-        const emailData = {
-          id: email.id,
-          threadId: email.threadId,
-          from: email.from,
-          to: email.to,
-          cc: email.cc,
-          bcc: email.bcc,
-          replyTo: email.replyTo,
-          subject: email.subject,
-          receivedAt: email.receivedAt,
-          sentAt: email.sentAt,
-          keywords: email.keywords,
-          hasAttachment: email.hasAttachment,
-          htmlBody: body.html,
-          textBody: body.text,
-          body: body.content,
-        };
-
-        // structuredContent powers the widget; content text is a brief summary for the AI
-        const from = email.from?.[0];
-        const fromStr = from
-          ? from.name
-            ? `${from.name} <${from.email}>`
-            : from.email
-          : "unknown";
-        const summary = [
-          `Email displayed in widget.`,
-          `From: ${fromStr}`,
-          `Subject: ${email.subject ?? "(no subject)"}`,
-          `Date: ${email.sentAt ?? email.receivedAt ?? "unknown"}`,
-          email.hasAttachment ? "Has attachments." : "",
-        ]
-          .filter(Boolean)
-          .join("\n");
-
-        return {
-          content: [{ type: "text", text: summary }],
-          structuredContent: emailData,
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
+    readEmailHandler,
   );
 }
