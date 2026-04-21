@@ -408,18 +408,22 @@ export async function executeHandler(
 ): Promise<CallToolResult> {
   const span = tracer.startSpan("tool:execute");
   try {
+    span.setAttribute("mcp.tool", "execute");
+    const rawCalls = Array.isArray(args.methodCalls) ? args.methodCalls : [];
+    span.setAttribute("jmap.method_count", rawCalls.length);
+    span.setAttribute(
+      "jmap.methods",
+      rawCalls.map((c) => (Array.isArray(c) && typeof c[0] === "string" ? c[0] : "<invalid>")),
+    );
+
     // Validate
     const validated = validateStructure(args.methodCalls);
     validateResultReferences(validated);
     validateHygiene(validated);
 
     const safety = classifySafety(validated);
-    span.setAttributes({
-      "mcp.tool": "execute",
-      "jmap.method_count": validated.length,
-      "jmap.methods": validated.map(([m]) => m).join(", "),
-      "jmap.safety": safety,
-    });
+    span.setAttribute("jmap.safety", safety);
+    span.setAttribute("mcp.confirmed", args.confirmed === true);
 
     // Safety gate — confirm destructive ops before executing.
     if (safety === "destructive") {
