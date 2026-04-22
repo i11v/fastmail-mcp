@@ -1,3 +1,4 @@
+import { SpanStatusCode } from "@opentelemetry/api";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
@@ -9,6 +10,8 @@ import {
 } from "@modelcontextprotocol/ext-apps/server";
 import { getSession, runJMAPDirect } from "./tools.js";
 import { formatEmailBody } from "./format.js";
+import { getTracer, forceFlush } from "./tracing.js";
+import { recordEvent } from "./observability.js";
 import composeHtml from "../public/apps/compose.html";
 import readEmailHtml from "../public/apps/read-email.html";
 
@@ -32,8 +35,11 @@ export async function readEmailHandler(
   args: { emailId: string },
   extra: RequestHandlerExtra<any, any>,
 ): Promise<CallToolResult> {
+  const span = getTracer().startSpan("tool:read_email");
+  span.setAttribute("mcp.tool", "read_email");
+  span.setAttribute("email.id", args.emailId);
   try {
-    const { session, bearerToken } = await getSession(extra);
+    const { session, bearerToken } = await getSession(extra, span);
     const result = await runJMAPDirect(
       [
         [
@@ -65,6 +71,7 @@ export async function readEmailHandler(
       ],
       session,
       bearerToken,
+      span,
     );
 
     // Extract email from JMAP response
@@ -72,11 +79,17 @@ export async function readEmailHandler(
     const email = getResult?.[1]?.list?.[0];
 
     if (!email) {
+      span.setAttribute("email.found", false);
+      span.setAttribute("mcp.outcome", "error");
+      span.setAttribute("error.class", "not_found");
+      recordEvent(span, "read_email.not_found", { emailId: args.emailId });
       return {
         content: [{ type: "text", text: `Error: Email with ID "${args.emailId}" not found.` }],
         isError: true,
       };
     }
+
+    span.setAttribute("email.found", true);
 
     const body = formatEmailBody(email);
 
@@ -111,20 +124,30 @@ export async function readEmailHandler(
       .filter(Boolean)
       .join("\n");
 
+    span.setAttribute("mcp.outcome", "success");
     return {
       content: [{ type: "text", text: summary }],
       structuredContent: emailData,
     };
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    span.recordException(error as Error);
+    span.setStatus({ code: SpanStatusCode.ERROR, message });
+    span.setAttribute("mcp.outcome", "error");
+    span.setAttribute("error.class", "unknown");
+    recordEvent(span, "read_email.unexpected_error", { message }, { alsoLog: true });
     return {
       content: [
         {
           type: "text",
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+          text: `Error: ${message}`,
         },
       ],
       isError: true,
     };
+  } finally {
+    span.end();
+    await forceFlush();
   }
 }
 
