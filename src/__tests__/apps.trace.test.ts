@@ -77,6 +77,27 @@ describe("tool:read_email tracing", () => {
     expect(jmap).toBeDefined();
     expect(jmap!.parentSpanContext?.spanId).toBe(root!.spanContext().spanId);
   });
+
+  it("emits read_email.auth_missing and error.class=auth when Authorization is absent", async () => {
+    const exporter = setupInMemoryTracing();
+    const extraNoAuth = {
+      requestInfo: { headers: {} },
+    } as unknown as RequestHandlerExtra<any, any>;
+
+    await readEmailHandler({ emailId: "m1" }, extraNoAuth);
+
+    const root = exporter.getFinishedSpans().find((s) => s.name === "tool:read_email");
+    expect(root).toBeDefined();
+    expect(root!.attributes["error.class"]).toBe("auth");
+
+    const event = root!.events.find((e) => e.name === "read_email.auth_missing");
+    expect(event).toBeDefined();
+    expect(event!.attributes).toMatchObject({ reason: "no_header" });
+
+    // No alsoLog event should fire for a routine auth-missing path.
+    const unexpected = root!.events.find((e) => e.name === "read_email.unexpected_error");
+    expect(unexpected).toBeUndefined();
+  });
 });
 
 describe("tool:compose_email tracing", () => {

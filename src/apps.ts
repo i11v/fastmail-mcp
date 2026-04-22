@@ -8,7 +8,7 @@ import {
   registerAppResource,
   RESOURCE_MIME_TYPE,
 } from "@modelcontextprotocol/ext-apps/server";
-import { getSession, runJMAPDirect, JMAPHttpError } from "./tools.js";
+import { getSession, runJMAPDirect, JMAPHttpError, AuthError } from "./tools.js";
 import { formatEmailBody } from "./format.js";
 import { getTracer, forceFlush } from "./tracing.js";
 import { recordEvent } from "./observability.js";
@@ -133,17 +133,21 @@ export async function readEmailHandler(
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     // Classify before the noisy `alsoLog` so routine upstream failures
-    // (Fastmail 5xx → JMAPHttpError) don't spam Workers Logs. Parity with
-    // executeHandler's error-class taxonomy.
-    const errorClass: "jmap_http" | "unknown" =
-      error instanceof JMAPHttpError ? "jmap_http" : "unknown";
+    // (missing auth, Fastmail 5xx → JMAPHttpError) don't spam Workers Logs.
+    // Full parity with executeHandler's error-class taxonomy.
+    let errorClass: "auth" | "jmap_http" | "unknown" = "unknown";
+    if (error instanceof AuthError) {
+      errorClass = "auth";
+      recordEvent(span, "read_email.auth_missing", { reason: error.reason });
+    } else if (error instanceof JMAPHttpError) {
+      errorClass = "jmap_http";
+      // jmap.http_error already emitted on the child span; don't duplicate here.
+    }
     span.setAttribute("mcp.outcome", "error");
     span.setAttribute("error.class", errorClass);
     span.recordException(error as Error);
     span.setStatus({ code: SpanStatusCode.ERROR, message });
     if (errorClass === "unknown") {
-      // JMAPHttpError already emitted jmap.http_error on the child span; no
-      // need to log again here.
       recordEvent(span, "read_email.unexpected_error", { message }, { alsoLog: true });
     }
     return {
