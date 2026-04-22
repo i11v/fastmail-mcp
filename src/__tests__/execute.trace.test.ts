@@ -49,7 +49,7 @@ describe("tool:execute — pre-validation labels", () => {
 
     const root = exporter.getFinishedSpans().find((s) => s.name === "tool:execute");
     expect(root).toBeDefined();
-    expect(root!.attributes["jmap.methods"]).toEqual(["<invalid>"]);
+    expect(root!.attributes["jmap.methods"]).toEqual(["<unknown>"]);
   });
 });
 

@@ -55,6 +55,14 @@ type MethodCall = [string, Record<string, unknown>, string];
 
 export type Safety = "read" | "write" | "destructive";
 
+// Sentinel used wherever we need to fill in a `method` slot on a span
+// attribute/event but the real method is unavailable — either because the
+// caller sent garbage (non-string entry in `methodCalls`) or because we
+// hit the error before the method could be identified. Single constant so
+// Honeycomb filters see one consistent value across `jmap.methods` array
+// entries and `execute.validation_failed` event attributes.
+const UNKNOWN_METHOD = "<unknown>";
+
 // --- Error classes ---
 
 export class ValidationError extends Error {
@@ -483,7 +491,7 @@ export async function executeHandler(
     span.setAttribute("jmap.method_count", rawCalls.length);
     span.setAttribute(
       "jmap.methods",
-      rawCalls.map((c) => (Array.isArray(c) && typeof c[0] === "string" ? c[0] : "<invalid>")),
+      rawCalls.map((c) => (Array.isArray(c) && typeof c[0] === "string" ? c[0] : UNKNOWN_METHOD)),
     );
 
     // Validate
@@ -541,13 +549,13 @@ export async function executeHandler(
     span.setAttribute("mcp.outcome", "success");
     return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
   } catch (error) {
-    let errorClass: string = "unknown";
+    let errorClass: "validation" | "auth" | "unknown" = "unknown";
     if (error instanceof ValidationError) {
       errorClass = "validation";
       recordEvent(span, "execute.validation_failed", {
         stage: error.stage,
         index: error.index,
-        method: error.method ?? "<unknown>",
+        method: error.method ?? UNKNOWN_METHOD,
         message: error.message,
       });
     } else if (error instanceof AuthError) {
