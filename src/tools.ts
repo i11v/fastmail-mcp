@@ -97,6 +97,20 @@ export class JMAPHttpError extends Error {
   }
 }
 
+// Cap on `body_preview` bytes attached to jmap.http_error events. Bounded in
+// bytes (not UTF-16 code units) to keep attribute payloads predictable for
+// Honeycomb regardless of whether the upstream body is ASCII or non-ASCII.
+const HTTP_ERROR_BODY_PREVIEW_BYTES = 500;
+
+function previewBytes(text: string, maxBytes: number): string {
+  const encoded = new TextEncoder().encode(text);
+  if (encoded.byteLength <= maxBytes) return text;
+  // `fatal: false` (default) replaces any truncated trailing multi-byte
+  // sequence with U+FFFD rather than throwing, so we always return a
+  // well-formed string.
+  return new TextDecoder().decode(encoded.slice(0, maxBytes));
+}
+
 // --- Auth helpers ---
 
 function extractBearerToken(extra: RequestHandlerExtra<any, any>): string {
@@ -450,7 +464,7 @@ export async function runJMAPDirect(
       span.setAttribute("http.response.body.size", responseText.length);
 
       if (!response.ok) {
-        const preview = responseText.slice(0, 500);
+        const preview = previewBytes(responseText, HTTP_ERROR_BODY_PREVIEW_BYTES);
         recordEvent(span, "jmap.http_error", {
           status: response.status,
           body_preview: preview,
@@ -481,6 +495,13 @@ export async function runJMAPDirect(
       return cleaned;
     } catch (error) {
       span.recordException(error as Error);
+      // Non-HTTP throws (fetch network failure, JSON.parse on 200, etc.) would
+      // otherwise leave the span at UNSET, breaking Honeycomb filters on
+      // `status.code = ERROR`. JMAPHttpError already sets ERROR above with a
+      // more specific HTTP-status message, so don't clobber it here.
+      if (!(error instanceof JMAPHttpError)) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: (error as Error).message });
+      }
       throw error;
     } finally {
       span.end();
