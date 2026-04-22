@@ -8,7 +8,7 @@ import {
   registerAppResource,
   RESOURCE_MIME_TYPE,
 } from "@modelcontextprotocol/ext-apps/server";
-import { getSession, runJMAPDirect } from "./tools.js";
+import { getSession, runJMAPDirect, JMAPHttpError } from "./tools.js";
 import { formatEmailBody } from "./format.js";
 import { getTracer, forceFlush } from "./tracing.js";
 import { recordEvent } from "./observability.js";
@@ -131,11 +131,20 @@ export async function readEmailHandler(
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    // Classify before the noisy `alsoLog` so routine upstream failures
+    // (Fastmail 5xx → JMAPHttpError) don't spam Workers Logs. Parity with
+    // executeHandler's error-class taxonomy.
+    const errorClass: "jmap_http" | "unknown" =
+      error instanceof JMAPHttpError ? "jmap_http" : "unknown";
+    span.setAttribute("mcp.outcome", "error");
+    span.setAttribute("error.class", errorClass);
     span.recordException(error as Error);
     span.setStatus({ code: SpanStatusCode.ERROR, message });
-    span.setAttribute("mcp.outcome", "error");
-    span.setAttribute("error.class", "unknown");
-    recordEvent(span, "read_email.unexpected_error", { message }, { alsoLog: true });
+    if (errorClass === "unknown") {
+      // JMAPHttpError already emitted jmap.http_error on the child span; no
+      // need to log again here.
+      recordEvent(span, "read_email.unexpected_error", { message }, { alsoLog: true });
+    }
     return {
       content: [
         {
