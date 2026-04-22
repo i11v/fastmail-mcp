@@ -589,26 +589,49 @@ export async function executeHandler(
     if (safety === "destructive") {
       // If the caller already confirmed via the `confirmed` flag, skip.
       if (!args.confirmed) {
-        // Try elicitation first (rich UI for clients that support it).
-        try {
-          const elicitResult = await deps.elicitInput({
-            message: `This will ${describeDestructiveAction(validated)}. Proceed?`,
-            requestedSchema: {
-              type: "object" as const,
-              properties: {
-                confirmed: {
-                  type: "boolean" as const,
-                  description: "Confirm the destructive operation",
+        const parentCtx = trace.setSpan(context.active(), span);
+        const gateResult = await getTracer().startActiveSpan(
+          "elicit_input",
+          {},
+          parentCtx,
+          async (elicitSpan) => {
+            try {
+              const elicitResult = await deps.elicitInput({
+                message: `This will ${describeDestructiveAction(validated)}. Proceed?`,
+                requestedSchema: {
+                  type: "object" as const,
+                  properties: {
+                    confirmed: {
+                      type: "boolean" as const,
+                      description: "Confirm the destructive operation",
+                    },
+                  },
+                  required: ["confirmed"],
                 },
-              },
-              required: ["confirmed"],
-            },
-          });
-          if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
-            span.setAttribute("mcp.outcome", "cancelled");
-            return { content: [{ type: "text", text: "Operation cancelled by user." }] };
-          }
-        } catch {
+              });
+              elicitSpan.setAttributes({
+                "mcp.elicit.supported": true,
+                "mcp.elicit.action": elicitResult.action,
+                "mcp.elicit.confirmed": Boolean(elicitResult.content?.confirmed),
+              });
+              if (elicitResult.action !== "accept" || !elicitResult.content?.confirmed) {
+                return { kind: "cancelled" as const };
+              }
+              return { kind: "proceed" as const };
+            } catch {
+              elicitSpan.setAttribute("mcp.elicit.supported", false);
+              return { kind: "awaiting" as const };
+            } finally {
+              elicitSpan.end();
+            }
+          },
+        );
+
+        if (gateResult.kind === "cancelled") {
+          span.setAttribute("mcp.outcome", "cancelled");
+          return { content: [{ type: "text", text: "Operation cancelled by user." }] };
+        }
+        if (gateResult.kind === "awaiting") {
           // Elicitation not supported — fall back to two-step confirmation.
           const description = describeDestructiveAction(validated);
           span.setAttribute("mcp.outcome", "awaiting_confirmation");

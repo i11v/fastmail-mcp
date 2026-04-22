@@ -219,3 +219,94 @@ describe("jmap_request span", () => {
     expect(root.attributes["error.class"]).toBe("jmap_http");
   });
 });
+
+describe("elicit_input span", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  const session = {
+    apiUrl: "https://api.fastmail.com/jmap/api",
+    uploadUrl: "https://api.fastmail.com/upload",
+    primaryAccounts: { "urn:ietf:params:jmap:mail": "acct-1" },
+  };
+
+  function mockFetch(sessionBody: object, jmapResponse: object) {
+    const body = JSON.stringify(jmapResponse);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.includes("/jmap/session")) {
+          return new Response(JSON.stringify(sessionBody), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return new Response(body, {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }),
+    );
+  }
+
+  it("creates elicit_input span with accept outcome", async () => {
+    const exporter = setupInMemoryTracing();
+    mockFetch(session, { methodResponses: [["Email/set", { destroyed: ["id1"] }, "call-0"]] });
+
+    const elicit = vi.fn().mockResolvedValue({ action: "accept", content: { confirmed: true } });
+
+    await executeHandler(
+      { methodCalls: [["Email/set", { destroy: ["id1"] }, "call-0"]] },
+      fakeExtra,
+      { elicitInput: elicit },
+    );
+
+    const elicitSpan = exporter.getFinishedSpans().find((s) => s.name === "elicit_input");
+    expect(elicitSpan).toBeDefined();
+    expect(elicitSpan!.attributes["mcp.elicit.supported"]).toBe(true);
+    expect(elicitSpan!.attributes["mcp.elicit.action"]).toBe("accept");
+    expect(elicitSpan!.attributes["mcp.elicit.confirmed"]).toBe(true);
+  });
+
+  it("records decline action and cancels the operation", async () => {
+    const exporter = setupInMemoryTracing();
+
+    const elicit = vi.fn().mockResolvedValue({ action: "decline" });
+
+    await executeHandler(
+      { methodCalls: [["Email/set", { destroy: ["id1"] }, "call-0"]] },
+      fakeExtra,
+      { elicitInput: elicit },
+    );
+
+    const elicitSpan = exporter.getFinishedSpans().find((s) => s.name === "elicit_input");
+    expect(elicitSpan).toBeDefined();
+    expect(elicitSpan!.attributes["mcp.elicit.action"]).toBe("decline");
+
+    const root = exporter.getFinishedSpans().find((s) => s.name === "tool:execute")!;
+    expect(root.attributes["mcp.outcome"]).toBe("cancelled");
+  });
+
+  it("records mcp.elicit.supported=false on elicit throw and falls back to two-step", async () => {
+    const exporter = setupInMemoryTracing();
+
+    const elicit = vi.fn().mockRejectedValue(new Error("not supported"));
+
+    const result = await executeHandler(
+      { methodCalls: [["Email/set", { destroy: ["id1"] }, "call-0"]] },
+      fakeExtra,
+      { elicitInput: elicit },
+    );
+
+    const elicitSpan = exporter.getFinishedSpans().find((s) => s.name === "elicit_input");
+    expect(elicitSpan).toBeDefined();
+    expect(elicitSpan!.attributes["mcp.elicit.supported"]).toBe(false);
+
+    const root = exporter.getFinishedSpans().find((s) => s.name === "tool:execute")!;
+    expect(root.attributes["mcp.outcome"]).toBe("awaiting_confirmation");
+
+    expect(result.content[0]).toMatchObject({ type: "text" });
+  });
+});
