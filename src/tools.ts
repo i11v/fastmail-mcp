@@ -5,6 +5,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { hashToken } from "./utils.js";
+import { recordEvent } from "./observability.js";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
@@ -54,13 +55,38 @@ type MethodCall = [string, Record<string, unknown>, string];
 
 export type Safety = "read" | "write" | "destructive";
 
+// --- Error classes ---
+
+export class ValidationError extends Error {
+  constructor(
+    public stage: "structure" | "references" | "hygiene",
+    public index: number,
+    public method: string | undefined,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ValidationError";
+  }
+}
+
+export class AuthError extends Error {
+  constructor(
+    public reason: "no_header" | "malformed",
+    message: string,
+  ) {
+    super(message);
+    this.name = "AuthError";
+  }
+}
+
 // --- Auth helpers ---
 
 function extractBearerToken(extra: RequestHandlerExtra<any, any>): string {
   const headers = extra.requestInfo?.headers;
 
   if (!headers) {
-    throw new Error(
+    throw new AuthError(
+      "no_header",
       "Missing request headers. Ensure Authorization header is set with 'Bearer <token>' format.",
     );
   }
@@ -68,7 +94,8 @@ function extractBearerToken(extra: RequestHandlerExtra<any, any>): string {
   const authHeader = headers["authorization"] || headers["Authorization"];
 
   if (!authHeader || typeof authHeader !== "string" || !authHeader.startsWith("Bearer ")) {
-    throw new Error(
+    throw new AuthError(
+      authHeader ? "malformed" : "no_header",
       "Missing bearer token. Ensure Authorization header is set with 'Bearer <token>' format.",
     );
   }
@@ -137,11 +164,11 @@ export async function getSession(
 
 export function validateStructure(methodCalls: unknown): MethodCall[] {
   if (!Array.isArray(methodCalls)) {
-    throw new Error("methodCalls must be an array");
+    throw new ValidationError("structure", 0, undefined, "methodCalls must be an array");
   }
 
   if (methodCalls.length === 0) {
-    throw new Error("methodCalls must not be empty");
+    throw new ValidationError("structure", 0, undefined, "methodCalls must not be empty");
   }
 
   const callIds = new Set<string>();
@@ -151,7 +178,10 @@ export function validateStructure(methodCalls: unknown): MethodCall[] {
     const call = methodCalls[i];
 
     if (!Array.isArray(call) || call.length !== 3) {
-      throw new Error(
+      throw new ValidationError(
+        "structure",
+        i,
+        undefined,
         `methodCalls[${i}]: must be a triple [methodName, args, callId]. Got ${JSON.stringify(call)}`,
       );
     }
@@ -159,25 +189,48 @@ export function validateStructure(methodCalls: unknown): MethodCall[] {
     const [method, args, callId] = call;
 
     if (typeof method !== "string") {
-      throw new Error(`methodCalls[${i}]: method name must be a string`);
+      throw new ValidationError(
+        "structure",
+        i,
+        undefined,
+        `methodCalls[${i}]: method name must be a string`,
+      );
     }
 
     if (!ALLOWED_METHODS.has(method)) {
-      throw new Error(
+      throw new ValidationError(
+        "structure",
+        i,
+        method,
         `methodCalls[${i}]: unknown method "${method}". Allowed: ${[...ALLOWED_METHODS].join(", ")}`,
       );
     }
 
     if (typeof args !== "object" || args === null || Array.isArray(args)) {
-      throw new Error(`methodCalls[${i}]: args must be an object`);
+      throw new ValidationError(
+        "structure",
+        i,
+        method,
+        `methodCalls[${i}]: args must be an object`,
+      );
     }
 
     if (typeof callId !== "string") {
-      throw new Error(`methodCalls[${i}]: callId must be a string`);
+      throw new ValidationError(
+        "structure",
+        i,
+        method,
+        `methodCalls[${i}]: callId must be a string`,
+      );
     }
 
     if (callIds.has(callId)) {
-      throw new Error(`methodCalls[${i}]: duplicate callId "${callId}"`);
+      throw new ValidationError(
+        "structure",
+        i,
+        method,
+        `methodCalls[${i}]: duplicate callId "${callId}"`,
+      );
     }
 
     callIds.add(callId);
@@ -203,10 +256,18 @@ export function validateResultReferences(methodCalls: MethodCall[]): void {
       ) {
         const ref = value as Record<string, unknown>;
         if (typeof ref.resultOf !== "string") {
-          throw new Error(`methodCalls[${i}].${key}: resultOf must be a string`);
+          throw new ValidationError(
+            "references",
+            i,
+            methodCalls[i][0],
+            `methodCalls[${i}].${key}: resultOf must be a string`,
+          );
         }
         if (!seenCallIds.has(ref.resultOf)) {
-          throw new Error(
+          throw new ValidationError(
+            "references",
+            i,
+            methodCalls[i][0],
             `methodCalls[${i}].${key}: resultOf references "${ref.resultOf}" which has not appeared in an earlier call`,
           );
         }
@@ -230,7 +291,10 @@ export function validateHygiene(methodCalls: MethodCall[]): void {
     ) {
       // Allow if ids is a resultOf reference (properties still required)
       if (!("properties" in args) || !Array.isArray(args.properties)) {
-        throw new Error(
+        throw new ValidationError(
+          "hygiene",
+          i,
+          method,
           `methodCalls[${i}]: ${method} requires a "properties" array. ` +
             `Example: ["from", "subject", "receivedAt", "preview"]. ` +
             `This prevents fetching unnecessary data.`,
@@ -241,7 +305,10 @@ export function validateHygiene(methodCalls: MethodCall[]): void {
     // /query calls must include limit
     if (method.endsWith("/query")) {
       if (!("limit" in args) || typeof args.limit !== "number") {
-        throw new Error(
+        throw new ValidationError(
+          "hygiene",
+          i,
+          method,
           `methodCalls[${i}]: ${method} requires a "limit" (number). Maximum recommended: 50.`,
         );
       }
@@ -249,7 +316,10 @@ export function validateHygiene(methodCalls: MethodCall[]): void {
 
     // Warn about ids: null on /get calls
     if (method.endsWith("/get") && "ids" in args && args.ids === null) {
-      throw new Error(
+      throw new ValidationError(
+        "hygiene",
+        i,
+        method,
         `methodCalls[${i}]: ${method} with ids: null fetches ALL items. ` +
           `Use a /query call first to get specific IDs.`,
       );
@@ -471,6 +541,31 @@ export async function executeHandler(
     span.setAttribute("mcp.outcome", "success");
     return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
   } catch (error) {
+    let errorClass: string = "unknown";
+    if (error instanceof ValidationError) {
+      errorClass = "validation";
+      recordEvent(span, "execute.validation_failed", {
+        stage: error.stage,
+        index: error.index,
+        method: error.method ?? "<unknown>",
+        message: error.message,
+      });
+    } else if (error instanceof AuthError) {
+      errorClass = "auth";
+      recordEvent(span, "execute.auth_missing", { reason: error.reason });
+    } else {
+      recordEvent(
+        span,
+        "execute.unexpected_error",
+        {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? (error.stack ?? "") : "",
+        },
+        { alsoLog: true },
+      );
+    }
+    span.setAttribute("error.class", errorClass);
+    span.setAttribute("mcp.outcome", "error");
     span.recordException(error as Error);
     span.setStatus({ code: SpanStatusCode.ERROR, message: (error as Error).message });
     return {

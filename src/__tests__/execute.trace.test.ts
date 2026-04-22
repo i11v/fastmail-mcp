@@ -52,3 +52,60 @@ describe("tool:execute — pre-validation labels", () => {
     expect(root!.attributes["jmap.methods"]).toEqual(["<invalid>"]);
   });
 });
+
+describe("tool:execute — unhappy-path span events", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("emits execute.validation_failed with stage=hygiene when /query lacks limit", async () => {
+    const exporter = setupInMemoryTracing();
+
+    await executeHandler(
+      {
+        methodCalls: [["Email/query", {}, "call-0"]], // hygiene fails: no limit
+      },
+      fakeExtra,
+      { elicitInput: noopElicit },
+    );
+
+    const root = exporter.getFinishedSpans().find((s) => s.name === "tool:execute");
+    expect(root).toBeDefined();
+
+    const event = root!.events.find((e) => e.name === "execute.validation_failed");
+    expect(event).toBeDefined();
+    expect(event!.attributes).toMatchObject({
+      stage: "hygiene",
+      index: 0,
+      method: "Email/query",
+    });
+    expect(root!.attributes["error.class"]).toBe("validation");
+    expect(root!.attributes["mcp.outcome"]).toBe("error");
+  });
+
+  it("emits execute.auth_missing when Authorization header is absent", async () => {
+    const exporter = setupInMemoryTracing();
+    vi.stubGlobal("fetch", vi.fn());
+
+    const extraNoAuth = {
+      requestInfo: { headers: {} },
+    } as unknown as RequestHandlerExtra<any, any>;
+
+    await executeHandler(
+      {
+        methodCalls: [["Email/get", { ids: ["x"], properties: ["subject"] }, "call-0"]],
+      },
+      extraNoAuth,
+      { elicitInput: noopElicit },
+    );
+
+    const root = exporter.getFinishedSpans().find((s) => s.name === "tool:execute");
+    expect(root).toBeDefined();
+
+    const event = root!.events.find((e) => e.name === "execute.auth_missing");
+    expect(event).toBeDefined();
+    expect(event!.attributes).toMatchObject({ reason: "no_header" });
+    expect(root!.attributes["error.class"]).toBe("auth");
+  });
+});
