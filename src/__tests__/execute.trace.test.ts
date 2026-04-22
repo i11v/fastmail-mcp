@@ -109,3 +109,113 @@ describe("tool:execute — unhappy-path span events", () => {
     expect(root!.attributes["error.class"]).toBe("auth");
   });
 });
+
+describe("jmap_request span", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  function mockFetch(sessionBody: object, jmapResponse: object | string, jmapStatus = 200) {
+    const body = typeof jmapResponse === "string" ? jmapResponse : JSON.stringify(jmapResponse);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.includes("/jmap/session")) {
+          return new Response(JSON.stringify(sessionBody), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return new Response(body, {
+          status: jmapStatus,
+          headers: { "Content-Type": "application/json" },
+        });
+      }),
+    );
+  }
+
+  const session = {
+    apiUrl: "https://api.fastmail.com/jmap/api",
+    uploadUrl: "https://api.fastmail.com/upload",
+    primaryAccounts: { "urn:ietf:params:jmap:mail": "acct-1" },
+  };
+
+  it("creates a jmap_request child span with HTTP + JMAP attributes on success", async () => {
+    const exporter = setupInMemoryTracing();
+    mockFetch(session, { methodResponses: [["Email/get", { list: [] }, "call-0"]] });
+
+    await executeHandler(
+      { methodCalls: [["Email/get", { ids: ["x"], properties: ["subject"] }, "call-0"]] },
+      fakeExtra,
+      { elicitInput: noopElicit },
+    );
+
+    const jmap = exporter.getFinishedSpans().find((s) => s.name === "jmap_request");
+    expect(jmap).toBeDefined();
+    expect(jmap!.attributes["http.request.method"]).toBe("POST");
+    expect(jmap!.attributes["http.response.status_code"]).toBe(200);
+    expect(jmap!.attributes["server.address"]).toBe("api.fastmail.com");
+    expect(jmap!.attributes["url.path"]).toBe("/jmap/api");
+    expect(jmap!.attributes["jmap.methods"]).toEqual(["Email/get"]);
+    expect(jmap!.attributes["jmap.error_count"]).toBe(0);
+    expect(typeof jmap!.attributes["http.request.body.size"]).toBe("number");
+    expect(typeof jmap!.attributes["http.response.body.size"]).toBe("number");
+  });
+
+  it("emits one jmap.response_error event per JMAP-level error in a 200 response", async () => {
+    const exporter = setupInMemoryTracing();
+    mockFetch(session, {
+      methodResponses: [
+        ["error", { type: "invalidArguments", description: "bad id" }, "call-0"],
+        ["Email/get", { list: [] }, "call-1"],
+      ],
+    });
+
+    await executeHandler(
+      {
+        methodCalls: [
+          ["Email/get", { ids: ["x"], properties: ["subject"] }, "call-0"],
+          ["Email/get", { ids: ["y"], properties: ["subject"] }, "call-1"],
+        ],
+      },
+      fakeExtra,
+      { elicitInput: noopElicit },
+    );
+
+    const jmap = exporter.getFinishedSpans().find((s) => s.name === "jmap_request")!;
+    expect(jmap.attributes["jmap.error_count"]).toBe(1);
+    const errorEvents = jmap.events.filter((e) => e.name === "jmap.response_error");
+    expect(errorEvents).toHaveLength(1);
+    expect(errorEvents[0].attributes).toMatchObject({
+      method: "error",
+      callId: "call-0",
+      type: "invalidArguments",
+      description: "bad id",
+    });
+
+    const root = exporter.getFinishedSpans().find((s) => s.name === "tool:execute")!;
+    expect(root.attributes["jmap.error_count"]).toBe(1);
+  });
+
+  it("emits jmap.http_error and error.class=jmap_http on non-200", async () => {
+    const exporter = setupInMemoryTracing();
+    mockFetch(session, "internal error", 500);
+
+    await executeHandler(
+      { methodCalls: [["Email/get", { ids: ["x"], properties: ["subject"] }, "call-0"]] },
+      fakeExtra,
+      { elicitInput: noopElicit },
+    );
+
+    const jmap = exporter.getFinishedSpans().find((s) => s.name === "jmap_request")!;
+    expect(jmap.attributes["http.response.status_code"]).toBe(500);
+    const evt = jmap.events.find((e) => e.name === "jmap.http_error");
+    expect(evt).toBeDefined();
+    expect(evt!.attributes).toMatchObject({ status: 500 });
+    expect((evt!.attributes.body_preview as string).length).toBeLessThanOrEqual(500);
+
+    const root = exporter.getFinishedSpans().find((s) => s.name === "tool:execute")!;
+    expect(root.attributes["error.class"]).toBe("jmap_http");
+  });
+});

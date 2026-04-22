@@ -1,4 +1,4 @@
-import { SpanStatusCode, trace, context, type Span } from "@opentelemetry/api";
+import { SpanStatusCode, trace, context, type Span, type AttributeValue } from "@opentelemetry/api";
 import { getTracer, forceFlush } from "./tracing.js";
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -84,6 +84,16 @@ export class AuthError extends Error {
   ) {
     super(message);
     this.name = "AuthError";
+  }
+}
+
+export class JMAPHttpError extends Error {
+  constructor(
+    public status: number,
+    public bodyPreview: string,
+  ) {
+    super(`JMAP request failed: HTTP ${status}`);
+    this.name = "JMAPHttpError";
   }
 }
 
@@ -407,24 +417,75 @@ export async function runJMAPDirect(
   methodCalls: MethodCall[],
   session: JMAPSession,
   bearerToken: string,
+  parentSpan?: Span,
 ): Promise<unknown[]> {
   const injectedCalls = injectAccountId(methodCalls, session.accountId);
+  const requestBody = JSON.stringify({ using: JMAP_USING, methodCalls: injectedCalls });
 
-  const response = await fetch(session.apiUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${bearerToken}`,
-    },
-    body: JSON.stringify({ using: JMAP_USING, methodCalls: injectedCalls }),
+  const parentCtx = parentSpan ? trace.setSpan(context.active(), parentSpan) : context.active();
+
+  return getTracer().startActiveSpan("jmap_request", {}, parentCtx, async (span) => {
+    try {
+      const url = new URL(session.apiUrl);
+      span.setAttributes({
+        "http.request.method": "POST",
+        "server.address": url.host,
+        "url.path": url.pathname,
+        "http.request.body.size": requestBody.length,
+        "jmap.method_count": methodCalls.length,
+        "jmap.methods": methodCalls.map(([m]) => m),
+      });
+
+      const response = await fetch(session.apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${bearerToken}`,
+        },
+        body: requestBody,
+      });
+
+      const responseText = await response.text();
+      span.setAttribute("http.response.status_code", response.status);
+      span.setAttribute("http.response.body.size", responseText.length);
+
+      if (!response.ok) {
+        const preview = responseText.slice(0, 500);
+        recordEvent(span, "jmap.http_error", {
+          status: response.status,
+          body_preview: preview,
+        });
+        span.setStatus({ code: SpanStatusCode.ERROR, message: `HTTP ${response.status}` });
+        throw new JMAPHttpError(response.status, preview);
+      }
+
+      const jmapResponse = JSON.parse(responseText) as { methodResponses: unknown[] };
+      const cleaned = cleanResponse(jmapResponse.methodResponses);
+
+      // Count and report JMAP-level errors (shaped ["error", {...}, callId]).
+      let errorCount = 0;
+      for (const resp of cleaned) {
+        if (Array.isArray(resp) && resp[0] === "error") {
+          errorCount += 1;
+          const [method, payload, callId] = resp as [string, Record<string, unknown>, string];
+          // Spec: type/description are optional — include them only when present.
+          const attrs: Record<string, AttributeValue> = { method, callId };
+          if (typeof payload?.type === "string") attrs.type = payload.type;
+          if (typeof payload?.description === "string") attrs.description = payload.description;
+          recordEvent(span, "jmap.response_error", attrs);
+        }
+      }
+      span.setAttribute("jmap.error_count", errorCount);
+      parentSpan?.setAttribute("jmap.error_count", errorCount);
+
+      return cleaned;
+    } catch (error) {
+      span.recordException(error as Error);
+      throw error;
+    } finally {
+      span.end();
+    }
   });
-
-  if (!response.ok) {
-    throw new Error(`JMAP request failed: HTTP ${response.status}`);
-  }
-
-  const jmapResponse = (await response.json()) as { methodResponses: unknown[] };
-  return cleanResponse(jmapResponse.methodResponses);
 }
 
 async function runJMAP(
@@ -433,7 +494,7 @@ async function runJMAP(
   span?: Span,
 ): Promise<unknown[]> {
   const { session, bearerToken } = await getSession(extra, span);
-  return runJMAPDirect(validatedCalls, session, bearerToken);
+  return runJMAPDirect(validatedCalls, session, bearerToken, span);
 }
 
 // --- Destructive action description ---
@@ -549,7 +610,7 @@ export async function executeHandler(
     span.setAttribute("mcp.outcome", "success");
     return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
   } catch (error) {
-    let errorClass: "validation" | "auth" | "unknown" = "unknown";
+    let errorClass: "validation" | "auth" | "jmap_http" | "unknown" = "unknown";
     if (error instanceof ValidationError) {
       errorClass = "validation";
       recordEvent(span, "execute.validation_failed", {
@@ -561,6 +622,9 @@ export async function executeHandler(
     } else if (error instanceof AuthError) {
       errorClass = "auth";
       recordEvent(span, "execute.auth_missing", { reason: error.reason });
+    } else if (error instanceof JMAPHttpError) {
+      errorClass = "jmap_http";
+      // span event already emitted on the child span inside runJMAPDirect
     } else {
       recordEvent(
         span,
