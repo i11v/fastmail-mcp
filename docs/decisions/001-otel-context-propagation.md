@@ -42,8 +42,23 @@ middleware span and no parent-child relationship to maintain.
 
 ### Surface area
 
-- `src/tracing.ts` — SDK setup, `tracer` and `forceFlush` exports
-- `src/tools.ts` — tool handlers create root spans
+- `src/tracing.ts` — SDK setup, `getTracer()` and `forceFlush` exports
+- `src/tools.ts` — `tool:execute` root span; `runJMAPDirect` wraps JMAP POSTs
+  in `jmap_request` child spans; `executeHandler` creates `elicit_input` child
+  spans around the destructive-action gate
+- `src/apps.ts` — `tool:read_email` and `tool:compose_email` root spans
+- `src/observability.ts` — `recordEvent()` helper for span events (used for
+  structured logs like `execute.validation_failed`, `jmap.http_error`,
+  `read_email.not_found`, and the `alsoLog: true` `*.unexpected_error`
+  variants)
+
+As of 2026-04-21, tool handlers emit child spans (`jmap_request`,
+`elicit_input`, `fetchSession`) via explicit parent-context passing —
+`parentCtx = trace.setSpan(context.active(), parentSpan)` threaded through
+`tracer.startActiveSpan(name, {}, parentCtx, cb)`. The detached Promise chain
+still breaks implicit context propagation, so the parent span is passed as an
+argument through function signatures (`runJMAPDirect(..., parentSpan?)`,
+`getSession(extra, parentSpan?)`).
 
 ## Consequences
 
@@ -54,11 +69,19 @@ middleware span and no parent-child relationship to maintain.
 - Simple — no middleware, no context maps, no nonces.
 
 **Negative:**
-- No parent-child trace structure — each tool invocation is a separate root
-  span. Multiple tools called in one HTTP request appear as separate traces in
-  Honeycomb rather than a single tree.
+- No cross-tool trace structure — each tool invocation is a separate root
+  span. Multiple tools called in one HTTP request appear as separate traces
+  in Honeycomb rather than a single tree. (Within a single tool invocation,
+  child spans DO parent correctly via explicit-context passing — see Surface
+  area above.)
 - No HTTP-level span (method, route, status code). In practice this is always
   `POST /mcp 200` so the information loss is minimal.
+- Every child-span call site must explicitly thread the parent span through
+  function signatures. Forgetting to do so silently produces an orphaned
+  span (no parent link). Mitigated by the pattern being concentrated in a
+  handful of helpers (`runJMAPDirect`, `getSession`, the destructive-gate
+  block in `executeHandler`) and exercised by in-memory-exporter tests that
+  assert `parentSpanContext?.spanId` equals the root's `spanId`.
 
 ## When to Revisit
 
