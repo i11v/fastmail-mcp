@@ -12,6 +12,7 @@ import { getSession, runJMAPDirect, JMAPHttpError } from "./tools.js";
 import { formatEmailBody } from "./format.js";
 import { getTracer, forceFlush } from "./tracing.js";
 import { recordEvent } from "./observability.js";
+import { hashToken } from "./utils.js";
 import composeHtml from "../public/apps/compose.html";
 import readEmailHtml from "../public/apps/read-email.html";
 
@@ -168,28 +169,45 @@ export async function composeEmailHandler(
     subject?: string;
     body?: string;
   },
-  _extra: RequestHandlerExtra<any, any>,
+  extra: RequestHandlerExtra<any, any>,
 ): Promise<CallToolResult> {
-  // Return the pre-fill data as structured content for the UI to consume
-  const prefill: Record<string, string> = {};
-  if (args.to) prefill.to = args.to;
-  if (args.cc) prefill.cc = args.cc;
-  if (args.bcc) prefill.bcc = args.bcc;
-  if (args.subject) prefill.subject = args.subject;
-  if (args.body) prefill.body = args.body;
+  const span = getTracer().startSpan("tool:compose_email");
+  span.setAttribute("mcp.tool", "compose_email");
+  try {
+    // Best-effort user.id — do not fail the UI handoff if auth is missing.
+    const authHeader =
+      extra.requestInfo?.headers?.["authorization"] ||
+      extra.requestInfo?.headers?.["Authorization"];
+    if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
+      span.setAttribute("user.id", hashToken(authHeader.substring(7)));
+    }
 
-  const text =
-    Object.keys(prefill).length > 0
-      ? `Opening compose form with pre-filled fields: ${Object.keys(prefill).join(", ")}`
-      : "Opening compose form.";
+    const prefill: Record<string, string> = {};
+    if (args.to) prefill.to = args.to;
+    if (args.cc) prefill.cc = args.cc;
+    if (args.bcc) prefill.bcc = args.bcc;
+    if (args.subject) prefill.subject = args.subject;
+    if (args.body) prefill.body = args.body;
 
-  return {
-    content: [
-      { type: "text", text: JSON.stringify(prefill) },
-      { type: "text", text },
-    ],
-    structuredContent: prefill,
-  };
+    span.setAttribute("mcp.prefill_fields", Object.keys(prefill));
+
+    const text =
+      Object.keys(prefill).length > 0
+        ? `Opening compose form with pre-filled fields: ${Object.keys(prefill).join(", ")}`
+        : "Opening compose form.";
+
+    span.setAttribute("mcp.outcome", "success");
+    return {
+      content: [
+        { type: "text", text: JSON.stringify(prefill) },
+        { type: "text", text },
+      ],
+      structuredContent: prefill,
+    };
+  } finally {
+    span.end();
+    await forceFlush();
+  }
 }
 
 // --- Resource & tool registration ---

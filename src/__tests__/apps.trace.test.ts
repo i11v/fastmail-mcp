@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { setupInMemoryTracing } from "./helpers/otel.js";
-import { readEmailHandler } from "../apps.js";
+import { readEmailHandler, composeEmailHandler } from "../apps.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
 const fakeExtra = {
@@ -76,5 +76,37 @@ describe("tool:read_email tracing", () => {
     expect(root).toBeDefined();
     expect(jmap).toBeDefined();
     expect(jmap!.parentSpanContext?.spanId).toBe(root!.spanContext().spanId);
+  });
+});
+
+describe("tool:compose_email tracing", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("records mcp.prefill_fields as the provided keys", async () => {
+    const exporter = setupInMemoryTracing();
+
+    await composeEmailHandler({ to: "x@y.z", subject: "hi" }, fakeExtra);
+
+    const spans = exporter.getFinishedSpans();
+    const root = spans.find((s) => s.name === "tool:compose_email");
+    expect(root).toBeDefined();
+    expect(root!.attributes["mcp.tool"]).toBe("compose_email");
+    expect(root!.attributes["mcp.prefill_fields"]).toEqual(["to", "subject"]);
+    expect(root!.attributes["mcp.outcome"]).toBe("success");
+    expect(typeof root!.attributes["user.id"]).toBe("string");
+  });
+
+  it("records empty prefill_fields when nothing is passed", async () => {
+    const exporter = setupInMemoryTracing();
+
+    await composeEmailHandler({}, fakeExtra);
+
+    const spans = exporter.getFinishedSpans();
+    const root = spans.find((s) => s.name === "tool:compose_email");
+    expect(root).toBeDefined();
+    expect(root!.attributes["mcp.prefill_fields"]).toEqual([]);
   });
 });
