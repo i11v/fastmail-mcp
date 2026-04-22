@@ -189,11 +189,12 @@ export async function composeEmailHandler(
     if (args.subject) prefill.subject = args.subject;
     if (args.body) prefill.body = args.body;
 
-    span.setAttribute("mcp.prefill_fields", Object.keys(prefill));
+    const prefillFields = Object.keys(prefill);
+    span.setAttribute("mcp.prefill_fields", prefillFields);
 
     const text =
-      Object.keys(prefill).length > 0
-        ? `Opening compose form with pre-filled fields: ${Object.keys(prefill).join(", ")}`
+      prefillFields.length > 0
+        ? `Opening compose form with pre-filled fields: ${prefillFields.join(", ")}`
         : "Opening compose form.";
 
     span.setAttribute("mcp.outcome", "success");
