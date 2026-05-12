@@ -57,6 +57,30 @@
     .tool-name { font-weight: 600; color: #1a1a2e; }
     .tool-desc { color: #666; font-size: 0.95rem; margin-top: 0.25rem; }
     a { color: #2563eb; }
+    table.bench {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      background: white;
+      font-size: 0.95rem;
+    }
+    table.bench th, table.bench td {
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+    }
+    table.bench th { background: #f3f4f6; color: #374151; font-weight: 600; }
+    table.bench td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    table.bench .win { color: #047857; font-weight: 600; }
+    table.bench .loss { color: #b45309; font-weight: 600; }
+    .caveat {
+      background: #f3f4f6;
+      border-left: 4px solid #9ca3af;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.95rem;
+    }
     footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; color: #666; font-size: 0.9rem; }
   </style>
 </head>
@@ -112,6 +136,29 @@
 
   <h2>Available Resources</h2>
   <p>Resource-aware MCP clients automatically receive the Fastmail skill — a progressive-disclosure markdown corpus that teaches the LLM how to drive the <code>execute</code> JMAP tool. 13 files total, namespaced under <code>file:///fastmail-skill/</code>. <code>SKILL.md</code> is the entry point (priority 1.0); reference files are loaded on demand.</p>
+
+  <h2>Benchmarks</h2>
+  <p>Head-to-head comparison against the official Fastmail MCP server, run on 2026-05-12. Identical seeded mailbox (186 messages), Claude Sonnet 4.6 as the agent, 25 tasks &times; 5 passes per server (125 runs each), mailbox reset between passes. Harness, datasets, and results: <a href="https://github.com/i11v/fastmail-mcp-comparison" target="_blank">i11v/fastmail-mcp-comparison</a>.</p>
+
+  <table class="bench">
+    <thead>
+      <tr><th>Metric</th><th>this server (i11v)</th><th>official</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Runs completed</td>          <td class="num">125 / 125</td>                  <td class="num">125 / 125</td></tr>
+      <tr><td>Step-budget exceeded</td>    <td class="num win">0</td>                       <td class="num loss">2</td></tr>
+      <tr><td>Tool calls — median / max</td><td class="num">2 / <span class="win">9</span></td><td class="num">2 / <span class="loss">104</span></td></tr>
+      <tr><td>Steps — median / max</td>    <td class="num">3 / 10</td>                      <td class="num">3 / 7</td></tr>
+      <tr><td>Latency p50 / max</td>       <td class="num">10.2s / 33.6s</td>               <td class="num">8.8s / <span class="loss">123s</span></td></tr>
+      <tr><td>Total wall time</td>         <td class="num win">~21 min</td>                 <td class="num">~31 min</td></tr>
+    </tbody>
+  </table>
+
+  <p>The biggest gaps are on multi-message work — <code>write-batch-03</code> averaged 3.4 tool calls here vs 57.2 on the official server; <code>write-batch-02</code> averaged 2.0 vs 27.8. Batching multiple JMAP method calls into one <code>execute</code> request lets the agent finish in one round-trip where a one-tool-call-per-action server forces many.</p>
+
+  <div class="caveat">
+    <strong>What this doesn't measure:</strong> answer correctness. These numbers cover efficiency only (tool calls, steps, latency, ability to finish within the step budget). A verifier-side correctness pass is the next step in the comparison harness.
+  </div>
 
   <h2>API Endpoints</h2>
   <ul style="margin-left: 1.5rem;">

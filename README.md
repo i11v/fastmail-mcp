@@ -128,6 +128,37 @@ All resources use the `file:///fastmail-skill/<path>` URI scheme and
 | `file:///fastmail-skill/sending/workflow.md` | 0.5 | EmailSubmission/set workflow |
 | `file:///fastmail-skill/thread/overview.md` | 0.5 | Thread/get |
 
+## Benchmarks
+
+Head-to-head comparison against the official Fastmail MCP server, run on
+2026-05-12. Harness, datasets, and results live in
+[i11v/fastmail-mcp-comparison](https://github.com/i11v/fastmail-mcp-comparison).
+
+**Setup:** identical seeded mailbox (186 messages), Claude Sonnet 4.6 as
+the agent, 25 tasks × 5 passes per server (125 runs each), mailbox reset
+between passes. Tasks span read, aggregate, search, write, batch-write,
+compose, and ambiguity categories.
+
+| | this server (i11v) | official |
+|---|---|---|
+| Runs completed | 125 / 125 | 125 / 125 |
+| Step-budget exceeded | 0 | 2 (both on `ambiguity-02`) |
+| Tool calls — median / max | 2 / **9** | 2 / **104** |
+| Steps — median / max | 3 / 10 | 3 / 7 |
+| Latency p50 / max | 10.2s / 33.6s | 8.8s / **123s** |
+| Total wall time | ~21 min | ~31 min |
+
+The biggest gaps are on multi-message work — `write-batch-03` averaged
+3.4 tool calls here vs 57.2 on the official server; `write-batch-02`
+averaged 2.0 vs 27.8. Batching multiple JMAP method calls into one
+`execute` request lets the agent finish in one round-trip where a
+one-tool-call-per-action server forces many.
+
+**What this doesn't measure:** answer correctness. These numbers cover
+efficiency only (tool calls, steps, latency, ability to finish within
+the step budget). A verifier-side correctness pass is the next step in
+the comparison harness.
+
 ## API Endpoints
 
 - `POST /mcp` - MCP protocol endpoint
