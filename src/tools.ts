@@ -4,9 +4,12 @@ import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import { hashToken } from "./utils.js";
+import { getEnv } from "./env.js";
 
 // Constants
 const FASTMAIL_SESSION_ENDPOINT = "https://api.fastmail.com/jmap/session";
+const SESSION_CACHE_TTL_SECONDS = 60 * 60; // 1 hour
+const SESSION_CACHE_KEY_PREFIX = "session:v1:";
 
 const JMAP_USING = [
   "urn:ietf:params:jmap:core",
@@ -77,6 +80,24 @@ function extractBearerToken(extra: RequestHandlerExtra<any, any>): string {
 
 // --- Session management ---
 
+function sessionCacheKey(tokenHash: string): string {
+  return `${SESSION_CACHE_KEY_PREFIX}${tokenHash}`;
+}
+
+async function readCachedSession(tokenHash: string): Promise<JMAPSession | null> {
+  const kv = getEnv()?.SESSION_CACHE;
+  if (!kv) return null;
+  return (await kv.get(sessionCacheKey(tokenHash), "json")) as JMAPSession | null;
+}
+
+async function writeCachedSession(tokenHash: string, session: JMAPSession): Promise<void> {
+  const kv = getEnv()?.SESSION_CACHE;
+  if (!kv) return;
+  await kv.put(sessionCacheKey(tokenHash), JSON.stringify(session), {
+    expirationTtl: SESSION_CACHE_TTL_SECONDS,
+  });
+}
+
 async function fetchSession(bearerToken: string): Promise<JMAPSession> {
   const response = await fetch(FASTMAIL_SESSION_ENDPOINT, {
     headers: { Authorization: `Bearer ${bearerToken}` },
@@ -109,16 +130,25 @@ export async function getSession(
   parentSpan?: Span,
 ): Promise<{ session: JMAPSession; bearerToken: string }> {
   const bearerToken = extractBearerToken(extra);
+  const tokenHash = hashToken(bearerToken);
 
   if (parentSpan) {
-    parentSpan.setAttribute("user.id", hashToken(bearerToken));
+    parentSpan.setAttribute("user.id", tokenHash);
   }
 
   const parentCtx = parentSpan ? trace.setSpan(context.active(), parentSpan) : context.active();
   const session = await tracer.startActiveSpan("fetchSession", {}, parentCtx, async (span) => {
     try {
+      const cached = await readCachedSession(tokenHash);
+      if (cached) {
+        span.setAttribute("jmap.cache_hit", true);
+        span.setAttribute("jmap.account_id", cached.accountId);
+        return cached;
+      }
+      span.setAttribute("jmap.cache_hit", false);
       const result = await fetchSession(bearerToken);
       span.setAttribute("jmap.account_id", result.accountId);
+      await writeCachedSession(tokenHash, result);
       return result;
     } catch (error) {
       span.recordException(error as Error);

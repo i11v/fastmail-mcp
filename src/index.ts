@@ -7,9 +7,10 @@ import { StreamableHTTPTransport } from "@hono/mcp";
 import { registerTools } from "./tools.js";
 import { registerApps } from "./apps.js";
 import { registerSkillResources } from "./skill.js";
+import { runWithEnv, type AppEnv } from "./env.js";
 import landingHtml from "../public/landing.html";
 
-const app = new Hono();
+const app = new Hono<{ Bindings: AppEnv }>();
 
 // CORS middleware
 app.use(
@@ -40,7 +41,7 @@ app.all("/mcp", async (c) => {
   if (!mcpServer.isConnected()) {
     await mcpServer.connect(transport);
   }
-  return transport.handleRequest(c);
+  return runWithEnv(c.env, () => transport.handleRequest(c));
 });
 
 // Health check
