@@ -4,171 +4,338 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fastmail MCP Server</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Cutive+Mono&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: #0c0a08; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 2rem;
-      background: #f9fafb;
+      --bg: #0c0a08;
+      --ink: #f4ecdc;
+      --gold: #c8a96a;
+      --gold-bright: #e6c682;
+      --mute: #8b7c5e;
+      --hair: #2a251c;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Cormorant Garamond', serif;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
     }
-    h1 { color: #1a1a2e; margin-bottom: 0.5rem; }
-    .subtitle { color: #666; margin-bottom: 2rem; font-size: 1.1rem; }
-    h2 { color: #1a1a2e; margin: 2rem 0 1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; }
-    h3 { color: #374151; margin: 1.5rem 0 0.75rem; }
-    p { margin-bottom: 1rem; }
-    code {
-      background: #e5e7eb;
-      padding: 0.2rem 0.4rem;
-      border-radius: 4px;
-      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
-      font-size: 0.9rem;
+    body::before {
+      content: "";
+      position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse at 50% 0%, rgba(200,169,106,.10), transparent 55%);
     }
-    pre {
-      background: #1a1a2e;
-      color: #e5e7eb;
-      padding: 1rem;
-      border-radius: 8px;
-      overflow-x: auto;
-      margin: 1rem 0;
+    body::after {
+      content: "";
+      position: fixed; inset: 0; pointer-events: none; z-index: 2;
+      opacity: .25; mix-blend-mode: screen;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85'/%3E%3CfeColorMatrix values='0 0 0 0 0.9 0 0 0 0 0.85 0 0 0 0 0.7 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
     }
-    pre code { background: none; padding: 0; color: inherit; }
-    .warning {
-      background: #fef3c7;
-      border-left: 4px solid #f59e0b;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 0 8px 8px 0;
+
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 3rem 2.5rem 6rem; position: relative; z-index: 1; }
+
+    .hero {
+      padding: clamp(4rem, 9vw, 8rem) 0 clamp(2rem, 5vw, 4rem);
+      text-align: center;
+      position: relative;
     }
-    .tools-list {
+    .hero .eyebrow {
+      font-family: 'Inter', sans-serif; font-weight: 400;
+      font-size: .7rem; letter-spacing: .42em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 2rem;
+      display: inline-flex; align-items: center; gap: 1rem;
+    }
+    .hero .eyebrow::before, .hero .eyebrow::after {
+      content: ""; width: 32px; height: 1px; background: var(--gold); opacity: .6;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif; font-weight: 400;
+      font-size: clamp(3.5rem, 11vw, 9rem);
+      line-height: 0.95;
+      letter-spacing: -.025em;
+      color: var(--ink);
+    }
+    .hero h1 em { font-style: italic; color: var(--gold); }
+    .hero .lede {
+      margin: 2.5rem auto 0;
+      max-width: 56ch;
+      font-size: 1.35rem;
+      line-height: 1.55;
+      font-weight: 300;
+      color: var(--ink);
+      font-style: italic;
+    }
+    .hero .lede em { font-style: normal; color: var(--gold); }
+
+    .sec-h {
+      display: flex; align-items: baseline; justify-content: center; gap: 1.5rem;
+      margin: 5rem 0 2.5rem;
+    }
+    .sec-h .num {
+      font-family: 'Playfair Display', serif; font-style: italic; font-weight: 400;
+      font-size: 1.4rem; color: var(--gold);
+    }
+    .sec-h .ttl {
+      font-family: 'Playfair Display', serif; font-weight: 400;
+      font-size: 2.5rem; letter-spacing: -.01em;
+      color: var(--ink);
+    }
+    .sec-h .ttl em { font-style: italic; color: var(--gold); }
+
+    /* ─── Tools ─── */
+    .tools-row {
       display: grid;
-      gap: 1rem;
-      margin: 1rem 0;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: var(--hair);
+      border-top: 1px solid var(--gold);
+      border-bottom: 1px solid var(--gold);
+      margin-top: 1rem;
     }
-    .tool {
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 1rem;
+    @media (max-width: 820px) {
+      .tools-row { grid-template-columns: 1fr; }
     }
-    .tool-name { font-weight: 600; color: #1a1a2e; }
-    .tool-desc { color: #666; font-size: 0.95rem; margin-top: 0.25rem; }
-    a { color: #2563eb; }
-    table.bench {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1rem 0;
-      background: white;
-      font-size: 0.95rem;
+    .tcard {
+      background: var(--bg);
+      padding: 2.4rem 1.8rem 2rem;
+      display: flex; flex-direction: column;
+      gap: 1.1rem;
+      position: relative;
     }
-    table.bench th, table.bench td {
-      padding: 0.6rem 0.8rem;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: left;
+    .tcard.primary {
+      background:
+        linear-gradient(180deg, rgba(200,169,106,.08), rgba(200,169,106,.02) 60%, transparent 100%);
     }
-    table.bench th { background: #f3f4f6; color: #374151; font-weight: 600; }
-    table.bench td.num { text-align: right; font-variant-numeric: tabular-nums; }
-    table.bench .win { color: #047857; font-weight: 600; }
-    table.bench .loss { color: #b45309; font-weight: 600; }
-    .caveat {
-      background: #f3f4f6;
-      border-left: 4px solid #9ca3af;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 0 8px 8px 0;
-      font-size: 0.95rem;
+    .tcard.primary::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gold);
     }
-    footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; color: #666; font-size: 0.9rem; }
+    .tlbl {
+      font-family: 'Inter', sans-serif; font-weight: 400;
+      font-size: .62rem; letter-spacing: .3em; text-transform: uppercase;
+      color: var(--mute);
+    }
+    .tcard.primary .tlbl {
+      color: var(--gold); font-weight: 500;
+    }
+    .tnm {
+      font-family: 'Playfair Display', serif; font-weight: 400;
+      font-size: 1.7rem; letter-spacing: -.01em;
+      line-height: 1; color: var(--ink);
+    }
+    .tcard.primary .tnm {
+      font-size: 2.4rem;
+    }
+    .tnm em {
+      font-style: italic; color: var(--gold);
+    }
+    .tds {
+      font-family: 'Cormorant Garamond', serif; font-weight: 300;
+      font-size: 1.02rem; line-height: 1.55;
+      color: var(--ink); opacity: .88;
+    }
+    .tds em { color: var(--gold); font-style: italic; }
+    .tcard.primary .tds {
+      font-weight: 400;
+      opacity: 1;
+      font-size: 1.05rem;
+    }
+
+    /* ─── Benchmark ─── */
+    .bench-intro {
+      max-width: 62ch;
+      margin: 0 auto 2.5rem;
+      text-align: center;
+      font-family: 'Cormorant Garamond', serif; font-weight: 300;
+      font-size: 1.12rem; line-height: 1.7;
+      color: var(--ink); opacity: .9;
+    }
+    .bench-intro em { color: var(--gold); font-style: italic; }
+    .bench-intro a {
+      color: var(--gold);
+      text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px;
+    }
+
+    .board {
+      margin-top: 1rem;
+      border-top: 1px solid var(--gold);
+      border-bottom: 1px solid var(--gold);
+    }
+    .row {
+      display: grid; grid-template-columns: 1.6fr 1fr 1fr;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--hair);
+      align-items: center;
+    }
+    .row:last-child { border-bottom: 0; }
+    .row .met {
+      font-family: 'Cormorant Garamond', serif; font-weight: 400;
+      font-size: 1.1rem;
+      color: var(--ink); opacity: .85;
+      padding-left: 1.5rem;
+    }
+    .row .c-this {
+      font-family: 'Playfair Display', serif; font-style: italic; font-weight: 400;
+      font-size: 1.5rem;
+      color: var(--gold);
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    .row .c-other {
+      font-family: 'Playfair Display', serif; font-weight: 400;
+      font-size: 1.4rem;
+      color: var(--ink); opacity: .4;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    .row.hdr .met, .row.hdr .c-this, .row.hdr .c-other {
+      font-family: 'Inter', sans-serif; font-weight: 400;
+      font-size: .62rem; letter-spacing: .28em; text-transform: uppercase;
+      color: var(--mute);
+      font-style: normal;
+      opacity: 1;
+    }
+    .row.hdr .c-this { color: var(--gold); }
+
+    /* ─── Configuration ─── */
+    .code-lbl {
+      font-family: 'Inter', sans-serif; font-weight: 400;
+      font-size: .62rem; letter-spacing: .3em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: .8rem;
+      text-align: center;
+    }
+    .or-sep {
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: var(--gold);
+      font-size: 1.25rem;
+      margin: 2.5rem 0 2rem;
+      opacity: .85;
+    }
+    .code {
+      margin-top: 1rem;
+      padding: 2.2rem 0;
+      border-top: 1px solid var(--gold);
+      border-bottom: 1px solid var(--gold);
+      background: transparent;
+      overflow-x: auto;
+      display: flex;
+      justify-content: center;
+    }
+    .code pre {
+      font-family: 'Cutive Mono', monospace;
+      font-size: .95rem;
+      line-height: 1.95;
+      letter-spacing: 0;
+      color: var(--ink);
+      opacity: .92;
+      padding: 0 2rem;
+    }
+    .code .k { color: var(--gold); font-style: italic; }
+    .code .s { color: var(--ink); opacity: .85; }
+    .code .v { color: var(--gold-bright); }
+
+    /* ─── Foot ─── */
+    .foot {
+      margin-top: 5rem; padding-top: 2rem; border-top: 1px solid var(--hair);
+      text-align: center;
+    }
+    .foot .mark {
+      font-family: 'Playfair Display', serif; font-style: italic; font-weight: 400;
+      font-size: 1.5rem; color: var(--gold);
+      margin-bottom: .8rem;
+    }
+    .foot .copy {
+      font-family: 'Inter', sans-serif; font-weight: 300;
+      font-size: .68rem; letter-spacing: .26em; text-transform: uppercase;
+      color: var(--mute);
+    }
+    .foot a { color: var(--gold); }
+
+    ::selection {
+      background: var(--gold);
+      color: var(--bg);
+    }
   </style>
 </head>
 <body>
-  <h1>Fastmail MCP Server</h1>
-  <p class="subtitle">Unofficial Model Context Protocol server for Fastmail integration</p>
+  <div class="wrap">
 
-  <h2>Setup Instructions</h2>
+    <div class="hero">
+      <div class="eyebrow">An unofficial Fastmail MCP server</div>
+      <h1>Fastmail <em>MCP</em>.</h1>
+      <p class="lede">Modern LLMs write code fluently — and <em>JMAP</em> fluently in particular. So this server ships a <em>single</em> tool, <em>execute</em>. Pass it raw method calls; the agent does the rest. All on a single <em>Cloudflare Worker</em>.</p>
+    </div>
 
-  <h3>1. Get Your Fastmail API Token</h3>
-  <ol style="margin-left: 1.5rem; margin-bottom: 1rem;">
-    <li>Log in to <a href="https://www.fastmail.com" target="_blank">Fastmail</a></li>
-    <li>Go to <strong>Settings</strong> &rarr; <strong>Privacy & Security</strong> &rarr; <strong>API tokens</strong></li>
-    <li>Click <strong>New API token</strong></li>
-    <li>Give it a name (e.g., "Claude MCP")</li>
-    <li>Select the required scopes: <code>Mail</code> (read/write as needed)</li>
-    <li>Copy the generated token</li>
-  </ol>
+    <div class="sec-h"><span class="num">I.</span><h2 class="ttl">The <em>Instrument</em></h2></div>
+    <div class="tools-row">
+      <article class="tcard primary">
+        <div class="tlbl">— The only tool —</div>
+        <div class="tnm"><em>execute</em></div>
+        <div class="tds">Pass raw JMAP method-call triples. The server validates, injects the <em>accountId</em>, and returns cleaned responses — with batching and <em>resultOf</em> back-references handled in a single round trip.</div>
+      </article>
+      <article class="tcard app">
+        <div class="tlbl">MCP App · UI Widget</div>
+        <div class="tnm">compose_email</div>
+        <div class="tds">An interactive compose form. Pre-fills to, cc, bcc, subject, body. On supported hosts it renders inline — with send and save-draft actions.</div>
+      </article>
+      <article class="tcard app">
+        <div class="tlbl">MCP App · UI Widget</div>
+        <div class="tnm">read_email</div>
+        <div class="tds">A rich reader. Fetches the email by id and renders headers, a sanitised body, and the action buttons — reply, reply all, forward.</div>
+      </article>
+    </div>
 
-  <h3>2. Configure Claude Code</h3>
-  <p>Add the following to your Claude Code MCP settings (<code>~/.claude/claude_desktop_config.json</code> or project <code>.mcp.json</code>):</p>
-  <pre><code>{
-  "mcpServers": {
-    "fastmail": {
-      "type": "url",
-      "url": "https://fastmail-mcp.i11v.com/mcp",
-      "headers": {
-        "Authorization": "Bearer YOUR_FASTMAIL_API_TOKEN"
-      }
+    <div class="sec-h"><span class="num">II.</span><h2 class="ttl">A study in <em>efficiency</em></h2></div>
+
+    <p class="bench-intro">Run head-to-head against the official Fastmail MCP server on <em>2026-05-12</em>. Identical seeded mailbox of <em>186</em> messages, <em>Claude Sonnet 4.6</em> as the agent, <em>25 tasks × 5 passes</em> per server — <em>250 runs</em> in total, the mailbox reset between every pass. Harness, datasets, and full results: <a href="https://github.com/i11v/fastmail-mcp-comparison" target="_blank" rel="noopener">i11v/fastmail-mcp-comparison</a>.</p>
+
+    <div class="board">
+      <div class="row hdr"><div class="met">Metric</div><div class="c-this">This server · i11v</div><div class="c-other">Official</div></div>
+      <div class="row"><div class="met">Runs completed</div><div class="c-this">125 / 125</div><div class="c-other">125 / 125</div></div>
+      <div class="row"><div class="met">Step-budget exceeded</div><div class="c-this">0</div><div class="c-other">2</div></div>
+      <div class="row"><div class="met">Tool calls — median / max</div><div class="c-this">2 / 9</div><div class="c-other">2 / 104</div></div>
+      <div class="row"><div class="met">Latency p50 / max</div><div class="c-this">10.2 / 33.6 s</div><div class="c-other">8.8 / 123 s</div></div>
+      <div class="row"><div class="met">Total wall time</div><div class="c-this">~21 min</div><div class="c-other">~31 min</div></div>
+    </div>
+
+    <div class="sec-h"><span class="num">III.</span><h2 class="ttl">The <em>configuration</em></h2></div>
+
+    <div class="code-lbl">— via the Claude CLI —</div>
+    <div class="code">
+<pre><span class="k">claude</span> mcp add fastmail \
+    <span class="s">https://fastmail-mcp.i11v.com/mcp</span> \
+    transport http \
+    --scope user \
+    header <span class="s">"Authorization: Bearer </span><span class="v">$TOKEN</span><span class="s">"</span></pre>
+    </div>
+
+    <div class="or-sep">— or —</div>
+
+    <div class="code-lbl">— via mcp.json —</div>
+    <div class="code">
+<pre>{
+  <span class="k">"mcpServers"</span>: {
+    <span class="k">"fastmail"</span>: {
+      <span class="k">"type"</span>: <span class="s">"url"</span>,
+      <span class="k">"url"</span>:  <span class="s">"https://fastmail-mcp.i11v.com/mcp"</span>,
+      <span class="k">"headers"</span>: { <span class="k">"Authorization"</span>: <span class="s">"Bearer </span><span class="v">$TOKEN</span><span class="s">"</span> }
     }
   }
-}</code></pre>
-
-  <div class="warning">
-    <strong>Security Note:</strong> Keep your API token secure. Never commit it to version control. Consider using environment variables or a secrets manager.
-  </div>
-
-  <h2>Available Tools</h2>
-  <div class="tools-list">
-    <div class="tool">
-      <div class="tool-name">execute</div>
-      <div class="tool-desc">Execute JMAP method calls against Fastmail. Accepts raw JMAP method call triples — the server validates, injects accountId, and returns cleaned responses. Supports batching and resultOf back-references.</div>
+}</pre>
     </div>
-    <div class="tool">
-      <div class="tool-name">compose_email <span style="font-size:0.8em;color:#2563eb;">(MCP App)</span></div>
-      <div class="tool-desc">Open an interactive email compose form. Pre-fill fields like to, cc, bcc, subject, and body. On supported hosts, renders an inline compose UI with send and save-draft buttons.</div>
-    </div>
-    <div class="tool">
-      <div class="tool-name">read_email <span style="font-size:0.8em;color:#2563eb;">(MCP App)</span></div>
-      <div class="tool-desc">Display the full content of an email in a rich reader view. Fetches the email by ID and renders headers, sanitized body, and action buttons (reply, reply all, forward).</div>
-    </div>
+
+    <footer class="foot">
+      <div class="mark">— fin —</div>
+      <div class="copy">Unofficial · Not affiliated with Fastmail · <a href="https://github.com/nicobrinkkemper/fastmail-mcp" target="_blank" rel="noopener">GitHub</a></div>
+    </footer>
+
   </div>
-
-  <h2>Available Resources</h2>
-  <p>Resource-aware MCP clients automatically receive the Fastmail skill — a progressive-disclosure markdown corpus that teaches the LLM how to drive the <code>execute</code> JMAP tool. 13 files total, namespaced under <code>file:///fastmail-skill/</code>. <code>SKILL.md</code> is the entry point (priority 1.0); reference files are loaded on demand.</p>
-
-  <h2>Benchmarks</h2>
-  <p>Head-to-head comparison against the official Fastmail MCP server, run on 2026-05-12. Identical seeded mailbox (186 messages), Claude Sonnet 4.6 as the agent, 25 tasks &times; 5 passes per server (125 runs each), mailbox reset between passes. Harness, datasets, and results: <a href="https://github.com/i11v/fastmail-mcp-comparison" target="_blank">i11v/fastmail-mcp-comparison</a>.</p>
-
-  <table class="bench">
-    <thead>
-      <tr><th>Metric</th><th>this server (i11v)</th><th>official</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Runs completed</td>          <td class="num">125 / 125</td>                  <td class="num">125 / 125</td></tr>
-      <tr><td>Step-budget exceeded</td>    <td class="num win">0</td>                       <td class="num loss">2</td></tr>
-      <tr><td>Tool calls — median / max</td><td class="num">2 / <span class="win">9</span></td><td class="num">2 / <span class="loss">104</span></td></tr>
-      <tr><td>Steps — median / max</td>    <td class="num">3 / 10</td>                      <td class="num">3 / 7</td></tr>
-      <tr><td>Latency p50 / max</td>       <td class="num">10.2s / 33.6s</td>               <td class="num">8.8s / <span class="loss">123s</span></td></tr>
-      <tr><td>Total wall time</td>         <td class="num win">~21 min</td>                 <td class="num">~31 min</td></tr>
-    </tbody>
-  </table>
-
-  <p>The biggest gaps are on multi-message work — <code>write-batch-03</code> averaged 3.4 tool calls here vs 57.2 on the official server; <code>write-batch-02</code> averaged 2.0 vs 27.8. Batching multiple JMAP method calls into one <code>execute</code> request lets the agent finish in one round-trip where a one-tool-call-per-action server forces many.</p>
-
-  <div class="caveat">
-    <strong>What this doesn't measure:</strong> answer correctness. These numbers cover efficiency only (tool calls, steps, latency, ability to finish within the step budget). A verifier-side correctness pass is the next step in the comparison harness.
-  </div>
-
-  <h2>API Endpoints</h2>
-  <ul style="margin-left: 1.5rem;">
-    <li><code>POST /mcp</code> - MCP protocol endpoint</li>
-    <li><code>GET /health</code> - Health check endpoint</li>
-  </ul>
-
-  <footer>
-    <p>This is an unofficial community project and is not affiliated with Fastmail.</p>
-    <p>Source code and issues: <a href="https://github.com/nicobrinkkemper/fastmail-mcp" target="_blank">GitHub</a></p>
-  </footer>
 </body>
 </html>
