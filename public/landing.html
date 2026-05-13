@@ -146,62 +146,6 @@
       font-size: 1.05rem;
     }
 
-    /* ─── Benchmark ─── */
-    .bench-intro {
-      max-width: 62ch;
-      margin: 0 auto 2.5rem;
-      text-align: center;
-      font-family: 'Cormorant Garamond', serif; font-weight: 300;
-      font-size: 1.12rem; line-height: 1.7;
-      color: var(--ink); opacity: .9;
-    }
-    .bench-intro em { color: var(--gold); font-style: italic; }
-    .bench-intro a {
-      color: var(--gold);
-      text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px;
-    }
-
-    .board {
-      margin-top: 1rem;
-      border-top: 1px solid var(--gold);
-      border-bottom: 1px solid var(--gold);
-    }
-    .row {
-      display: grid; grid-template-columns: 1.6fr 1fr 1fr;
-      padding: 1rem 0;
-      border-bottom: 1px solid var(--hair);
-      align-items: center;
-    }
-    .row:last-child { border-bottom: 0; }
-    .row .met {
-      font-family: 'Cormorant Garamond', serif; font-weight: 400;
-      font-size: 1.1rem;
-      color: var(--ink); opacity: .85;
-      padding-left: 1.5rem;
-    }
-    .row .c-this {
-      font-family: 'Playfair Display', serif; font-style: italic; font-weight: 400;
-      font-size: 1.5rem;
-      color: var(--gold);
-      text-align: center;
-      font-variant-numeric: tabular-nums;
-    }
-    .row .c-other {
-      font-family: 'Playfair Display', serif; font-weight: 400;
-      font-size: 1.4rem;
-      color: var(--ink); opacity: .4;
-      text-align: center;
-      font-variant-numeric: tabular-nums;
-    }
-    .row.hdr .met, .row.hdr .c-this, .row.hdr .c-other {
-      font-family: 'Inter', sans-serif; font-weight: 400;
-      font-size: .62rem; letter-spacing: .28em; text-transform: uppercase;
-      color: var(--mute);
-      font-style: normal;
-      opacity: 1;
-    }
-    .row.hdr .c-this { color: var(--gold); }
-
     /* ─── Configuration ─── */
     .code-lbl {
       font-family: 'Inter', sans-serif; font-weight: 400;
@@ -292,20 +236,7 @@
       </article>
     </div>
 
-    <div class="sec-h"><span class="num">II.</span><h2 class="ttl">A study in <em>efficiency</em></h2></div>
-
-    <p class="bench-intro">Run head-to-head against the official Fastmail MCP server on <em>2026-05-12</em>. Identical seeded mailbox of <em>186</em> messages, <em>Claude Sonnet 4.6</em> as the agent, <em>25 tasks × 5 passes</em> per server — <em>250 runs</em> in total, the mailbox reset between every pass. Harness, datasets, and full results: <a href="https://github.com/i11v/fastmail-mcp-comparison" target="_blank" rel="noopener">i11v/fastmail-mcp-comparison</a>.</p>
-
-    <div class="board">
-      <div class="row hdr"><div class="met">Metric</div><div class="c-this">This server · i11v</div><div class="c-other">Official</div></div>
-      <div class="row"><div class="met">Runs completed</div><div class="c-this">125 / 125</div><div class="c-other">125 / 125</div></div>
-      <div class="row"><div class="met">Step-budget exceeded</div><div class="c-this">0</div><div class="c-other">2</div></div>
-      <div class="row"><div class="met">Tool calls — median / max</div><div class="c-this">2 / 9</div><div class="c-other">2 / 104</div></div>
-      <div class="row"><div class="met">Latency p50 / max</div><div class="c-this">10.2 / 33.6 s</div><div class="c-other">8.8 / 123 s</div></div>
-      <div class="row"><div class="met">Total wall time</div><div class="c-this">~21 min</div><div class="c-other">~31 min</div></div>
-    </div>
-
-    <div class="sec-h"><span class="num">III.</span><h2 class="ttl">The <em>configuration</em></h2></div>
+    <div class="sec-h"><span class="num">II.</span><h2 class="ttl">The <em>configuration</em></h2></div>
 
     <div class="code-lbl">— via the Claude CLI —</div>
     <div class="code">
